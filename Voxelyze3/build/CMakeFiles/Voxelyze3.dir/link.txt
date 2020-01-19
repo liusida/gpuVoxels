@@ -1,0 +1,1 @@
+/bin/g++-8  -g  -rdynamic CMakeFiles/Voxelyze3.dir/src/main.cpp.o  -o Voxelyze3 
