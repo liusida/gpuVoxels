@@ -1,0 +1,3 @@
+[submodule "Voxelyze3/test/googletest"]
+	path = Voxelyze3/test/googletest
+	url = https://github.com/google/googletest.git
