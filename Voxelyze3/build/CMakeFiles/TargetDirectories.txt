@@ -1,4 +1,0 @@
-/home/liusida/Simulators/Voxel/gpuVoxels/Voxelyze3/build/CMakeFiles/rebuild_cache.dir
-/home/liusida/Simulators/Voxel/gpuVoxels/Voxelyze3/build/CMakeFiles/edit_cache.dir
-/home/liusida/Simulators/Voxel/gpuVoxels/Voxelyze3/build/CMakeFiles/Voxelyze3.dir
-/home/liusida/Simulators/Voxel/gpuVoxels/Voxelyze3/build/CMakeFiles/vx_run.dir
