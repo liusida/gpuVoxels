@@ -1,5 +1,77 @@
-cmake_minimum_required(VERSION 3.8.0)
+cmake_minimum_required(VERSION 3.5.0)
 project(Voxelyze3 LANGUAGES CXX CUDA)
 
+set(CMAKE_CXX_STANDARD 17)
+
+include_directories(src)
+
+file( GLOB VX3_SRC src/VX3/*.c* )
+
+add_library(voxelyze.3.0 ${VX3_SRC})
 add_executable(Voxelyze3 src/Voxelyze3.cu)
 add_executable(vx_run src/vx_run.cpp)
+
+target_link_libraries(Voxelyze3 PUBLIC voxelyze.3.0)
+
+# for Boost
+set(Boost_USE_STATIC_LIBS   ON)
+find_package(Boost REQUIRED COMPONENTS filesystem thread chrono program_options)
+target_link_libraries(voxelyze.3.0 PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(Voxelyze3 PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(vx_run PUBLIC ${Boost_LIBRARIES})
+
+
+# CUDA options
+set_target_properties(voxelyze.3.0 PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(Voxelyze3 PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+    #-G means debug info in GPU, so you can step in GPU kernels
+    target_compile_options(voxelyze.3.0 PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-G -arch=compute_60 -code=compute_60>)
+    target_compile_options(Voxelyze3 PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-G -arch=compute_60 -code=compute_60>)
+    # target_compile_options(voxelyze.3.0 PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=compute_60 -code=compute_60>)
+    # target_compile_options(Voxelyze3 PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=compute_60 -code=compute_60>)
+list(APPEND CMAKE_CUDA_FLAGS "-gencode=arch=compute_60,code=sm_60")
+
+
+#for gtest
+################################
+# Testing
+################################
+option(test "Build all tests." ON) # Makes boolean 'test' available.
+if (test)
+  if (APPLE)
+    add_definitions(-DGTEST_USE_OWN_TR1_TUPLE)
+    add_definitions(-D__GLIBCXX__)
+  endif (APPLE)
+
+  # This adds another subdirectory, which has 'project(gtest)'.
+  add_subdirectory(test/googletest)
+
+  enable_testing()
+
+  # Include the gtest library. gtest_SOURCE_DIR is available due to
+  # 'project(gtest)' above.
+  include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+
+  ##############
+  # Unit Tests
+  ##############
+  set(TEST_DIR test/testcase)
+  file(GLOB TEST_FILES ${TEST_DIR}/test_*.c*)
+  add_executable(runUnitTests ${TEST_FILES})
+
+  # Standard linking to gtest stuff.
+  target_link_libraries(runUnitTests gtest gtest_main)
+
+  # Extra linking for the project.
+  target_link_libraries(runUnitTests voxelyze.3.0)
+
+  # This is so you can do 'make test' to see all your tests run, instead of
+  # manually running the executable runUnitTests to see those specific tests.
+  add_test(NAME that-test-I-made COMMAND runUnitTests)
+
+  # You can also omit NAME and COMMAND. The second argument could be some other
+  # test executable.
+  add_test(that-other-test-I-made runUnitTests)
+endif()
+
+set(CMAKE_VERBOSE_MAKEFILE OFF) #turn on if we want to debug in compilation.
