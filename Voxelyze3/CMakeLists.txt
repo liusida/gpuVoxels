@@ -5,9 +5,10 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(src)
 
-file( GLOB VX3_SRC src/VX3/*.c* )
+file( GLOB VX3_SRC_cu src/VX3/*.cu )
+file( GLOB VX3_SRC_cpp src/VX3/*.cpp )
 
-add_library(voxelyze.3.0 ${VX3_SRC})
+add_library(voxelyze.3.0 ${VX3_SRC_cu} ${VX3_SRC_cpp})
 add_executable(Voxelyze3 src/Voxelyze3.cu)
 add_executable(vx_run src/vx_run.cpp)
 

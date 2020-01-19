@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "Utils/VX3_vector.h"
+#include "Utils/VX3_vector.cuh"
 
 
 //Basic_Usage: create in host, pass to device, copy to another memory in device, return to host

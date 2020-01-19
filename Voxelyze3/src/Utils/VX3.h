@@ -33,6 +33,6 @@
     #define DEBUG_CUDA_ERROR_CHECK_STATUS() {printf("DEBUG_CUDA_ERROR_CHECK_STATUS ON.\n");}
 #endif
 
-#include "Utils/VX3_vector.h"
+#include "Utils/VX3_vector.cuh"
 
 #endif // VX3_H

@@ -2,6 +2,8 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+#include "VX3/VX3_SimulationManager.cuh"
+
 int main(int argc, char** argv) {
     po::options_description desc(R"(This program starts a batch of simulation on a server with multiple GPUs.
         
@@ -29,5 +31,6 @@ Allowed options)");
 
     std::cout << "input directory:" << input_directory <<"\n";
     std::cout << "output file:" << output_file <<"\n";
+
 
 }
