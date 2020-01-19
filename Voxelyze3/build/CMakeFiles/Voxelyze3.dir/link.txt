@@ -1,1 +1,1 @@
-/bin/g++-8  -g  -rdynamic CMakeFiles/Voxelyze3.dir/src/main.cpp.o  -o Voxelyze3 
+/usr/bin/g++  CMakeFiles/Voxelyze3.dir/src/Voxelyze3.cu.o CMakeFiles/Voxelyze3.dir/cmake_device_link.o -o Voxelyze3  -L"/usr/local/cuda/targets/x86_64-linux/lib/stubs" -L"/usr/local/cuda/targets/x86_64-linux/lib" -lcudadevrt -lcudart_static -lrt -lpthread -ldl

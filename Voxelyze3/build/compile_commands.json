@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/liusida/Simulators/Voxel/gpuVoxels/Voxelyze3/build",
-  "command": "/bin/g++-8    -g   -o CMakeFiles/Voxelyze3.dir/src/main.cpp.o -c /home/liusida/Simulators/Voxel/gpuVoxels/Voxelyze3/src/main.cpp",
-  "file": "/home/liusida/Simulators/Voxel/gpuVoxels/Voxelyze3/src/main.cpp"
-}
-]
