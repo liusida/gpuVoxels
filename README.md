@@ -1,6 +1,6 @@
-# EvoSoRo (Evolutionary Soft Robotics)
+# gpuVoxels
 
-Introducion and balabala...
+(We need a well written introduction with pics. But basically this is a tool for us run experiments on Deep Green.)
 
 ## Typical User Case
 
