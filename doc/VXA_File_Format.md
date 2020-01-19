@@ -1,5 +1,6 @@
 This is a note for the format of configure files (VXA, VXC, etc...).
 
+```bash
 {Simulator}
     Integration
         Integrator              0                           //0 = euler in older versions
@@ -169,3 +170,4 @@ This is a note for the format of configure files (VXA, VXC, etc...).
     FitnessType             FT_NONE
     TrackVoxel              0
     FitnessFileName         ""
+```
