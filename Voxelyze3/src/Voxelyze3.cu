@@ -53,6 +53,7 @@ Allowed options)");
         if (boost::algorithm::to_lower_copy(file.path().extension().string()) == ".vxa") {
             int iGPU = (i%nDevices);
             sub_batches[iGPU].push_back( file.path() );
+            i++;
         }
     }
 
