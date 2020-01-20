@@ -4,9 +4,10 @@
 #include "VX_Sim.h"
 
 
-__global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_tasks) {
+__global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simulation, int device_index) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i<num_tasks) {
+    printf("CUDA_Simulation: num_simulation %d, device_index %d.\n", num_simulation, device_index);
+    if (i<num_simulation) {
         VX3_VoxelyzeKernel *d_v3 = &d_voxelyze_3[i];
         d_v3->syncVectors(); //Everytime we pass a class with VX3_vectors in it, we should sync hd_vector to d_vector first.
         printf(COLORCODE_GREEN "Simulation %d runs. vxa_filename %s. \n" COLORCODE_RESET, i, d_v3->vxa_filename);
@@ -118,12 +119,13 @@ std::vector<std::vector<fs::path>> VX3_SimulationManager::splitIntoSubBatches() 
     return sub_batches;
 }
 
-void VX3_SimulationManager::startKernel(int num_tasks, int device_index) {
+void VX3_SimulationManager::startKernel(int num_simulation, int device_index) {
     int threadsPerBlock = 512;
-    int numBlocks = (num_tasks + threadsPerBlock - 1) / threadsPerBlock;
+    int numBlocks = (num_simulation + threadsPerBlock - 1) / threadsPerBlock;
     if (numBlocks == 1)
-        threadsPerBlock = num_tasks;
-    CUDA_Simulation<<<numBlocks,threadsPerBlock,0,streams[device_index]>>>(d_voxelyze_3s[device_index], num_tasks);
+        threadsPerBlock = num_simulation;
+    printf("Starting kernel on device %d\n", device_index);
+    CUDA_Simulation<<<numBlocks,threadsPerBlock,0,streams[device_index]>>>(d_voxelyze_3s[device_index], num_simulation, device_index);
 }
 
 void VX3_SimulationManager::writeResults(int num_tasks) {
