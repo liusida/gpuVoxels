@@ -124,7 +124,7 @@ void VX3_SimulationManager::startKernel(int num_simulation, int device_index) {
     int numBlocks = (num_simulation + threadsPerBlock - 1) / threadsPerBlock;
     if (numBlocks == 1)
         threadsPerBlock = num_simulation;
-    printf("Starting kernel on device %d\n", device_index);
+    printf("Starting kernel on device %d on stream %d. passing d_voxelyze_3s[device_index] %p.\n", device_index, streams[device_index], d_voxelyze_3s[device_index]);
     CUDA_Simulation<<<numBlocks,threadsPerBlock,0,streams[device_index]>>>(d_voxelyze_3s[device_index], num_simulation, device_index);
     CUDA_CHECK_AFTER_CALL();
 }
