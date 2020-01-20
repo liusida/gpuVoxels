@@ -39,23 +39,27 @@ VX3_SimulationManager::~VX3_SimulationManager() {
 
 void VX3_SimulationManager::start() {
     std::vector<std::vector<fs::path>> sub_batches = splitIntoSubBatches();
-    int device_index=0;
-    for (auto &files : sub_batches) {
+    
+    for (int device_index=0;device_index<num_of_devices;device_index++) { //multi GPUs
+        auto files = sub_batches[device_index];
         cudaSetDevice(device_index);
-        printf("set device to %d.\n", device_index);
-        printf("=====%ld====\n", files.size());
+        printf("=== set device to %d for %ld simulations ===\n", device_index, files.size());
         readVXA(files, device_index);
         startKernel(files.size(), device_index);
-        device_index++;
     }
     cudaDeviceSynchronize();
+    for (int device_index=0;device_index<num_of_devices;device_index++) { //multi GPUs
+        auto files = sub_batches[device_index];
+        collectResults(files.size(), device_index);
+    }
+    sortResults();
 }
 
 void VX3_SimulationManager::readVXA(std::vector<fs::path> files, int device_index) {
     std::vector<std::string> filenames;
-    int batch_size = files.size();
+    int num_simulation = files.size();
     
-    VcudaMalloc((void**)&d_voxelyze_3s[device_index], batch_size * sizeof(VX3_VoxelyzeKernel));
+    VcudaMalloc((void**)&d_voxelyze_3s[device_index], num_simulation * sizeof(VX3_VoxelyzeKernel));
     
     int i = 0;
     for (auto &file : files ) {
@@ -73,6 +77,7 @@ void VX3_SimulationManager::readVXA(std::vector<fs::path> files, int device_inde
         }
         
         VX3_VoxelyzeKernel h_d_tmp(&MainSim.Vx, 0);
+        //not all the data needed is in MainSim.Vx, so here are several other assignments:
         strcpy(h_d_tmp.vxa_filename, file.filename().c_str());
         h_d_tmp.DtFrac = MainSim.DtFrac;
         h_d_tmp.StopConditionType = MainSim.StopConditionType;
@@ -84,7 +89,7 @@ void VX3_SimulationManager::readVXA(std::vector<fs::path> files, int device_inde
         h_d_tmp.TempPeriod = MainSim.pEnv->TempPeriod;
         h_d_tmp.currentTemperature = h_d_tmp.TempBase + h_d_tmp.TempAmplitude;
         
-        printf("copy %s to device %d.\n", h_d_tmp.vxa_filename, device_index);
+        // printf("copy %s to device %d.\n", h_d_tmp.vxa_filename, device_index);
         VcudaMemcpyAsync(d_voxelyze_3s[device_index] + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), VcudaMemcpyHostToDevice, 0);
         
         i++;
@@ -110,47 +115,33 @@ void VX3_SimulationManager::startKernel(int num_simulation, int device_index) {
     int numBlocks = (num_simulation + threadsPerBlock - 1) / threadsPerBlock;
     if (numBlocks == 1)
         threadsPerBlock = num_simulation;
-    printf("Starting kernel on device %d. passing d_voxelyze_3s[device_index] %p.\n", device_index, d_voxelyze_3s[device_index]);
+    // printf("Starting kernel on device %d. passing d_voxelyze_3s[device_index] %p.\n", device_index, d_voxelyze_3s[device_index]);
     CUDA_Simulation<<<numBlocks,threadsPerBlock>>>(d_voxelyze_3s[device_index], num_simulation, device_index);
     CUDA_CHECK_AFTER_CALL();
 }
 
-void VX3_SimulationManager::writeResults(int num_tasks) {
-    // double final_z = 0.0;
-    // VX3_VoxelyzeKernel* result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(num_tasks * sizeof(VX3_VoxelyzeKernel));
-    
-    // VcudaMemcpyAsync( result_voxelyze_kernel, d_voxelyze_3s[device_index], num_tasks * sizeof(VX3_VoxelyzeKernel), VcudaMemcpyDeviceToHost );
-    
-    // printf("\n====[RESULTS for ]====\n");
-    // std::vector< std::pair<double, int> > normAbsoluteDisplacement;
-    // for (int i=0;i<num_tasks;i++) {
-    //     double x = result_voxelyze_kernel[i].currentCenterOfMass.x;
-    //     double y = result_voxelyze_kernel[i].currentCenterOfMass.y;
-    //     double z = result_voxelyze_kernel[i].currentCenterOfMass.y;
-    //     double v = result_voxelyze_kernel[i].voxSize;
-    //     x = x/v; y = y/v; z = z/v;
-    //     double dist = sqrt(x*x + y*y + z*z);
-    //     normAbsoluteDisplacement.push_back( std::make_pair(dist,i) );
-    // }
-    // std::sort(normAbsoluteDisplacement.begin(), normAbsoluteDisplacement.end());
-    // std::reverse(normAbsoluteDisplacement.begin(), normAbsoluteDisplacement.end());
-    // pt::ptree xml_tree;
-    // // xml_tree.put("voxelyzeManager.batchName", batchFolder.filename());
-    // for (auto p : normAbsoluteDisplacement) {
-    //     pt::ptree task;
-    //     task.put("normAbsoluteDisplacement", p.first);
-    //     task.put("taskId", p.second);
-    //     // task.put("VXAFilename", filenames[p.second]);
-    //     task.put("AbsoluteDistanceInMeter.x", result_voxelyze_kernel[p.second].currentCenterOfMass.x);
-    //     task.put("AbsoluteDistanceInMeter.y", result_voxelyze_kernel[p.second].currentCenterOfMass.y);
-    //     task.put("AbsoluteDistanceInMeter.z", result_voxelyze_kernel[p.second].currentCenterOfMass.z);
-    //     task.put("VoxelSizeInMeter", result_voxelyze_kernel[p.second].voxSize);
-    //     xml_tree.add_child("voxelyzeManager.Report", task);
-    // }
-    // pt::write_xml(output_file.string(), xml_tree, \
-    //                     std::locale(), pt::xml_writer_make_settings<std::string>('\t', 1));
-    // printf("Best distance of this generation is %f (x voxelSize).\n", normAbsoluteDisplacement[0].first);
-    // printf("A detailed report.xml has been produced in the batch folder.\n");
+void VX3_SimulationManager::collectResults(int num_simulation, int device_index)  {
+    //insert results to h_results
+    VX3_VoxelyzeKernel* result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(num_simulation * sizeof(VX3_VoxelyzeKernel));
+    VcudaMemcpy( result_voxelyze_kernel, d_voxelyze_3s[device_index], num_simulation * sizeof(VX3_VoxelyzeKernel), VcudaMemcpyDeviceToHost );
+    for (int i=0;i<num_simulation;i++) {
+        VX3_SimulationResult tmp;
+        tmp.x = result_voxelyze_kernel[i].currentCenterOfMass.x;
+        tmp.y = result_voxelyze_kernel[i].currentCenterOfMass.y;
+        tmp.z = result_voxelyze_kernel[i].currentCenterOfMass.z;
+        tmp.voxSize = result_voxelyze_kernel[i].voxSize;
+        tmp.vxa_filename = result_voxelyze_kernel[i].vxa_filename;
+        tmp.computeDisplacement();
+        h_results.push_back(tmp);
+    }
+}
 
-    // delete result_voxelyze_kernel;
+void VX3_SimulationManager::printResults() {
+    for (auto &r : h_results) {
+        printf("%s, dis: %f.\n", r.vxa_filename.c_str(), r.distance);
+    }
+}
+
+void VX3_SimulationManager::sortResults() {
+    sort(h_results.begin(), h_results.end(), VX3_SimulationResult::compareDistance); 
 }

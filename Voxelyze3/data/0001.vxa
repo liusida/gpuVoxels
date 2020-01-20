@@ -26,7 +26,7 @@
     </Features>
     <StopCondition>
       <StopConditionType>2</StopConditionType>
-      <StopConditionValue>4</StopConditionValue>
+      <StopConditionValue>1.2</StopConditionValue>
     </StopCondition>
     <EquilibriumMode>
       <EquilibriumModeEnabled>0</EquilibriumModeEnabled>

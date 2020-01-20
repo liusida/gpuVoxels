@@ -61,6 +61,8 @@ Allowed options)");
     VX3_SimulationManager mgr(input_directory, output_file);
     mgr.start();
 
+    mgr.printResults();
+
     std::cout<<"\n\n";
     return 0;
 }
