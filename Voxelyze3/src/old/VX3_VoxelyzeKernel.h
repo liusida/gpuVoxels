@@ -24,6 +24,7 @@ public:
     __device__ void syncVectors();
 
     /* data */
+    char vxa_filename[256];
 	double voxSize; //lattice size
 	double currentTime = 0.0f; //current time of the simulation in seconds
     double OptimalDt = 0.0f;

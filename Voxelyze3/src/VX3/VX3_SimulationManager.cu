@@ -9,7 +9,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_tasks)
     if (i<num_tasks) {
         VX3_VoxelyzeKernel *d_v3 = &d_voxelyze_3[i];
         d_v3->syncVectors(); //Everytime we pass a class with VX3_vectors in it, we should sync hd_vector to d_vector first.
-        printf(COLORCODE_GREEN "Simulation %d runs. voxSize %f. \t" COLORCODE_RESET, i, d_v3->voxSize);
+        printf(COLORCODE_GREEN "Simulation %d runs. vxa_filename %s. \n" COLORCODE_RESET, i, d_v3->vxa_filename);
         // for (int j=0;j<1000000;j++) { //Maximum Steps 1000000
         //     if (d_v3->StopConditionMet()) break;
         //     // if (j%1000==0) {
@@ -80,6 +80,7 @@ void VX3_SimulationManager::readVXA(std::vector<fs::path> files, int batch_index
         }
         
         VX3_VoxelyzeKernel h_d_tmp(&MainSim.Vx, streams[batch_index]);
+        strcpy(h_d_tmp.vxa_filename, file.filename().c_str());
         h_d_tmp.DtFrac = MainSim.DtFrac;
         h_d_tmp.StopConditionType = MainSim.StopConditionType;
         h_d_tmp.StopConditionValue = MainSim.StopConditionValue;
