@@ -25,8 +25,8 @@
       <VolumeEffectsEnabled>0</VolumeEffectsEnabled>
     </Features>
     <StopCondition>
-      <StopConditionType>0</StopConditionType>
-      <StopConditionValue>99</StopConditionValue>
+      <StopConditionType>2</StopConditionType>
+      <StopConditionValue>4</StopConditionValue>
     </StopCondition>
     <EquilibriumMode>
       <EquilibriumModeEnabled>0</EquilibriumModeEnabled>

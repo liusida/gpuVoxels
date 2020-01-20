@@ -6,28 +6,19 @@
 
 __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simulation, int device_index) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
-    printf("CUDA_Simulation: num_simulation %d, device_index %d.\n", num_simulation, device_index);
     if (i<num_simulation) {
         VX3_VoxelyzeKernel *d_v3 = &d_voxelyze_3[i];
         d_v3->syncVectors(); //Everytime we pass a class with VX3_vectors in it, we should sync hd_vector to d_vector first.
-        printf(COLORCODE_GREEN "Simulation %d runs. vxa_filename %s. \n" COLORCODE_RESET, i, d_v3->vxa_filename);
+        printf(COLORCODE_GREEN "%d) Simulation %d runs: %s. \n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename);
         for (int j=0;j<1000000;j++) { //Maximum Steps 1000000
-        //     if (d_v3->StopConditionMet()) break;
-        //     // if (j%1000==0) {
-        //     //     printf("----> [Task %d] doTimeStep %d, Current Time (in sec) %f \t", i, j, d_v3->currentTime);
-        //     //     d_v3->updateCurrentCenterOfMass();
-        //     //     printf("Current Location (in meter): %f %f %f\n", d_v3->currentCenterOfMass.x, d_v3->currentCenterOfMass.y, d_v3->currentCenterOfMass.z);
-        //     // }
-        //     if (!d_v3->doTimeStep()) {
-        //         printf(COLORCODE_BOLD_RED "\nSimulation %d Diverged.\n" COLORCODE_RESET, i);
-        //         break;
-        //     }
-            if (j% 100000==0)
-                printf("%d) Time: %f, pos[0]: %f %f %f\n", device_index, d_v3->currentTime, d_v3->d_voxels[0].pos.x, d_v3->d_voxels[0].pos.y, d_v3->d_voxels[0].pos.z);
-
+            if (d_v3->StopConditionMet()) break;
+            if (!d_v3->doTimeStep()) {
+                printf(COLORCODE_BOLD_RED "\n%d) Simulation %d Diverged: %s.\n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename);
+                break;
+            }
         }
-        // d_v3->updateCurrentCenterOfMass();
-        printf(COLORCODE_BLUE "Simulation %d ends.\t" COLORCODE_RESET, i);
+        d_v3->updateCurrentCenterOfMass();
+        printf(COLORCODE_BLUE "%d) Simulation %d ends: %s Time: %f, pos[0]: %f %f %f\n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename, d_v3->currentTime, d_v3->d_voxels[0].pos.x, d_v3->d_voxels[0].pos.y, d_v3->d_voxels[0].pos.z);
     }
 }
 
