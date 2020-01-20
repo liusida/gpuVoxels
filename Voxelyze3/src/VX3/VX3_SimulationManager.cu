@@ -46,9 +46,8 @@ VX3_SimulationManager::~VX3_SimulationManager() {
 }
 
 void VX3_SimulationManager::start() {
-    splitIntoSubBatches();
+    std::vector<std::vector<fs::path>> sub_batches = splitIntoSubBatches();
     int i=0;
-
     for (auto &files : sub_batches) {
         cudaSetDevice(i);
         printf("=====%ld====\n", files.size());
@@ -97,9 +96,9 @@ void VX3_SimulationManager::readVXA(std::vector<fs::path> files, int batch_index
     }
 }
 
-void VX3_SimulationManager::splitIntoSubBatches() { //Sub-batches are for Multiple GPUs on one node.
+std::vector<std::vector<fs::path>> VX3_SimulationManager::splitIntoSubBatches() { //Sub-batches are for Multiple GPUs on one node.
     int i=0;
-    sub_batches.clear(); //TODO: check if we can clear a vector of vector like this. memory leak?
+    std::vector<std::vector<fs::path>> sub_batches;
     sub_batches.resize(num_of_devices);
     for (auto & file : fs::directory_iterator( input_directory )) {
         if (boost::algorithm::to_lower_copy(file.path().extension().string()) == ".vxa") {
@@ -108,6 +107,7 @@ void VX3_SimulationManager::splitIntoSubBatches() { //Sub-batches are for Multip
             i++;
         }
     }
+    return sub_batches;
 }
 
 void VX3_SimulationManager::startKernel(int num_tasks, int batch_index) {

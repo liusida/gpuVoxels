@@ -23,14 +23,13 @@ public:
 
     void start();
     void readVXA(std::vector<fs::path> files, int batch_index);
-    void splitIntoSubBatches();
+    std::vector<std::vector<fs::path>> splitIntoSubBatches();
     void startKernel(int num_tasks, int batch_index);
     void writeResults(int num_tasks);
 
     /* DATA */
     int num_of_devices;
     VX3_VoxelyzeKernel* d_voxelyze_3;
-    std::vector<std::vector<fs::path>> sub_batches;
     fs::path input_directory;
     fs::path output_file;
     std::vector<cudaStream_t> streams;
