@@ -11,7 +11,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         VX3_VoxelyzeKernel *d_v3 = &d_voxelyze_3[i];
         d_v3->syncVectors(); //Everytime we pass a class with VX3_vectors in it, we should sync hd_vector to d_vector first.
         printf(COLORCODE_GREEN "Simulation %d runs. vxa_filename %s. \n" COLORCODE_RESET, i, d_v3->vxa_filename);
-        // for (int j=0;j<1000000;j++) { //Maximum Steps 1000000
+        for (int j=0;j<1000000;j++) { //Maximum Steps 1000000
         //     if (d_v3->StopConditionMet()) break;
         //     // if (j%1000==0) {
         //     //     printf("----> [Task %d] doTimeStep %d, Current Time (in sec) %f \t", i, j, d_v3->currentTime);
@@ -22,10 +22,10 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         //         printf(COLORCODE_BOLD_RED "\nSimulation %d Diverged.\n" COLORCODE_RESET, i);
         //         break;
         //     }
-        //     // if (j% 1000==0)
-        //     //     printf("Time: %f, pos[0]: %f %f %f\n", d_v3->currentTime, d_v3->d_voxels[0].pos.x, d_v3->d_voxels[0].pos.y, d_v3->d_voxels[0].pos.z);
+            if (j% 100000==0)
+                printf("%d) Time: %f, pos[0]: %f %f %f\n", device_index, d_v3->currentTime, d_v3->d_voxels[0].pos.x, d_v3->d_voxels[0].pos.y, d_v3->d_voxels[0].pos.z);
 
-        // }
+        }
         // d_v3->updateCurrentCenterOfMass();
         printf(COLORCODE_BLUE "Simulation %d ends.\t" COLORCODE_RESET, i);
     }
@@ -36,16 +36,11 @@ input_directory(input), output_file(output) {
     cudaGetDeviceCount(&num_of_devices);
     
     d_voxelyze_3s.resize(num_of_devices);
-    streams.resize(num_of_devices);
     for (int i=0;i<num_of_devices;i++) {
         d_voxelyze_3s[i] = NULL;
-        cudaStreamCreate(&streams[i]);
     }
 }
 VX3_SimulationManager::~VX3_SimulationManager() {
-    for (auto stream : streams) {
-        cudaStreamDestroy(stream);
-    }
     for (auto d:d_voxelyze_3s) {
         if (d) VcudaFree(d);
     }
@@ -86,7 +81,7 @@ void VX3_SimulationManager::readVXA(std::vector<fs::path> files, int device_inde
             std::cout<<err_string;
         }
         
-        VX3_VoxelyzeKernel h_d_tmp(&MainSim.Vx, streams[device_index]);
+        VX3_VoxelyzeKernel h_d_tmp(&MainSim.Vx, 0);
         strcpy(h_d_tmp.vxa_filename, file.filename().c_str());
         h_d_tmp.DtFrac = MainSim.DtFrac;
         h_d_tmp.StopConditionType = MainSim.StopConditionType;
@@ -99,7 +94,7 @@ void VX3_SimulationManager::readVXA(std::vector<fs::path> files, int device_inde
         h_d_tmp.currentTemperature = h_d_tmp.TempBase + h_d_tmp.TempAmplitude;
         
         printf("copy %s to device %d.\n", h_d_tmp.vxa_filename, device_index);
-        VcudaMemcpyAsync(d_voxelyze_3s[device_index] + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), VcudaMemcpyHostToDevice, streams[device_index]);
+        VcudaMemcpyAsync(d_voxelyze_3s[device_index] + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), VcudaMemcpyHostToDevice, 0);
         
         i++;
     }
@@ -124,8 +119,8 @@ void VX3_SimulationManager::startKernel(int num_simulation, int device_index) {
     int numBlocks = (num_simulation + threadsPerBlock - 1) / threadsPerBlock;
     if (numBlocks == 1)
         threadsPerBlock = num_simulation;
-    printf("Starting kernel on device %d on stream %d. passing d_voxelyze_3s[device_index] %p.\n", device_index, streams[device_index], d_voxelyze_3s[device_index]);
-    CUDA_Simulation<<<numBlocks,threadsPerBlock,0,streams[device_index]>>>(d_voxelyze_3s[device_index], num_simulation, device_index);
+    printf("Starting kernel on device %d. passing d_voxelyze_3s[device_index] %p.\n", device_index, d_voxelyze_3s[device_index]);
+    CUDA_Simulation<<<numBlocks,threadsPerBlock>>>(d_voxelyze_3s[device_index], num_simulation, device_index);
     CUDA_CHECK_AFTER_CALL();
 }
 
@@ -133,7 +128,7 @@ void VX3_SimulationManager::writeResults(int num_tasks) {
     // double final_z = 0.0;
     // VX3_VoxelyzeKernel* result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(num_tasks * sizeof(VX3_VoxelyzeKernel));
     
-    // VcudaMemcpyAsync( result_voxelyze_kernel, d_voxelyze_3s[device_index], num_tasks * sizeof(VX3_VoxelyzeKernel), VcudaMemcpyDeviceToHost, streams[num_tasks] );
+    // VcudaMemcpyAsync( result_voxelyze_kernel, d_voxelyze_3s[device_index], num_tasks * sizeof(VX3_VoxelyzeKernel), VcudaMemcpyDeviceToHost );
     
     // printf("\n====[RESULTS for ]====\n");
     // std::vector< std::pair<double, int> > normAbsoluteDisplacement;

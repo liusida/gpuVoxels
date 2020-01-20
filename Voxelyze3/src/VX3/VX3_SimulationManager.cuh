@@ -32,7 +32,6 @@ public:
     std::vector<VX3_VoxelyzeKernel*> d_voxelyze_3s;
     fs::path input_directory;
     fs::path output_file;
-    std::vector<cudaStream_t> streams;
 
 };
 
