@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
     cudaGetDeviceCount(&nDevices);
     if (nDevices<=0) {
         printf("Error: No GPU found.\n");
+        return 1;
     } else {
         printf("%d GPUs found.\n", nDevices);
     }
@@ -27,7 +28,8 @@ Allowed options)");
     desc.add_options()
     ("help,h", "produce help message")
     ("input,i", po::value<std::string>(), "Set input directory path which contains a generation of VXA files.")
-    ("output,o", po::value<std::string>(), "Set output file path for report. (e.g. report_1.xml)");
+    ("output,o", po::value<std::string>(), "Set output file path for report. (e.g. report_1.xml)")
+    ("force,f", "Overwrite output file if exists.");
     
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -44,25 +46,21 @@ Allowed options)");
     fs::path input_directory(str_input_directory);
     fs::path output_file(str_output_file);
 
-    // std::cout << "input directory:" << input_directory.string() <<"\n";
-    // std::cout << "output file:" << output_file.string() <<"\n";
-    int i=0;
-    std::vector<std::vector<fs::path>> sub_batches;
-    sub_batches.resize(nDevices);
-    for (auto & file : fs::directory_iterator( input_directory )) {
-        if (boost::algorithm::to_lower_copy(file.path().extension().string()) == ".vxa") {
-            int iGPU = (i%nDevices);
-            sub_batches[iGPU].push_back( file.path() );
-            i++;
-        }
+    if (!fs::is_directory(input_directory)) {
+        printf("Error: input directory not found.\n\n");
+        std::cout << desc << "\n";
+        return 1;
     }
 
-    for (auto &files : sub_batches) {
-        printf("=====%ld====\n", files.size());
-        for (auto &file : files) {
-            
-            std::cout << file.string() <<"\n";
-
-        }
+    if (fs::is_regular_file(output_file) && !vm.count("force") ) {
+        std::cout << "Error: output file exists.\n\n";
+        std::cout << desc << "\n";
+        return 1;
     }
+    
+    VX3_SimulationManager mgr(input_directory, output_file);
+    mgr.start();
+
+    std::cout<<"\n\n";
+    return 0;
 }

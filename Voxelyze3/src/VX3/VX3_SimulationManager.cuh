@@ -11,16 +11,29 @@ namespace fs = boost::filesystem;
 #include <boost/property_tree/xml_parser.hpp>
 namespace pt = boost::property_tree;
 
+#include "VX3_VoxelyzeKernel.h"
+
 class VX3_SimulationManager
 {
 private:
     /* data */
 public:
-    VX3_SimulationManager() = default;
-    
-    //Overload operator to start thread
-    void operator()(fs::path batchFolder, cudaStream_t stream);
+    VX3_SimulationManager(fs::path input, fs::path output);
+    ~VX3_SimulationManager();
 
+    void start();
+    void readVXA(std::vector<fs::path> files, int batch_index);
+    void splitIntoSubBatches();
+    void startKernel(int num_tasks, int batch_index);
+    void writeResults(int num_tasks);
+
+    /* DATA */
+    int num_of_devices;
+    VX3_VoxelyzeKernel* d_voxelyze_3;
+    std::vector<std::vector<fs::path>> sub_batches;
+    fs::path input_directory;
+    fs::path output_file;
+    std::vector<cudaStream_t> streams;
 
 };
 

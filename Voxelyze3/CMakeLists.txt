@@ -4,11 +4,15 @@ project(Voxelyze3 LANGUAGES CXX CUDA)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(src)
+include_directories(src/VX3)
+include_directories(src/Utils)
+include_directories(src/old)
 
 file( GLOB VX3_SRC_cu src/VX3/*.cu )
 file( GLOB VX3_SRC_cpp src/VX3/*.cpp )
+file( GLOB OLD_SRC src/old/*.c* )
 
-add_library(voxelyze.3.0 ${VX3_SRC_cu} ${VX3_SRC_cpp})
+add_library(voxelyze.3.0 ${VX3_SRC_cu} ${VX3_SRC_cpp} ${OLD_SRC})
 add_executable(Voxelyze3 src/Voxelyze3.cu)
 add_executable(vx_run src/vx_run.cpp)
 
