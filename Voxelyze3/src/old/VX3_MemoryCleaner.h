@@ -6,7 +6,7 @@
 #include <vector>
 #include <boost/thread/mutex.hpp>
 #include <boost/chrono.hpp>
-#include "VX3.h"
+#include "VX3.cuh"
 
 extern bool VX3_MemoryCleaner_running;
 extern boost::mutex MemoryCleaner_mutex;

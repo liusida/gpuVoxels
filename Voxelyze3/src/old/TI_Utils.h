@@ -2,7 +2,7 @@
 #define TI_UTILS_H
 #include <stdexcept>
 
-#include "VX3.h"
+#include "VX3.cuh"
 
 #ifdef __CUDACC__
 #define CUDA_CALLABLE_MEMBER __host__ __device__

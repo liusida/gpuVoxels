@@ -31,8 +31,11 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_tasks)
 }
 
 VX3_SimulationManager::VX3_SimulationManager(fs::path input, fs::path output) : 
-d_voxelyze_3(NULL), input_directory(input), output_file(output) {
+input_directory(input), output_file(output) {
     cudaGetDeviceCount(&num_of_devices);
+    
+    d_voxelyze_3s.resize(num_of_devices);
+
     streams.resize(num_of_devices);
     for (int i=0;i<num_of_devices;i++) {
         cudaStreamCreate(&streams[i]);
@@ -42,7 +45,9 @@ VX3_SimulationManager::~VX3_SimulationManager() {
     for (auto stream : streams) {
         cudaStreamDestroy(stream);
     }
-    VcudaFree(d_voxelyze_3);
+    for (auto d:d_voxelyze_3s) {
+        VcudaFree(d);
+    }
 }
 
 void VX3_SimulationManager::start() {
@@ -62,7 +67,7 @@ void VX3_SimulationManager::readVXA(std::vector<fs::path> files, int batch_index
     std::vector<std::string> filenames;
     int batch_size = files.size();
     
-    VcudaMalloc((void**)&d_voxelyze_3, batch_size * sizeof(VX3_VoxelyzeKernel));
+    VcudaMalloc((void**)&d_voxelyze_3s[batch_index], batch_size * sizeof(VX3_VoxelyzeKernel));
     
     int i = 0;
     for (auto &file : files ) {
@@ -91,7 +96,7 @@ void VX3_SimulationManager::readVXA(std::vector<fs::path> files, int batch_index
         h_d_tmp.TempPeriod = MainSim.pEnv->TempPeriod;
         h_d_tmp.currentTemperature = h_d_tmp.TempBase + h_d_tmp.TempAmplitude;
         
-        VcudaMemcpyAsync(d_voxelyze_3 + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), VcudaMemcpyHostToDevice, streams[batch_index]);
+        VcudaMemcpyAsync(d_voxelyze_3s[batch_index] + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), VcudaMemcpyHostToDevice, streams[batch_index]);
         
         i++;
     }
@@ -116,14 +121,14 @@ void VX3_SimulationManager::startKernel(int num_tasks, int batch_index) {
     int numBlocks = (num_tasks + threadsPerBlock - 1) / threadsPerBlock;
     if (numBlocks == 1)
         threadsPerBlock = num_tasks;
-    CUDA_Simulation<<<numBlocks,threadsPerBlock,0,streams[batch_index]>>>(d_voxelyze_3, num_tasks);
+    CUDA_Simulation<<<numBlocks,threadsPerBlock,0,streams[batch_index]>>>(d_voxelyze_3s[batch_index], num_tasks);
 }
 
 void VX3_SimulationManager::writeResults(int num_tasks) {
     // double final_z = 0.0;
     // VX3_VoxelyzeKernel* result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(num_tasks * sizeof(VX3_VoxelyzeKernel));
     
-    // VcudaMemcpyAsync( result_voxelyze_kernel, d_voxelyze_3, num_tasks * sizeof(VX3_VoxelyzeKernel), VcudaMemcpyDeviceToHost, streams[num_tasks] );
+    // VcudaMemcpyAsync( result_voxelyze_kernel, d_voxelyze_3s[batch_index], num_tasks * sizeof(VX3_VoxelyzeKernel), VcudaMemcpyDeviceToHost, streams[num_tasks] );
     
     // printf("\n====[RESULTS for ]====\n");
     // std::vector< std::pair<double, int> > normAbsoluteDisplacement;

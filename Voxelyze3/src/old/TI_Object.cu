@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "TI_Object.h"
-#include "VX3.h"
+#include "VX3.cuh"
 
 
 __global__ void kernel(float *A, unsigned num_A) {

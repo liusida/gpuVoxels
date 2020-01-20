@@ -3,6 +3,8 @@ project(Voxelyze3 LANGUAGES CXX CUDA)
 
 set(CMAKE_CXX_STANDARD 17)
 
+include_directories(/usr/local/cuda/include) # for cuda intellisense
+
 include_directories(src)
 include_directories(src/VX3)
 include_directories(src/Utils)

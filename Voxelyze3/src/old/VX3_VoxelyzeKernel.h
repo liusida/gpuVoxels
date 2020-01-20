@@ -1,6 +1,6 @@
 #if !defined(VX3_VOXELYZE_KERNEL_H)
 #define VX3_VOXELYZE_KERNEL_H
-#include "VX3.h"
+#include "VX3.cuh"
 #include "Voxelyze.h"
 #include "TI_Link.h"
 #include "TI_Voxel.h"

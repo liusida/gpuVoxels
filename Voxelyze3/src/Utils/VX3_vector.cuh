@@ -2,7 +2,7 @@
 #define VX3_VECTOR_H
 
 #include <vector>
-#include "Utils/VX3.h"
+#include "Utils/VX3.cuh"
 
 template <typename T> class VX3_hdVector; //A vector that can be initialized in host and passed to device. It should be freed after return from device.
 template <typename T> class VX3_dVector; //A vector that can be initialized in device, and do push_back() and get(), and it should be freed after use. 
