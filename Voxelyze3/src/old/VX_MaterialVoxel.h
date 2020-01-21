@@ -28,7 +28,7 @@ class CVX_MaterialVoxel : public CVX_Material {
 	CVX_MaterialVoxel(const CVX_Material& mat, double nominalSize=0.001); //!< Constructs from an existing material. @param[in] mat Material to construct from. @param[in] nominalSize The nominal voxel size in meters
 	//virtual ~CVX_MaterialVoxel(void); //!< Destructor. Virtual so we can just keep track of CVX_Material pointers.
 	CVX_MaterialVoxel(const CVX_MaterialVoxel& vIn) {*this = vIn;} //!< Copy constructor
-	virtual CVX_MaterialVoxel& operator=(const CVX_MaterialVoxel& vIn); //!< Equals operator
+	CVX_MaterialVoxel& operator=(const CVX_MaterialVoxel& vIn); //!< Equals operator
 
 	//size and scaling
 	bool setNominalSize(double size); //!< Sets the nominal cubic voxel size in order to calculate mass, moments of inertia, etc of this material. In ordinary circumstances this should be controlled by the overall simulation and never called directly. Use setExternalScaleFactor() if you wish to change the size of voxels of this material. @param[in] size The size of a voxel as measured by its linear outer dimension. (units: meters)

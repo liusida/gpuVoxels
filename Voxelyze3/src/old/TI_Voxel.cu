@@ -1,7 +1,7 @@
 #include <vector>
 #include "TI_Voxel.h"
 #include "TI_VoxelyzeKernel.h"
-#include "VX3_VoxelyzeKernel.h"
+#include "VX3_VoxelyzeKernel.cuh"
 #include "VX3_MemoryCleaner.h"
 
 TI_Voxel::TI_Voxel(CVX_Voxel *p, VX3_VoxelyzeKernel* k): 
@@ -13,9 +13,9 @@ previousDt(p->previousDt) {
     _kernel = k;
 
 	VcudaMalloc((void **) &mat, sizeof(TI_MaterialVoxel));
-	TI_MaterialVoxel temp1(p->mat, k->stream);
+	TI_MaterialVoxel temp1(p->mat);
 	
-	VcudaMemcpyAsync(mat, &temp1, sizeof(TI_MaterialVoxel), VcudaMemcpyHostToDevice, k->stream);
+	VcudaMemcpy(mat, &temp1, sizeof(TI_MaterialVoxel), VcudaMemcpyHostToDevice);
 
 	for (unsigned i=0;i<6;i++) {
 		if (p->links[i]) {
@@ -29,7 +29,7 @@ previousDt(p->previousDt) {
 	if (p->ext) {
 		VcudaMalloc((void **) &ext, sizeof(TI_External));
 		TI_External temp2(p->ext);
-		VcudaMemcpyAsync(ext, &temp2, sizeof(TI_External), VcudaMemcpyHostToDevice, k->stream);
+		VcudaMemcpy(ext, &temp2, sizeof(TI_External), VcudaMemcpyHostToDevice);
 	} else {
 		ext = NULL;
 	}

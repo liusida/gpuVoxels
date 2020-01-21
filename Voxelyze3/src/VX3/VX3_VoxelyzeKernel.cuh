@@ -1,17 +1,27 @@
 #if !defined(VX3_VOXELYZE_KERNEL_H)
 #define VX3_VOXELYZE_KERNEL_H
 #include "VX3.cuh"
-#include "Voxelyze.h"
+#include "VX_Sim.h" //readVXA
+
 #include "TI_Link.h"
 #include "TI_Voxel.h"
 #include "TI_MaterialLink.h"
 #include "VX_Enums.h"
 
+
+/*
+ * VX3_VoxelyzeKernel is a GPU mock class of CVoxelyze
+ * Usage: setup a CVoxelyze, and use the constructor function to initialize a VX3_VoxelyzeKernel.
+ */
 class VX3_VoxelyzeKernel
 {   
 public:
     /* Host methods */
-    VX3_VoxelyzeKernel(CVoxelyze* In, cudaStream_t In_stream);
+    VX3_VoxelyzeKernel(CVX_Sim* In);
+    VX3_VoxelyzeKernel()=default; //start from scratch, read VXA ourselves.
+
+    
+
     void cleanup();
     TI_MaterialLink * getMaterialLink(CVX_MaterialLink* vx_mats);
 
@@ -57,8 +67,6 @@ public:
     // TI_vector<TI_Collision *>* d_collisions;
     // TI_vector<TI_Collision *> h_collisions;
 
-    /* CUDA Stream */
-    cudaStream_t stream;
 };
 
 

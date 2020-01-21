@@ -1,5 +1,5 @@
 #include <vector>
-#include "VX3_VoxelyzeKernel.h"
+#include "VX3_VoxelyzeKernel.cuh"
 #include "TI_Link.h"
 #include "TI_VoxelyzeKernel.h"
 #include "TI_MaterialLink.h"
@@ -192,7 +192,7 @@ CUDA_DEVICE void TI_Link::updateForces()
 
 CUDA_DEVICE float TI_Link::updateStrain(float axialStrain)
 {
-	int di = 0;
+	// int di = 0;
 	
 	strain = axialStrain; //redundant?
 	

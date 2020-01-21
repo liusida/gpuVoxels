@@ -28,7 +28,7 @@ class CVX_MaterialLink : public CVX_MaterialVoxel {
 	public:
 	CVX_MaterialLink(CVX_MaterialVoxel* mat1, CVX_MaterialVoxel* mat2); //!< Creates a link material from the two specified voxel materials. The order is unimportant. @param[in] mat1 voxel material on one side of the link. @param[in] mat2 voxel material on the other side of the link.
 	CVX_MaterialLink(const CVX_MaterialLink& VIn) {*this = VIn;} //!< Copy constructor
-	virtual CVX_MaterialLink& operator=(const CVX_MaterialLink& VIn); //!< Equals operator
+	CVX_MaterialLink& operator=(const CVX_MaterialLink& VIn); //!< Equals operator
 
 protected:
 	virtual bool updateAll(); //!< Updates and recalculates eveything possible (used by inherited classed when material properties have changed)

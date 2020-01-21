@@ -37,7 +37,7 @@ class CVX_Material {
 	CVX_Material(rapidjson::Value& mat) {readJSON(mat);} //!< Constructs this CVX_Material object from a rapidjson parser node that contains valid "materials" sub-nodes. @param[in] mat pointer to a rapidjson Value that contains material information. See rapidjson documentation and the *.vxl.json format info in the voxelyze user guide.
 	virtual ~CVX_Material(void) {}; //!< Destructor. Specified as virtual so we can just keep track of generic material pointers for voxel and link materials.
 	CVX_Material(const CVX_Material& vIn) {*this = vIn;} //!< Copy constructor
-	virtual CVX_Material& operator=(const CVX_Material& vIn); //!< Equals operator
+	CVX_Material& operator=(const CVX_Material& vIn); //!< Equals operator
 
 	void clear(); //!< Resets all material information to default.
 	const char* lastError() const {return error.c_str();} //!< Returns the last error encountered for this object.

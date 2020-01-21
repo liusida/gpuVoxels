@@ -11,12 +11,12 @@
 class TI_Material {
 public:
 
-	TI_Material( CVX_Material* p, cudaStream_t stream );
+	TI_Material( CVX_Material* p );
 
 	CUDA_DEVICE TI_Material(float youngsModulus=1e6f, float density=1e3f); //!< Default Constructor. @param[in] youngsModulus The Young's Modulus (stiffness) of this material in Pascals. @param[in] density The density of this material in Kg/m^3
 	//CUDA_DEVICE virtual ~TI_Material(void) {}; //!< Destructor. Specified as virtual so we can just keep track of generic material pointers for voxel and link materials.
 	CUDA_DEVICE TI_Material(const TI_Material& vIn) {*this = vIn;} //!< Copy constructor
-	CUDA_DEVICE virtual TI_Material& operator=(const TI_Material& vIn); //!< Equals operator
+	CUDA_DEVICE TI_Material& operator=(const TI_Material& vIn); //!< Equals operator
 
 	CUDA_DEVICE void clear(); //!< Resets all material information to default.
 	//CUDA_DEVICE const char* lastError() const {return error.c_str();} //!< Returns the last error encountered for this object.

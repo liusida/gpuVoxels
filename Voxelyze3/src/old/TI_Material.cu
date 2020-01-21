@@ -1,9 +1,9 @@
 #include "TI_Material.h"
 
-TI_Material::TI_Material( CVX_Material* p, cudaStream_t stream ):
+TI_Material::TI_Material( CVX_Material* p ):
 linear(p->linear), E(p->E), sigmaYield(p->sigmaYield), sigmaFail(p->sigmaFail),
 epsilonYield(p->epsilonYield), epsilonFail(p->epsilonFail), 
-hd_strainData(p->strainData, stream), hd_stressData(p->stressData, stream), //hd_vector init in host, used for passing data to kernel. With syncVector() function, we use d_vector in kernel.
+hd_strainData(p->strainData), hd_stressData(p->stressData), //hd_vector init in host, used for passing data to kernel. With syncVector() function, we use d_vector in kernel.
 nu(p->nu),rho(p->rho),
 alphaCTE(p->alphaCTE), muStatic(p->muStatic), muKinetic(p->muKinetic),
 zetaInternal(p->zetaInternal), zetaGlobal(p->zetaGlobal), zetaCollision(p->zetaCollision),
@@ -185,6 +185,7 @@ Special cases:
 CUDA_DEVICE bool TI_Material::setModel(int dataPointCount, float* pStrainValues, float* pStressValues)
 {
 	assert(false); //not used.
+	return false;
 	// //Pre-checks
 	// if (*pStrainValues==0 && *pStressValues==0) { //if first data point is 0,0, ignore it
 	// 	pStrainValues++; //advance the pointers...

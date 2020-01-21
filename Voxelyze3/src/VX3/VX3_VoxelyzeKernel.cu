@@ -1,4 +1,4 @@
-#include "VX3_VoxelyzeKernel.h"
+#include "VX3_VoxelyzeKernel.cuh"
 #include "VX3_MemoryCleaner.h"
 
 /* Sub GPU Threads */
@@ -8,49 +8,52 @@ __global__ void gpu_update_temperature(TI_Voxel* voxels, int num, double current
 
 /* Host methods */
 
-VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVoxelyze* In, cudaStream_t In_stream)
-{
-    stream = In_stream;
+VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim* In) {
 
-    voxSize = In->voxSize;
+    voxSize = In->Vx.voxSize;
     
-    num_d_linkMats = In->linkMats.size();
+    num_d_linkMats = In->Vx.linkMats.size();
     VcudaMalloc( (void **)&d_linkMats, num_d_linkMats * sizeof(TI_MaterialLink));
     {
         int i = 0;
-        for (auto mat:In->linkMats) {
-            TI_MaterialLink tmp_linkMat( mat, stream );
-            VcudaMemcpyAsync( d_linkMats+i, &tmp_linkMat, sizeof(TI_MaterialLink), VcudaMemcpyHostToDevice, stream );
+        for (auto mat:In->Vx.linkMats) {
+            TI_MaterialLink tmp_linkMat( mat );
+            VcudaMemcpy( d_linkMats+i, &tmp_linkMat, sizeof(TI_MaterialLink), VcudaMemcpyHostToDevice );
             h_linkMats.push_back( mat );
             i++;
         }
     }
 
-    num_d_voxels = In->voxelsList.size();
+    num_d_voxels = In->Vx.voxelsList.size();
     VcudaMalloc( (void **)&d_voxels, num_d_voxels * sizeof(TI_Voxel));
     for (int i=0;i<num_d_voxels;i++) {
-        h_voxels.push_back( In->voxelsList[i] );
+        h_voxels.push_back( In->Vx.voxelsList[i] );
     }
 
-    num_d_links = In->linksList.size();
+    num_d_links = In->Vx.linksList.size();
     VcudaMalloc( (void **)&d_links, num_d_links * sizeof(TI_Link));
     for (int i=0;i<num_d_links;i++) {
-        TI_Link tmp_link( In->linksList[i], this );
-        VcudaMemcpyAsync( d_links+i, &tmp_link, sizeof(TI_Link), VcudaMemcpyHostToDevice, stream );
-        h_links.push_back( In->linksList[i] );
+        TI_Link tmp_link( In->Vx.linksList[i], this );
+        VcudaMemcpy( d_links+i, &tmp_link, sizeof(TI_Link), VcudaMemcpyHostToDevice );
+        h_links.push_back( In->Vx.linksList[i] );
     }
 
     for (int i=0;i<num_d_voxels;i++) {
         //set values for GPU memory space
-        TI_Voxel tmp_voxel(In->voxelsList[i], this);
-        VcudaMemcpyAsync(d_voxels+i, &tmp_voxel, sizeof(TI_Voxel), VcudaMemcpyHostToDevice, stream);
+        TI_Voxel tmp_voxel(In->Vx.voxelsList[i], this);
+        VcudaMemcpy(d_voxels+i, &tmp_voxel, sizeof(TI_Voxel), VcudaMemcpyHostToDevice);
     }
 
-    // VcudaMalloc((void**)&d_collisionsStale, sizeof(bool));
-
-    // VcudaMalloc((void **)&d_collisions, sizeof(TI_vector<TI_Collision *>));
-    // VcudaMemcpyAsync(d_collisions, &h_collisions, sizeof(TI_vector<TI_Collision *>), VcudaMemcpyHostToDevice, stream);
-
+    //Not all data is in Vx, here are others:
+    DtFrac = In->DtFrac;
+    StopConditionType = In->StopConditionType;
+    StopConditionValue = In->StopConditionValue;
+    TempEnabled = In->pEnv->TempEnabled;
+    VaryTempEnabled = In->pEnv->VaryTempEnabled;
+    TempBase = In->pEnv->TempBase;
+    TempAmplitude = In->pEnv->TempAmplitude;
+    TempPeriod = In->pEnv->TempPeriod;
+    currentTemperature = TempBase + TempAmplitude;
 }
 
 void VX3_VoxelyzeKernel::cleanup() {
@@ -82,7 +85,7 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
 __device__ bool VX3_VoxelyzeKernel::StopConditionMet(void) //have we met the stop condition yet?
 {
     if (StopConditionType!=SC_MAX_SIM_TIME) {
-        printf(COLORCODE_BOLD_RED "Only support this type of stop condition for now.\n" COLORCODE_RESET);
+        printf(COLORCODE_BOLD_RED "StopConditionType: %d. Type of stop condition no supported for now.\n" COLORCODE_RESET, StopConditionType);
         return true;
     }
     return currentTime > StopConditionValue ? true : false;

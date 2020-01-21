@@ -8,34 +8,38 @@ include_directories(/usr/local/cuda/include) # for cuda intellisense
 include_directories(src)
 include_directories(src/VX3)
 include_directories(src/Utils)
+include_directories(src/VXA)
 include_directories(src/old)
 
 file( GLOB VX3_SRC_cu src/VX3/*.cu )
 file( GLOB VX3_SRC_cpp src/VX3/*.cpp )
+file( GLOB VXA_SRC_cpp src/VXA/*.cpp )
 file( GLOB OLD_SRC src/old/*.c* )
 
-add_library(voxelyze.3.0 ${VX3_SRC_cu} ${VX3_SRC_cpp} ${OLD_SRC})
-add_executable(Voxelyze3 src/Voxelyze3.cu)
-add_executable(vx_run src/vx_run.cpp)
+add_library(voxelyze.3.0 ${VX3_SRC_cu} ${VX3_SRC_cpp} ${VXA_SRC_cpp} ${OLD_SRC})
+add_executable(Voxelyze3 src/Executables/Voxelyze3.cpp)
+add_executable(vx3_node_worker src/Executables/vx3_node_worker.cu)
+add_executable(vx3_node_daemon src/Executables/vx3_node_daemon.cpp)
 
-target_link_libraries(Voxelyze3 PUBLIC voxelyze.3.0)
+target_link_libraries(vx3_node_worker PUBLIC voxelyze.3.0)
 
 # for Boost
 set(Boost_USE_STATIC_LIBS   ON)
 find_package(Boost REQUIRED COMPONENTS filesystem thread chrono program_options)
 target_link_libraries(voxelyze.3.0 PUBLIC ${Boost_LIBRARIES})
 target_link_libraries(Voxelyze3 PUBLIC ${Boost_LIBRARIES})
-target_link_libraries(vx_run PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(vx3_node_worker PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(vx3_node_daemon PUBLIC ${Boost_LIBRARIES})
 
 
 # CUDA options
 set_target_properties(voxelyze.3.0 PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(Voxelyze3 PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(vx3_node_worker PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
     #-G means debug info in GPU, so you can step in GPU kernels
     target_compile_options(voxelyze.3.0 PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-G -arch=compute_60 -code=compute_60>)
-    target_compile_options(Voxelyze3 PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-G -arch=compute_60 -code=compute_60>)
+    target_compile_options(vx3_node_worker PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-G -arch=compute_60 -code=compute_60>)
     # target_compile_options(voxelyze.3.0 PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=compute_60 -code=compute_60>)
-    # target_compile_options(Voxelyze3 PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=compute_60 -code=compute_60>)
+    # target_compile_options(vx3_node_worker PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=compute_60 -code=compute_60>)
 list(APPEND CMAKE_CUDA_FLAGS "-gencode=arch=compute_60,code=sm_60")
 
 

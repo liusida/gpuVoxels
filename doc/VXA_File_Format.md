@@ -171,3 +171,5 @@ This is a note for the format of configure files (VXA, VXC, etc...).
     TrackVoxel              0
     FitnessFileName         ""
 ```
+
+[Other formats](https://github.com/liusida/gpuVoxels/blob/master/doc/File_Formats.md)

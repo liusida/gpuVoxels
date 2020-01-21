@@ -1,7 +1,7 @@
 #include "TI_MaterialVoxel.h"
 
-TI_MaterialVoxel::TI_MaterialVoxel( CVX_MaterialVoxel *p, cudaStream_t stream ):
-TI_Material( (CVX_Material*) p, stream ),
+TI_MaterialVoxel::TI_MaterialVoxel( CVX_MaterialVoxel *p ):
+TI_Material( (CVX_Material*) p ),
 nomSize(p->nomSize), gravMult(p->gravMult),_mass(p->_mass),
 _massInverse(p->_massInverse), _sqrtMass(p->_sqrtMass), _firstMoment(p->_firstMoment),
 _momentInertia(p->_momentInertia), _momentInertiaInverse(p->_momentInertiaInverse),

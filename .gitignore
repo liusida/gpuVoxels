@@ -2,6 +2,7 @@
 .vscode
 compile_commands.json
 build
+workspace
 
 # Prerequisites
 *.d

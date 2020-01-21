@@ -14,7 +14,7 @@ class VX3_hdVector {
 /* It should be initialized in host, and pass to kernel directly, and it should be freed after kernel returns. */
 public:
     VX3_hdVector<T>()=default;
-    VX3_hdVector<T>(const std::vector<T>& p, cudaStream_t stream=(cudaStream_t) 0) {
+    VX3_hdVector<T>(const std::vector<T>& p) {
         num_main = p.size();
         VcudaMalloc( &main , num_main*sizeof(T) );
         T* temp = (T *)malloc(num_main*sizeof(T));
@@ -22,7 +22,7 @@ public:
         for (unsigned i=0;i<num_main;i++) {
             temp[i] = p[i];
         }
-        VcudaMemcpyAsync(main, temp, num_main*sizeof(T), VcudaMemcpyHostToDevice, stream);
+        VcudaMemcpy(main, temp, num_main*sizeof(T), VcudaMemcpyHostToDevice);
         // cudaFreeHost(temp);
         delete temp;
     }

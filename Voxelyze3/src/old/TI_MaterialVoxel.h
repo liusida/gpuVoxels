@@ -8,13 +8,13 @@
 
 class TI_MaterialVoxel : public TI_Material {
 public:
-	TI_MaterialVoxel( CVX_MaterialVoxel *p, cudaStream_t stream );
+	TI_MaterialVoxel( CVX_MaterialVoxel *p );
 
 	CUDA_DEVICE TI_MaterialVoxel(float youngsModulus=1e6f, float density=1e3f, double nominalSize=0.001); //!< Default Constructor. @param[in] youngsModulus The Young's Modulus (stiffness) of this material in Pascals. @param[in] density The density of this material in Kg/m^3. @param[in] nominalSize The nominal voxel size in meters.
 	CUDA_DEVICE TI_MaterialVoxel(const TI_Material& mat, double nominalSize=0.001); //!< Constructs from an existing material. @param[in] mat Material to construct from. @param[in] nominalSize The nominal voxel size in meters
 	//virtual ~TI_MaterialVoxel(void); //!< Destructor. Virtual so we can just keep track of TI_Material pointers.
 	CUDA_DEVICE TI_MaterialVoxel(const TI_MaterialVoxel& vIn) {*this = vIn;} //!< Copy constructor
-	CUDA_DEVICE virtual TI_MaterialVoxel& operator=(const TI_MaterialVoxel& vIn); //!< Equals operator
+	CUDA_DEVICE TI_MaterialVoxel& operator=(const TI_MaterialVoxel& vIn); //!< Equals operator
 
 	//size and scaling
 	CUDA_DEVICE bool setNominalSize(double size); //!< Sets the nominal cubic voxel size in order to calculate mass, moments of inertia, etc of this material. In ordinary circumstances this should be controlled by the overall simulation and never called directly. Use setExternalScaleFactor() if you wish to change the size of voxels of this material. @param[in] size The size of a voxel as measured by its linear outer dimension. (units: meters)

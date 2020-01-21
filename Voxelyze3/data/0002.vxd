@@ -3,7 +3,7 @@
   <Simulator>
     <Integration>
       <Integrator>0</Integrator>
-      <DtFrac>0.3</DtFrac>
+      <DtFrac>0.1</DtFrac>
     </Integration>
     <Damping>
       <BondDampingZ>1</BondDampingZ>
@@ -26,7 +26,7 @@
     </Features>
     <StopCondition>
       <StopConditionType>2</StopConditionType>
-      <StopConditionValue>1.2</StopConditionValue>
+      <StopConditionValue>0.0001</StopConditionValue>
     </StopCondition>
     <EquilibriumMode>
       <EquilibriumModeEnabled>0</EquilibriumModeEnabled>

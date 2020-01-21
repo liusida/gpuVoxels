@@ -7,13 +7,13 @@
 
 class TI_MaterialLink : public TI_MaterialVoxel {
 public:
-	TI_MaterialLink(CVX_MaterialLink* p, cudaStream_t stream);
+	TI_MaterialLink(CVX_MaterialLink* p);
 	~TI_MaterialLink();
 
 	CUDA_DEVICE TI_MaterialLink(TI_MaterialVoxel* mat1, TI_MaterialVoxel* mat2); //!< Creates a link material from the two specified voxel materials. The order is unimportant. @param[in] mat1 voxel material on one side of the link. @param[in] mat2 voxel material on the other side of the link.
 	CUDA_DEVICE TI_MaterialLink(const TI_MaterialLink& VIn) {*this = VIn;} //!< Copy constructor
 
-	CUDA_DEVICE virtual TI_MaterialLink& operator=(const TI_MaterialLink& VIn); //!< Equals operator
+	CUDA_DEVICE TI_MaterialLink& operator=(const TI_MaterialLink& VIn); //!< Equals operator
 
 	CUDA_DEVICE virtual bool updateAll(); //!< Updates and recalculates eveything possible (used by inherited classed when material properties have changed)
 	CUDA_DEVICE virtual bool updateDerived(); //!< Updates all the derived quantities cached as member variables for this and derived classes. (Especially if density, size or elastic modulus changes.)

@@ -8,7 +8,7 @@ This suite includes three parts: Experiments + Voxelyze3 on DeepGreen + VoxCAD o
 
 Here is the diagram of a typical user case:
 
-![A Typical User Case](https://github.com/liusida/EvoSoRo/blob/master/doc/misc/TypicalUseCase.png?raw=true)
+![A Typical User Case](https://github.com/liusida/gpuVoxels/blob/master/doc/misc/TypicalUseCase.png?raw=true)
 
 1. Experiments (Python or other langauges) produce a generation of .VXA files (each .VXA file stands for one virtual world with one creature in it);
 
@@ -28,7 +28,7 @@ Here is the diagram of a typical user case:
 
 VXA file is an important interface in this project. VXA is in XML format.
 
-[Here is a specification of .VXA file.](https://github.com/liusida/EvoSoRo/blob/master/doc/VXA_File_Format.md)
+[Here is a specification of .VXA file.](https://github.com/liusida/gpuVoxels/blob/master/doc/VXA_File_Format.md)
 
-[Here is an example of .VXA file.](https://github.com/liusida/EvoSoRo/blob/master/doc/misc/example.vxa)
+[Here is an example of .VXA file.](https://github.com/liusida/gpuVoxels/blob/master/doc/misc/example.vxa)
 
