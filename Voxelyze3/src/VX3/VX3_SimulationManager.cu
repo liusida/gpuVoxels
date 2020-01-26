@@ -1,5 +1,6 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include "VX3_SimulationManager.cuh"
+#include "ctool.h"
 
 #include "VX3_VoxelyzeKernel.cuh"
 #include "VX_Sim.h" //readVXA
@@ -10,8 +11,8 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
     if (i<num_simulation) {
         VX3_VoxelyzeKernel *d_v3 = &d_voxelyze_3[i];
         d_v3->syncVectors(); //Everytime we pass a class with VX3_vectors in it, we should sync hd_vector to d_vector first.
-        printf(COLORCODE_GREEN "%d) Simulation %d runs: %s. with DtFrac %f. \n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename, d_v3->DtFrac);
-        printf("%d) Simulation %d: TempEnabled %d.\n", device_index, i, d_v3->TempEnabled);
+        printf(COLORCODE_GREEN "%d) Simulation %d runs: %s. with stop condition: %f. \n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename, d_v3->StopConditionValue);
+        printf("%d) Simulation %d: links %d, voxels %d.\n", device_index, i, d_v3->num_d_links, d_v3->num_d_voxels);
         for (int j=0;j<1000000;j++) { //Maximum Steps 1000000
             if (d_v3->StopConditionMet()) break;
             if (!d_v3->doTimeStep()) {
@@ -55,49 +56,64 @@ void VX3_SimulationManager::start() {
     sortResults();
 }
 
-void VX3_SimulationManager::readVXA(fs::path base) { //TODO: after we can read VXA by ourselves, the base only need to be read once.
-}
-
 void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, int device_index) {
+    pt::ptree pt_baseVXA;
+    pt::read_xml(base.string(), pt_baseVXA);
+
     int num_simulation = files.size();
     
     VcudaMalloc((void**)&d_voxelyze_3s[device_index], num_simulation * sizeof(VX3_VoxelyzeKernel));
     
     int i = 0;
     for (auto &file : files ) {
+        // Read VXD file, clone base VXA, replace parts specified in VXD, send to MainSim.ReadVXA to process.
+        printf("reading %s\n", (input_dir/file).c_str());
+        pt::ptree pt_VXD;
+        pt::read_xml( (input_dir/file).string(), pt_VXD );
+        pt::ptree pt_merged = pt_baseVXA;
+        ctool::ptree_merge(pt_VXD, pt_merged);
+        std::ostringstream stream_merged;
+        std::string str_merged;
+        pt::write_xml(stream_merged, pt_merged);
+        str_merged = stream_merged.str();
+        CXML_Rip XML;
+        XML.fromXMLText(&str_merged);
         CVX_Environment MainEnv;
         CVX_Sim MainSim;
         CVX_Object MainObj;
         MainEnv.pObj = &MainObj; //connect environment to object
         MainSim.pEnv = &MainEnv; //connect Simulation to envirnment
-        printf("--> reading %s\n", base.c_str());
-        MainSim.LoadVXAFile(base.string());
+        MainSim.ReadVXA(&XML);
+
         std::string err_string; //need to link this up to get info back...
         if (!MainSim.Import(NULL, NULL, &err_string)){
             std::cout<<err_string;
         }
         VX3_VoxelyzeKernel h_d_tmp(&MainSim);
-        //read VXD to h_d_tmp;
-        printf("reading %s\n", (input_dir/file).c_str());
-        pt::ptree tree;
-        pt::read_xml( (input_dir/file).string(), tree );
-        h_d_tmp.voxSize            = tree.get<double>  ("VXA.VXC.Lattice.Lattice_Dim", h_d_tmp.voxSize); //lattice size
-        h_d_tmp.DtFrac             = tree.get<double>  ("VXA.Simulator.Integration.DtFrac", h_d_tmp.DtFrac);
-        h_d_tmp.StopConditionType  = (StopCondition) tree.get<int>     ("VXA.Simulator.StopCondition.StopConditionType", (int) h_d_tmp.StopConditionType);
-        h_d_tmp.StopConditionValue = tree.get<double>     ("VXA.Simulator.StopCondition.StopConditionValue", h_d_tmp.StopConditionValue);
-
-        h_d_tmp.TempEnabled        = tree.get<int>     ("VXA.Environment.Thermal.TempEnabled", h_d_tmp.TempEnabled); //overall flag for temperature calculations
-        h_d_tmp.VaryTempEnabled    = tree.get<int>     ("VXA.Environment.Thermal.VaryTempEnabled", h_d_tmp.VaryTempEnabled); //is periodic variation of temperature on?
-        h_d_tmp.TempBase           = tree.get<int>     ("VXA.Environment.Thermal.TempBase", h_d_tmp.TempBase);
-        h_d_tmp.TempAmplitude      = tree.get<double>  ("VXA.Environment.Thermal.TempAmplitude", h_d_tmp.TempAmplitude);
-        h_d_tmp.TempPeriod         = tree.get<double>  ("VXA.Environment.Thermal.TempPeriod", h_d_tmp.TempPeriod); //degress celcius
-
         strcpy(h_d_tmp.vxa_filename, file.filename().c_str());
         VcudaMemcpy(d_voxelyze_3s[device_index] + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), cudaMemcpyHostToDevice);
         i++;
     }
 }
     // TODO: Read more and more VXD ourselves. But I'll do this later.
+        // //read VXD to h_d_tmp;
+        // printf("reading %s\n", (input_dir/file).c_str());
+        // pt::ptree tree;
+        // pt::read_xml( (input_dir/file).string(), tree );
+
+        // h_d_tmp.voxSize            = tree.get<double>  ("VXA.VXC.Lattice.Lattice_Dim", h_d_tmp.voxSize); //lattice size
+        // h_d_tmp.DtFrac             = tree.get<double>  ("VXA.Simulator.Integration.DtFrac", h_d_tmp.DtFrac);
+        // h_d_tmp.StopConditionType  = (StopCondition) tree.get<int>     ("VXA.Simulator.StopCondition.StopConditionType", (int) h_d_tmp.StopConditionType);
+        // h_d_tmp.StopConditionValue = tree.get<double>     ("VXA.Simulator.StopCondition.StopConditionValue", h_d_tmp.StopConditionValue);
+
+        // h_d_tmp.TempEnabled        = tree.get<int>     ("VXA.Environment.Thermal.TempEnabled", h_d_tmp.TempEnabled); //overall flag for temperature calculations
+        // h_d_tmp.VaryTempEnabled    = tree.get<int>     ("VXA.Environment.Thermal.VaryTempEnabled", h_d_tmp.VaryTempEnabled); //is periodic variation of temperature on?
+        // h_d_tmp.TempBase           = tree.get<int>     ("VXA.Environment.Thermal.TempBase", h_d_tmp.TempBase);
+        // h_d_tmp.TempAmplitude      = tree.get<double>  ("VXA.Environment.Thermal.TempAmplitude", h_d_tmp.TempAmplitude);
+        // h_d_tmp.TempPeriod         = tree.get<double>  ("VXA.Environment.Thermal.TempPeriod", h_d_tmp.TempPeriod); //degress celcius
+        
+        // //TODO: FIRST PRIORITY: Read material, read voxels, read phaseoffset, make links.
+        
     //
     // pt::ptree &tree_material = tree.get_child("VXC.Palette");
     // VcudaMalloc( (void **)&h_d_base.d_linkMats, tree_material.size() * sizeof(TI_MaterialLink));

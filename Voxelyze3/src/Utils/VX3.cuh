@@ -36,7 +36,7 @@ inline bool u_with_ext(fs::path file, std::string ext) {
 #define COLORCODE_BLUE "\033[0;34m" 
 #define COLORCODE_RESET "\033[0m" 
 
-#define DEBUG_LINE printf("%s(%d): %s\n", __FILE__, __LINE__, u_format_now("at %M:%S").c_str());
+//#define DEBUG_LINE printf("%s(%d): %s\n", __FILE__, __LINE__, u_format_now("at %M:%S").c_str());
 #define CUDA_DEBUG_LINE(str) {printf("%s(%d): %s\n", __FILE__, __LINE__, str);}
 #define DEBUG_LINE_
 

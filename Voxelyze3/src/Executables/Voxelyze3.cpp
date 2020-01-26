@@ -10,7 +10,8 @@ namespace pt = boost::property_tree;
 #include <boost/foreach.hpp>
 #include <boost/process.hpp>
 
-#define WORKSPACE "workspace"
+#include "ctool.h"
+
 #define APP_DESCRIPTION "\
 This application is balabalabala....\n\
 Usage:\n\
@@ -79,34 +80,41 @@ int main(int argc, char** argv) {
     }
 
     //Setup a workspace folder
-    fs::path workspace(WORKSPACE);
-    try {
-        boost::filesystem::create_directory(workspace);
-    } catch (...) {}
-    if (!fs::is_directory(workspace)) {
-        std::cout << "Error: cannot create workspace, make sure you have writing permission.\n\n";
-        std::cout << desc << "\n";
-        return 1;
-    }
+    fs::path workspace("workspace");
+    try { fs::create_directory(workspace); }
+    catch(...){}
 
     //Do evocations: locally or distributedly
     if (vm.count("locally")) { //Produce a vxt file and pass that to vx3_node_worker
+        fs::path locally(workspace/"locally");
+        try {
+            fs::create_directory(locally);
+        } catch(...) {}
         pt::ptree tree;
         tree.put("vxa", (input/"base.vxa").string());
-        tree.put("workspace", workspace.string());
         tree.put("input_dir", input.string());
         for (auto & file : fs::directory_iterator( input )) {
             if (boost::algorithm::to_lower_copy(file.path().extension().string())==".vxd")
                 tree.add("vxd.f", file.path().filename().string());
         }
-        std::string vxt = "002.vxt";
-        std::string vxr = "002.vxr";
-        pt::write_xml((workspace/vxt).string(), tree);
-        std::string command = worker.string() + " -i " + (workspace/vxt).string() + " -o " + (workspace/vxr).string();
+        std::string str_time = ctool::u_format_now("%Y%m%d%H%M%S");
+        std::string vxt = str_time + ".vxt";
+        std::string vxr = str_time + ".vxr";
+        pt::write_xml((locally/vxt).string(), tree);
+        std::string command = worker.string() + " -i " + (locally/vxt).string() + " -o " + (locally/vxr).string();
 
         std::cout << command << "\n";
         boost::process::child worker(command);
         worker.wait();
+        try {
+            if (fs::is_regular_file(locally/vxr)) {
+                fs::copy_file(locally/vxr, output, fs::copy_option::overwrite_if_exists);
+            } else {
+                printf("File not exist: %s.\n", (locally/vxr).c_str());
+            }
+        } catch(...) {
+            printf("ERROR: Failed to copy result file: %s.\n", (locally/vxr).c_str());
+        }
     } else { //Call vx3_start_daemon to check desired number of daomons are waiting on different nodes, produce multiple vxt files, monitor the results, merge into one output
 
     }

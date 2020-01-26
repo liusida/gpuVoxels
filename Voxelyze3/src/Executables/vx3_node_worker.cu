@@ -83,5 +83,9 @@ int main(int argc, char** argv) {
     VX3_SimulationManager sm(sub_batches, base, input_dir, nDevices);
     sm.start();
 
+    pt::ptree tr_result;
+    tr_result.put("bestfit.filename", sm.h_results[0].vxa_filename);
+    tr_result.put("bestfit.distance", sm.h_results[0].distance);
+    pt::write_xml(output.string(), tr_result);
     return 0;
 }

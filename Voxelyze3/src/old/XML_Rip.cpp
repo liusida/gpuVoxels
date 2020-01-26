@@ -91,6 +91,10 @@ bool CXML_Rip::fromXMLText(std::string* Text)
 	ElStack.push_back(doc.documentElement()); //start with the root element!
 #else //TINY_XML
 	//ImplementMe
+	doc.Parse(Text->c_str(), 0, TIXML_ENCODING_UTF8);
+	ElStack.clear();
+	ElStack.push_back(doc.RootElement()); //start with the root element!
+
 #endif
 
 	StrStack.clear(); //Maybe don't want for qt xml?

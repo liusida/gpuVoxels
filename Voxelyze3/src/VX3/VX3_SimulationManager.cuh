@@ -21,7 +21,6 @@ public:
     ~VX3_SimulationManager();
 
     void start();
-    void readVXA(fs::path base);
     void readVXD(fs::path base, std::vector<fs::path> files, int device_index);
     std::vector<std::vector<fs::path>> splitIntoSubBatches();
     void startKernel(int num_tasks, int device_index);
