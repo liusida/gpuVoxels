@@ -1,26 +1,27 @@
-#include "TI_MaterialLink.h"
+#include "VX3_MaterialLink.h"
+#include "VX3_VoxelyzeKernel.cuh"
 
-TI_MaterialLink::TI_MaterialLink(CVX_MaterialLink* p):
-TI_MaterialVoxel((CVX_MaterialVoxel *)p),
+VX3_MaterialLink::VX3_MaterialLink(CVX_MaterialLink* p, VX3_VoxelyzeKernel* k):
+VX3_MaterialVoxel((CVX_MaterialVoxel *)p, k),
 _a1(p->_a1), _a2(p->_a2), _b1(p->_b1), _b2(p->_b2), _b3(p->_b3),
 _sqA1(p->_sqA1), _sqA2xIp(p->_sqA2xIp), _sqB1(p->_sqB1), 
 _sqB2xFMp(p->_sqB2xFMp), _sqB3xIp(p->_sqB3xIp) {
-	vox1Mat = new TI_MaterialVoxel(p->vox1Mat);
-	vox2Mat = new TI_MaterialVoxel(p->vox2Mat);
-	//TODO: please remember to free all newly allocated memory after the program works.
+	for (int i=0;i<k->h_voxelMats.size();i++) {
+		if (k->h_voxelMats[i] == p->vox1Mat) {
+			vox1Mat = &k->d_voxelMats[i];
+		} //vox1Mat and vox2Mat could be the same Mat
+		if (k->h_voxelMats[i] == p->vox2Mat) {
+			vox2Mat = &k->d_voxelMats[i];
+		}
+	}
+	if (vox1Mat==NULL || vox2Mat==NULL) {
+		printf("ERROR: Cannot find voxel for voxelMats.\n");
+	}
 }
-TI_MaterialLink::~TI_MaterialLink() {
-	if (vox1Mat) {
-		delete vox1Mat;
-		vox1Mat = NULL;
-	}
-	if (vox2Mat) {
-		delete vox2Mat;
-		vox2Mat = NULL;
-	}
+VX3_MaterialLink::~VX3_MaterialLink() {
 }
 
-CUDA_DEVICE TI_MaterialLink::TI_MaterialLink(TI_MaterialVoxel* mat1, TI_MaterialVoxel* mat2)
+__device__ VX3_MaterialLink::VX3_MaterialLink(VX3_MaterialVoxel* mat1, VX3_MaterialVoxel* mat2)
 {
 	vox1Mat = mat1;
 	vox2Mat = mat2;
@@ -29,9 +30,9 @@ CUDA_DEVICE TI_MaterialLink::TI_MaterialLink(TI_MaterialVoxel* mat1, TI_Material
 
 }
 
-CUDA_DEVICE TI_MaterialLink& TI_MaterialLink::operator=(const TI_MaterialLink& vIn)
+__device__ VX3_MaterialLink& VX3_MaterialLink::operator=(const VX3_MaterialLink& vIn)
 {
-	TI_MaterialVoxel::operator=(vIn); //set base TI_MaterialVoxel class variables equal
+	VX3_MaterialVoxel::operator=(vIn); //set base VX3_MaterialVoxel class variables equal
 
 	vox1Mat = vIn.vox1Mat;
 	vox2Mat = vIn.vox2Mat;
@@ -49,7 +50,7 @@ CUDA_DEVICE TI_MaterialLink& TI_MaterialLink::operator=(const TI_MaterialLink& v
 	return *this;
 }
 
-CUDA_DEVICE bool TI_MaterialLink::updateAll()
+__device__ bool VX3_MaterialLink::updateAll()
 {
 	nomSize = 0.5*(vox1Mat->nomSize + vox2Mat->nomSize); //these should be the same...
 
@@ -66,7 +67,7 @@ CUDA_DEVICE bool TI_MaterialLink::updateAll()
 	zetaGlobal = 0.5f*(vox1Mat->zetaGlobal + vox2Mat->zetaGlobal);
 	zetaCollision= 0.5f*(vox1Mat->zetaCollision + vox2Mat->zetaCollision);
 
-	extScale=TI_Vec3D<>(1.0, 1.0, 1.0);
+	extScale=VX3_Vec3D<>(1.0, 1.0, 1.0);
 
 	//failure stress (f) is the minimum of the two failure stresses, or if both are -1.0f it should also be -1.0f to denote no failure specified
 	float stressFail=-1.0f, /*strainFail=-1.0f,*/ f1=vox1Mat->sigmaFail, f2=vox2Mat->sigmaFail;
@@ -125,9 +126,9 @@ CUDA_DEVICE bool TI_MaterialLink::updateAll()
 	return updateDerived();
 }
 
-CUDA_DEVICE bool TI_MaterialLink::updateDerived() 
+__device__ bool VX3_MaterialLink::updateDerived() 
 {
-	TI_MaterialVoxel::updateDerived(); //update base TI_Material class derived variables
+	VX3_MaterialVoxel::updateDerived(); //update base VX3_Material class derived variables
 
 	//stiffnesses terms for links
 	float L = (float)nomSize;

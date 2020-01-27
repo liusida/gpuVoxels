@@ -1,3 +1,8 @@
+#if !defined(CTOOL_H)
+#define CTOOL_H
+
+
+
 #include <unistd.h>
 #include <string>
 #include <iostream>
@@ -14,23 +19,23 @@ namespace pt = boost::property_tree;
 namespace ctool {
 
 
-        inline std::string u_format_now(std::string format) {
-            auto now = std::chrono::system_clock::now();
-            auto in_time_t = std::chrono::system_clock::to_time_t(now);
+    inline std::string u_format_now(std::string format) {
+        auto now = std::chrono::system_clock::now();
+        auto in_time_t = std::chrono::system_clock::to_time_t(now);
 
-            std::stringstream folderName;
-            folderName << std::put_time(std::localtime(&in_time_t), format.c_str());
-            return folderName.str();
-        }
+        std::stringstream folderName;
+        folderName << std::put_time(std::localtime(&in_time_t), format.c_str());
+        return folderName.str();
+    }
 
-        inline bool u_with_ext(fs::path file, std::string ext) {
+    inline bool u_with_ext(fs::path file, std::string ext) {
 
-            std::string ext_file = file.filename().extension().string();
-            boost::to_upper(ext);
-            boost::to_upper(ext_file);
+        std::string ext_file = file.filename().extension().string();
+        boost::to_upper(ext);
+        boost::to_upper(ext_file);
 
-            return ext==ext_file;
-        }
+        return ext==ext_file;
+    }
 
 
     std::string get_exe_path() {
@@ -49,5 +54,7 @@ namespace ctool {
             }
         }
     }
-
 }
+
+
+#endif // CTOOL_H

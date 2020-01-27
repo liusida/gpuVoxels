@@ -191,6 +191,7 @@ private:
 
 	friend class TI_VoxelyzeKernel;
 	friend class VX3_VoxelyzeKernel;
+	friend class VX3_SimulationManager;
 };
 
 

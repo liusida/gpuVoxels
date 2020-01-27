@@ -1,7 +1,8 @@
-#include "TI_MaterialVoxel.h"
+#include "VX3_MaterialVoxel.h"
+#include "VX3_VoxelyzeKernel.cuh"
 
-TI_MaterialVoxel::TI_MaterialVoxel( CVX_MaterialVoxel *p ):
-TI_Material( (CVX_Material*) p ),
+VX3_MaterialVoxel::VX3_MaterialVoxel( CVX_MaterialVoxel *p, VX3_VoxelyzeKernel* k ):
+VX3_Material( (CVX_Material*) p, k ),
 nomSize(p->nomSize), gravMult(p->gravMult),_mass(p->_mass),
 _massInverse(p->_massInverse), _sqrtMass(p->_sqrtMass), _firstMoment(p->_firstMoment),
 _momentInertia(p->_momentInertia), _momentInertiaInverse(p->_momentInertiaInverse),
@@ -9,26 +10,26 @@ _2xSqMxExS(p->_2xSqMxExS), _2xSqIxExSxSxS(p->_2xSqIxExSxSxS) {
 
 }
 
-CUDA_DEVICE TI_MaterialVoxel::TI_MaterialVoxel(float youngsModulus, float density, double nominalSize) : TI_Material(youngsModulus, density)
+__device__ VX3_MaterialVoxel::VX3_MaterialVoxel(float youngsModulus, float density, double nominalSize) : VX3_Material(youngsModulus, density)
 {
 	initialize(nominalSize);
 }
 
-CUDA_DEVICE TI_MaterialVoxel::TI_MaterialVoxel(const TI_Material& mat, double nominalSize) : TI_Material(mat)
+__device__ VX3_MaterialVoxel::VX3_MaterialVoxel(const VX3_Material& mat, double nominalSize) : VX3_Material(mat)
 {
 	initialize(nominalSize);
 }
 
-CUDA_DEVICE void TI_MaterialVoxel::initialize(double nominalSize)
+__device__ void VX3_MaterialVoxel::initialize(double nominalSize)
 {
 	nomSize = nominalSize;
 	gravMult = 0.0f;
 	updateDerived();
 }
 
-CUDA_DEVICE TI_MaterialVoxel& TI_MaterialVoxel::operator=(const TI_MaterialVoxel& vIn)
+__device__ VX3_MaterialVoxel& VX3_MaterialVoxel::operator=(const VX3_MaterialVoxel& vIn)
 {
-	TI_Material::operator=(vIn); //set base TI_Material class variables equal
+	VX3_Material::operator=(vIn); //set base VX3_Material class variables equal
 
 	nomSize=vIn.nomSize;
 	gravMult=vIn.gravMult;
@@ -45,9 +46,9 @@ CUDA_DEVICE TI_MaterialVoxel& TI_MaterialVoxel::operator=(const TI_MaterialVoxel
 	return *this;
 }
 
-CUDA_DEVICE bool TI_MaterialVoxel::updateDerived() 
+__device__ bool VX3_MaterialVoxel::updateDerived() 
 {
-	TI_Material::updateDerived(); //update base TI_Material class derived variables
+	VX3_Material::updateDerived(); //update base VX3_Material class derived variables
 
 	double volume = nomSize*nomSize*nomSize;
 	_mass = (float)(volume*rho); 
@@ -70,7 +71,7 @@ CUDA_DEVICE bool TI_MaterialVoxel::updateDerived()
 }
 
 
-CUDA_DEVICE bool TI_MaterialVoxel::setNominalSize(double size)
+__device__ bool VX3_MaterialVoxel::setNominalSize(double size)
 {
 	if (size <= 0) size = FLT_MIN;
 	nomSize=size;

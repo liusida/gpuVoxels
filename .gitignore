@@ -4,6 +4,8 @@ compile_commands.json
 build
 workspace
 tmp
+core
+*.output
 
 # Prerequisites
 *.d

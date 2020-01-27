@@ -19,7 +19,5 @@
 #include "types.h"
 #include "const.h"
 // #include "TI_vector.h"
-#include "TI_Vec3D.h"
-#include "TI_Quat3D.h"
 
 #endif // TI_UTILS_H

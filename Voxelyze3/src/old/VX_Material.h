@@ -108,7 +108,7 @@ class CVX_Material {
 	void setCte(float cte) {alphaCTE=cte;} //!< Defines the coefficient of thermal expansion. @param [in] cte Desired coefficient of thermal expansion per degree C (-INF, INF)
 	float cte() const {return alphaCTE;} //!< Returns the current coefficient of thermal expansion per degree C.
 
-protected:
+// protected:
 	std::string error; //!< The last error encountered
 	std::string myName; //!< The name of this material. Default is "".
 	int r; //!< Red color value of this material from 0-255. Default is -1 (invalid/not set).
@@ -155,11 +155,6 @@ protected:
 	void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& w); //!< Writes this material's data to the rapidjson writing object.
 	bool readJSON(rapidjson::Value& mat); //!< reads this material data from the rapidjson Value.
 
-private:
-	friend class CVoxelyze; //give the main simulation class full access
-	friend class CVX_Voxel; //give our voxel class direct access to all the members for quick access};
-	friend class CVX_Link; 
-	friend class TI_Material;
 };
 
 #endif //VX_MATERIAL_H

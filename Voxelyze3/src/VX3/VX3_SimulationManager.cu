@@ -11,8 +11,21 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
     if (i<num_simulation) {
         VX3_VoxelyzeKernel *d_v3 = &d_voxelyze_3[i];
         d_v3->syncVectors(); //Everytime we pass a class with VX3_vectors in it, we should sync hd_vector to d_vector first.
+        d_v3->regenerateSurfaceVoxels(); //first time regenerate d_surface_voxels.
         printf(COLORCODE_GREEN "%d) Simulation %d runs: %s. with stop condition: %f. \n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename, d_v3->StopConditionValue);
         printf("%d) Simulation %d: links %d, voxels %d.\n", device_index, i, d_v3->num_d_links, d_v3->num_d_voxels);
+        printf("%d) Simulation %d enableAttach %d.\n", device_index, i, d_v3->enableAttach);
+        //
+        // print check regenerateSurfaceVoxels() is correct. (TODO: shouldn't this be tested in seperate test code? :)
+        // printf("all voxels:");
+        // for (int j=0;j<d_v3->num_d_voxels;j++) {
+        //     printf(" [%d]%p ", j, &d_v3->d_voxels[j]);
+        // }
+        // printf("\nsurface:");
+        // for (int j=0;j<d_v3->num_d_surface_voxels;j++) {
+        //     printf(" [%d]%p ", j, d_v3->d_surface_voxels[j]);
+        // }
+        //
         for (int j=0;j<1000000;j++) { //Maximum Steps 1000000
             if (d_v3->StopConditionMet()) break;
             if (!d_v3->doTimeStep()) {
@@ -21,7 +34,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
             }
         }
         d_v3->updateCurrentCenterOfMass();
-        printf(COLORCODE_BLUE "%d) Simulation %d ends: %s Time: %f, pos[0]: %f %f %f\n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename, d_v3->currentTime, d_v3->currentCenterOfMass.x, d_v3->currentCenterOfMass.y, d_v3->currentCenterOfMass.z);
+        printf(COLORCODE_BLUE "%d) Simulation %d ends: %s Time: %f, CoM: %f (xyz %f %f %f)\n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename, d_v3->currentTime, d_v3->currentCenterOfMass.Dist(VX3_Vec3D<double>(0,0,0)), d_v3->currentCenterOfMass.x, d_v3->currentCenterOfMass.y, d_v3->currentCenterOfMass.z);
     }
 }
 
@@ -89,8 +102,19 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         if (!MainSim.Import(NULL, NULL, &err_string)){
             std::cout<<err_string;
         }
+        for (auto m:MainSim.Vx.voxelMats) {
+            int i=0;
+            for (auto mm:m->dependentMaterials) {
+                printf("m:%p %d/%ld -> mm: %p\n", m, i, m->dependentMaterials.size(), mm);
+                i++;
+            }
+        }
         VX3_VoxelyzeKernel h_d_tmp(&MainSim);
+        // More VXA settings which is new in VX3
         strcpy(h_d_tmp.vxa_filename, file.filename().c_str());
+        h_d_tmp.enableAttach = pt_merged.get<bool>("VXA.Simulator.AttachDetach.EnableAttach", false);
+        h_d_tmp.watchDistance = pt_merged.get<double>("VXA.Simulator.AttachDetach.watchDistance", 1.0f);
+        h_d_tmp.boundingRadius = pt_merged.get<double>("VXA.Simulator.AttachDetach.boundingRadius", 0.75f);
         VcudaMemcpy(d_voxelyze_3s[device_index] + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), cudaMemcpyHostToDevice);
         i++;
     }
@@ -116,7 +140,7 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         
     //
     // pt::ptree &tree_material = tree.get_child("VXC.Palette");
-    // VcudaMalloc( (void **)&h_d_base.d_linkMats, tree_material.size() * sizeof(TI_MaterialLink));
+    // VcudaMalloc( (void **)&h_d_base.d_linkMats, tree_material.size() * sizeof(VX3_MaterialLink));
     // int i=0;
     // for (const auto &v: tree_material) {
     //     double youngsModulus = v.get<double> ("Material.Mechanical.Elastic_Mod");
@@ -124,8 +148,8 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
     //     CVX_MaterialLink tmp_material(youngsModulus, density);
     //     tmp_material.myname = v.get<std::string> ("Material.Name");
     //     tmp_material.alphaCTE = v.get<double> ("Material.Mechanical.CTE");
-    //     TI_MaterialLink tmp_linkMat(tmp_material);
-    //     cudaMemcpy(h_d_base.d_linkMats + i, &tmp_linkMat, sizeof(TI_MaterialLink), cudaMemcpyHostToDevice);
+    //     VX3_MaterialLink tmp_linkMat(tmp_material);
+    //     cudaMemcpy(h_d_base.d_linkMats + i, &tmp_linkMat, sizeof(VX3_MaterialLink), cudaMemcpyHostToDevice);
     //     i++;
     // }
 
@@ -177,7 +201,17 @@ void VX3_SimulationManager::collectResults(int num_simulation, int device_index)
         tmp.y = result_voxelyze_kernel[i].currentCenterOfMass.y;
         tmp.z = result_voxelyze_kernel[i].currentCenterOfMass.z;
         tmp.voxSize = result_voxelyze_kernel[i].voxSize;
+        tmp.num_voxel = result_voxelyze_kernel[i].num_d_voxels;
         tmp.vxa_filename = result_voxelyze_kernel[i].vxa_filename;
+        VX3_Voxel *tmp_v;
+        tmp_v = (VX3_Voxel *)malloc( result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Voxel) );
+        cudaMemcpy( tmp_v, result_voxelyze_kernel[i].d_voxels, result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Voxel), cudaMemcpyDeviceToHost );
+
+        for (int j=0;j<result_voxelyze_kernel[i].num_d_voxels;j++) {
+            tmp.voxel_position.push_back(Vec3D<double>( tmp_v[j].pos.x, tmp_v[j].pos.y, tmp_v[j].pos.z ));
+        }
+        delete tmp_v;
+
         tmp.computeDisplacement();
         h_results.push_back(tmp);
     }

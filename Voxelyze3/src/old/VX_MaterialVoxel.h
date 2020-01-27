@@ -50,7 +50,7 @@ class CVX_MaterialVoxel : public CVX_Material {
 	//stiffness
 	float penetrationStiffness() const {return (float)(2*E*nomSize);} //!< returns the stiffness with which this voxel will resist penetration. This is calculated according to E*A/L with L = voxelSize/2.
 
-protected:
+// protected:
 	void initialize(double nominalSize); //!< Initializes this voxel material with the specified voxel size. @param[in] nominalSize The nominal voxel size in meters.
 	
 	//only the main simulation should update gravity
@@ -71,11 +71,6 @@ protected:
 	float _momentInertiaInverse; //!< Cached 1/Inertia (1/(kg*m^2))
 	float _2xSqMxExS; //!< Cached value needed for quick damping calculations (Kg*m/s)
 	float _2xSqIxExSxSxS; //!< Cached value needed for quick rotational damping calculations (Kg*m^2/s)
-
-	friend class CVoxelyze; //give the main simulation class full access
-	friend class CVX_Voxel; //give our voxel class direct access to all the members for quick access};
-	friend class CVX_MaterialLink;
-	friend class TI_MaterialVoxel;
 };
 
 

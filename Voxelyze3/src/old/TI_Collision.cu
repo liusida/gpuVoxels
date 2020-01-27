@@ -1,3 +1,4 @@
+#ifdef _0
 #include "TI_Collision.h"
 
 #define ENVELOPE_RADIUS 0.625f
@@ -43,3 +44,5 @@ CUDA_DEVICE void TI_Collision::updateContactForce()
 	}
 	else force = TI_Vec3D<float>(0,0,0);
 }
+
+#endif

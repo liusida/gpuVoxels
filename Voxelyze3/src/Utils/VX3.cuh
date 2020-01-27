@@ -58,6 +58,8 @@ inline bool u_with_ext(fs::path file, std::string ext) {
 #define CUDA_CHECK_AFTER_CALL() {CUDA_ERROR_CHECK(cudaGetLastError());}
 #define DEBUG_CUDA_ERROR_CHECK_STATUS() {printf("DEBUG_CUDA_ERROR_CHECK_STATUS ON.\n");}
 
+#include "Utils/VX3_Vec3D.h"
+#include "Utils/VX3_Quat3D.h"
 #include "Utils/VX3_vector.cuh"
 #include "VX3/VX3_SimulationResult.h"
 

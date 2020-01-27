@@ -82,7 +82,7 @@ public:
 	void clearMoment(){extMoment = Vec3D<float>();} //!< Clears all applied moments from this voxel.
 	
 	
-private:
+// private:
 	dofObject dofFixed;
 	
 	Vec3D<float> extForce, extMoment; //External force, moment applied to these voxels (N, N-m) if relevant DOF are unfixed
@@ -91,7 +91,6 @@ private:
 
 	void rotationChanged(); //called to keep cached quaternion rotation in sync
 
-	friend class TI_External;
 };
 
 

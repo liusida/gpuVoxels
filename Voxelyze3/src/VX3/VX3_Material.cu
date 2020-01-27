@@ -1,6 +1,7 @@
-#include "TI_Material.h"
+#include "VX3_Material.h"
+#include "VX3_VoxelyzeKernel.cuh"
 
-TI_Material::TI_Material( CVX_Material* p ):
+VX3_Material::VX3_Material( CVX_Material* p, VX3_VoxelyzeKernel* k ):
 linear(p->linear), E(p->E), sigmaYield(p->sigmaYield), sigmaFail(p->sigmaFail),
 epsilonYield(p->epsilonYield), epsilonFail(p->epsilonFail), 
 hd_strainData(p->strainData), hd_stressData(p->stressData), //hd_vector init in host, used for passing data to kernel. With syncVector() function, we use d_vector in kernel.
@@ -8,10 +9,20 @@ nu(p->nu),rho(p->rho),
 alphaCTE(p->alphaCTE), muStatic(p->muStatic), muKinetic(p->muKinetic),
 zetaInternal(p->zetaInternal), zetaGlobal(p->zetaGlobal), zetaCollision(p->zetaCollision),
 extScale(p->extScale), _eHat(p->_eHat) {
-	
+	// Is the only dependency linkMats[j] depend on voxelMats[i]??
+	std::vector<VX3_Material*> tmp_dependentMaterials;
+	for (auto m: p->dependentMaterials) {
+		for (int i=0;i<k->num_d_voxelMats;i++) {
+			if (m==k->h_voxelMats[i]) {
+				printf("got it.\n");
+				tmp_dependentMaterials.push_back((VX3_Material*)&k->d_voxelMats[i]);
+			}
+		}
+	}
+	hd_dependentMaterials = VX3_hdVector<VX3_Material*>(tmp_dependentMaterials);
 }
 
-CUDA_DEVICE TI_Material::TI_Material(float youngsModulus, float density)
+__device__ VX3_Material::VX3_Material(float youngsModulus, float density)
 {
 	clear();
 	rho = density;
@@ -20,7 +31,7 @@ CUDA_DEVICE TI_Material::TI_Material(float youngsModulus, float density)
 
 }
 
-CUDA_DEVICE TI_Material& TI_Material::operator=(const TI_Material& vIn)
+__device__ VX3_Material& VX3_Material::operator=(const VX3_Material& vIn)
 {
 	//error = vIn.error;
 	//myName = vIn.myName;
@@ -51,7 +62,7 @@ CUDA_DEVICE TI_Material& TI_Material::operator=(const TI_Material& vIn)
 	return *this;
 }
 
-CUDA_DEVICE void TI_Material::clear()
+__device__ void VX3_Material::clear()
 {
 	r = -1;
 	g = -1;
@@ -66,13 +77,13 @@ CUDA_DEVICE void TI_Material::clear()
 	zetaGlobal = 0.0f;
 	zetaCollision = 0.0f;
 
-	extScale=TI_Vec3D<>(1.0, 1.0, 1.0);
+	extScale=VX3_Vec3D<>(1.0, 1.0, 1.0);
 
 	setModelLinear(1.0);
 	updateDerived();
 }
 
-CUDA_DEVICE float TI_Material::stress(float strain, float transverseStrainSum, bool forceLinear)
+__device__ float VX3_Material::stress(float strain, float transverseStrainSum, bool forceLinear)
 {
 	//reference: http://www.colorado.edu/engineering/CAS/courses.d/Structures.d/IAST.Lect05.d/IAST.Lect05.pdf page 10
 	if (isFailed(strain)) return 0.0f; //if a failure point is set and exceeded, we've broken!
@@ -100,7 +111,7 @@ CUDA_DEVICE float TI_Material::stress(float strain, float transverseStrainSum, b
 	return 0.0f;
 }
 
-CUDA_DEVICE float TI_Material::strain(float stress)
+__device__ float VX3_Material::strain(float stress)
 {
 	if (stress <= d_stressData[1] || linear) return stress/E; //for compression/first segment and linear materials (forced or otherwise), simple calculation
 
@@ -115,7 +126,7 @@ CUDA_DEVICE float TI_Material::strain(float stress)
 }
 
 
-CUDA_DEVICE float TI_Material::modulus(float strain)
+__device__ float VX3_Material::modulus(float strain)
 {
 	if (isFailed(strain)) return 0.0f; //if a failure point is set and exceeded, we've broken!
 	if (strain <= d_strainData[1] || linear) return E; //for compression/first segment and linear materials, simple calculation
@@ -127,7 +138,7 @@ CUDA_DEVICE float TI_Material::modulus(float strain)
 	return 0.0f;
 }
 
-CUDA_DEVICE void TI_Material::setColor(int red, int green, int blue, int alpha)
+__device__ void VX3_Material::setColor(int red, int green, int blue, int alpha)
 {
 	setRed(red);
 	setGreen(green);
@@ -135,28 +146,28 @@ CUDA_DEVICE void TI_Material::setColor(int red, int green, int blue, int alpha)
 	setAlpha(alpha);
 }
 
-CUDA_DEVICE void TI_Material::setRed(int red)
+__device__ void VX3_Material::setRed(int red)
 {
 	if (red>255) red=255;
 	if (red<0) red=0;
 	r = red;
 }
 
-CUDA_DEVICE void TI_Material::setGreen(int green)
+__device__ void VX3_Material::setGreen(int green)
 {
 	if (green>255) green=255;
 	if (green<0) green=0;
 	g = green;
 }
 
-CUDA_DEVICE void TI_Material::setBlue(int blue)
+__device__ void VX3_Material::setBlue(int blue)
 {
 	if (blue>255) blue=255;
 	if (blue<0) blue=0;
 	b = blue;
 }
 
-CUDA_DEVICE void TI_Material::setAlpha(int alpha)
+__device__ void VX3_Material::setAlpha(int alpha)
 {
 	if (alpha>255) alpha=255;
 	if (alpha<0) alpha=0;
@@ -182,7 +193,7 @@ Special cases:
 	- 2 data points (bilinear): Yield is taken as the first data point, failure at the second.
 
 */
-CUDA_DEVICE bool TI_Material::setModel(int dataPointCount, float* pStrainValues, float* pStressValues)
+__device__ bool VX3_Material::setModel(int dataPointCount, float* pStrainValues, float* pStressValues)
 {
 	assert(false); //not used.
 	return false;
@@ -202,8 +213,6 @@ CUDA_DEVICE bool TI_Material::setModel(int dataPointCount, float* pStrainValues,
 	// }
 
 	// //Copy the data into something more usable (and check for monotonically increasing)
-	// TI_vector<float> tmpStrainData;
-	// TI_vector<float> tmpStressData;
 	// tmpStrainData.push_back(0); //add in the zero data point (required always)
 	// tmpStressData.push_back(0);
 	// float sweepStrain = 0.0f, sweepStress = 0.0f;
@@ -254,7 +263,7 @@ CUDA_DEVICE bool TI_Material::setModel(int dataPointCount, float* pStrainValues,
 /*! Specified Young's modulus and failure stress must both be positive.
 Yield stress is interpreted as identical to failure stress. If failure stress is not specified an arbitrary data point consistent with the specified Young's modulus is added to the model.
 */
-CUDA_DEVICE bool TI_Material::setModelLinear(float youngsModulus, float failureStress)
+__device__ bool VX3_Material::setModelLinear(float youngsModulus, float failureStress)
 {
 	if (youngsModulus<=0){
 		//error = "Young's modulus must be positive";
@@ -288,7 +297,7 @@ CUDA_DEVICE bool TI_Material::setModelLinear(float youngsModulus, float failureS
 /*! Specified Young's modulus, plastic modulus, yield stress, and failure stress must all be positive.
 Plastic modulus must be less than Young's modulus and failure stress must be greater than the yield stress.
 */
-CUDA_DEVICE bool TI_Material::setModelBilinear(float youngsModulus, float plasticModulus, float yieldStress, float failureStress)
+__device__ bool VX3_Material::setModelBilinear(float youngsModulus, float plasticModulus, float yieldStress, float failureStress)
 {
 	if (youngsModulus<=0){
 		//error = "Young's modulus must be positive";
@@ -336,7 +345,7 @@ CUDA_DEVICE bool TI_Material::setModelBilinear(float youngsModulus, float plasti
 }
 
 
-CUDA_DEVICE bool TI_Material::setYieldFromData(float percentStrainOffset)
+__device__ bool VX3_Material::setYieldFromData(float percentStrainOffset)
 {
 	sigmaYield = -1.0f; //assume we fail until we succeed.
 	epsilonYield = -1.0f; //assume we fail until we succeed.
@@ -369,7 +378,7 @@ CUDA_DEVICE bool TI_Material::setYieldFromData(float percentStrainOffset)
 	return false;
 }
 
-CUDA_DEVICE void TI_Material::setPoissonsRatio(float poissonsRatio)
+__device__ void VX3_Material::setPoissonsRatio(float poissonsRatio)
 {
 	if (poissonsRatio < 0) poissonsRatio = 0;
 	if (poissonsRatio >= 0.5 ) poissonsRatio = 0.5-FLT_EPSILON*2; //exactly 0.5 will still cause problems, but it can get very close.
@@ -377,44 +386,44 @@ CUDA_DEVICE void TI_Material::setPoissonsRatio(float poissonsRatio)
 	updateDerived();
 }
 
-CUDA_DEVICE void TI_Material::setDensity(float density)
+__device__ void VX3_Material::setDensity(float density)
 {
 	if (density <= 0) density = FLT_MIN; //density of exactly 0 will cause problems, but can get as close as desired.
 	rho = density;
 	updateDerived();
 }
 
-CUDA_DEVICE void TI_Material::setStaticFriction(float staticFrictionCoefficient)
+__device__ void VX3_Material::setStaticFriction(float staticFrictionCoefficient)
 {
 	if (staticFrictionCoefficient <= 0) staticFrictionCoefficient = 0;
 	muStatic = staticFrictionCoefficient;
 }
 
-CUDA_DEVICE void TI_Material::setKineticFriction(float kineticFrictionCoefficient)
+__device__ void VX3_Material::setKineticFriction(float kineticFrictionCoefficient)
 {
 	if (kineticFrictionCoefficient <= 0) kineticFrictionCoefficient = 0;
 	muKinetic = kineticFrictionCoefficient;
 }
 
-CUDA_DEVICE void TI_Material::setInternalDamping(float zeta)
+__device__ void VX3_Material::setInternalDamping(float zeta)
 {
 	if (zeta <= 0) zeta = 0;
 	zetaInternal = zeta;
 }
 
-CUDA_DEVICE void TI_Material::setGlobalDamping(float zeta)
+__device__ void VX3_Material::setGlobalDamping(float zeta)
 {
 	if (zeta <= 0) zeta = 0;
 	zetaGlobal = zeta;
 }
 
-CUDA_DEVICE void TI_Material::setCollisionDamping(float zeta)
+__device__ void VX3_Material::setCollisionDamping(float zeta)
 {
 	if (zeta <= 0) zeta = 0;
 	zetaCollision = zeta;
 }
 
-CUDA_DEVICE void TI_Material::setExternalScaleFactor(TI_Vec3D<double> factor)
+__device__ void VX3_Material::setExternalScaleFactor(VX3_Vec3D<double> factor)
 {
 	if (factor.x <= 0) factor.x = FLT_MIN;
 	if (factor.y <= 0) factor.y = FLT_MIN;
@@ -422,18 +431,17 @@ CUDA_DEVICE void TI_Material::setExternalScaleFactor(TI_Vec3D<double> factor)
 	extScale = factor;
 }
 
-CUDA_DEVICE bool TI_Material::updateDerived() 
+__device__ bool VX3_Material::updateDerived() 
 {
 	_eHat = E/((1-2*nu)*(1+nu));
 
-	//for (TI_vector<TI_Material*>::iterator it = dependentMaterials.begin(); it != dependentMaterials.end(); it++) (*it)->updateAll(); //update material properties of any that depend on this...
-	// for (unsigned i=0;i<dependentMaterials.num_main;i++) {
-	// 	dependentMaterials[i]->updateAll();
-	// }
+	for (int i=0;i<d_dependentMaterials.size();i++) {
+		d_dependentMaterials[i]->updateDerived();
+	}
 	return true;
 }
 
-CUDA_DEVICE void TI_Material::syncVectors()
+__device__ void VX3_Material::syncVectors()
 {
 	//hd_strainData -> d_strainData
 	d_strainData.clear();
@@ -451,5 +459,10 @@ CUDA_DEVICE void TI_Material::syncVectors()
 		d_stressData.push_back(hd_stressData[i]);
 	}
 
+	//hd_dependent -> d_dependentMaterials
+	d_dependentMaterials.clear();
+	for (int i=0;i<hd_dependentMaterials.size();i++) {
+		d_dependentMaterials.push_back(hd_dependentMaterials[i]);
+	}
 	
 }

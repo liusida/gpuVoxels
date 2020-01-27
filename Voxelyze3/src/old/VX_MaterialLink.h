@@ -25,12 +25,12 @@ If the materials are different a third material is carefully crafted from the tw
 */
 
 class CVX_MaterialLink : public CVX_MaterialVoxel {
-	public:
+public:
 	CVX_MaterialLink(CVX_MaterialVoxel* mat1, CVX_MaterialVoxel* mat2); //!< Creates a link material from the two specified voxel materials. The order is unimportant. @param[in] mat1 voxel material on one side of the link. @param[in] mat2 voxel material on the other side of the link.
 	CVX_MaterialLink(const CVX_MaterialLink& VIn) {*this = VIn;} //!< Copy constructor
 	CVX_MaterialLink& operator=(const CVX_MaterialLink& VIn); //!< Equals operator
 
-protected:
+// protected:
 	virtual bool updateAll(); //!< Updates and recalculates eveything possible (used by inherited classed when material properties have changed)
 	virtual bool updateDerived(); //!< Updates all the derived quantities cached as member variables for this and derived classes. (Especially if density, size or elastic modulus changes.)
 
@@ -47,10 +47,7 @@ protected:
 	float _sqB1; //!< Cached sqrt(b1) constant for damping calculations.
 	float _sqB2xFMp; //!< Cached sqrt(b2*L/2) constant for damping calculations.
 	float _sqB3xIp; //!< Cached sqrt(b3*L*L/6) constant for damping calculations.
-	
-	friend class CVoxelyze; //give the main simulation class full access
-	friend class CVX_Link; //give links direct access to parameters
-	friend class TI_MaterialLink;
+
 };
 
 

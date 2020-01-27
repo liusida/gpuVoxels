@@ -1,18 +1,18 @@
-#include "TI_External.h"
+#include "VX3_External.h"
 
-TI_External::TI_External( CVX_External* p ) :
+VX3_External::VX3_External( CVX_External* p ) :
 dofFixed(p->dofFixed), extForce(p->extForce), extMoment(p->extMoment),
 extTranslation(p->extTranslation), extRotation(p->extRotation), 
 _extRotationQ(p->_extRotationQ) {
 
 }
 
-CUDA_DEVICE TI_External::TI_External() 
+__device__ VX3_External::VX3_External() 
 {
 	reset();
 }
 
-CUDA_DEVICE TI_External& TI_External::operator=(const TI_External& eIn)
+__device__ VX3_External& VX3_External::operator=(const VX3_External& eIn)
 {
 	dofFixed = eIn.dofFixed;
 	extForce = eIn.extForce;
@@ -23,23 +23,23 @@ CUDA_DEVICE TI_External& TI_External::operator=(const TI_External& eIn)
 	return *this;
 }
 
-CUDA_DEVICE void TI_External::reset()
+__device__ void VX3_External::reset()
 {
 	dofFixed=0;
-	extForce = extMoment = TI_Vec3D<float>();
-	extTranslation = TI_Vec3D<double>();
-	extRotation = TI_Vec3D<double>();
+	extForce = extMoment = VX3_Vec3D<float>();
+	extTranslation = VX3_Vec3D<double>();
+	extRotation = VX3_Vec3D<double>();
 	rotationChanged();
 }
 
 
-CUDA_DEVICE void TI_External::setFixed(bool xTranslate, bool yTranslate, bool zTranslate, bool xRotate, bool yRotate, bool zRotate)
+__device__ void VX3_External::setFixed(bool xTranslate, bool yTranslate, bool zTranslate, bool xRotate, bool yRotate, bool zRotate)
 {
 	dofFixed = dof(xTranslate, yTranslate, zTranslate, xRotate, yRotate, zRotate);
-	extTranslation = extRotation = TI_Vec3D<double>(); //clear displacements
+	extTranslation = extRotation = VX3_Vec3D<double>(); //clear displacements
 }
 
-CUDA_DEVICE void TI_External::setDisplacement(dofComponent dof, double displacement)
+__device__ void VX3_External::setDisplacement(dofComponent dof, double displacement)
 {
 	dofSet(dofFixed, dof, true);
 	if (displacement != 0.0f){
@@ -54,7 +54,7 @@ CUDA_DEVICE void TI_External::setDisplacement(dofComponent dof, double displacem
 	rotationChanged();
 }
 
-CUDA_DEVICE void TI_External::setDisplacementAll(const TI_Vec3D<double>& translation, const TI_Vec3D<double>& rotation)
+__device__ void VX3_External::setDisplacementAll(const VX3_Vec3D<double>& translation, const VX3_Vec3D<double>& rotation)
 {
 	dofSetAll(dofFixed, true);
 	extTranslation = translation;
@@ -63,7 +63,7 @@ CUDA_DEVICE void TI_External::setDisplacementAll(const TI_Vec3D<double>& transla
 	rotationChanged();
 }
 
-CUDA_DEVICE void TI_External::clearDisplacement(dofComponent dof)
+__device__ void VX3_External::clearDisplacement(dofComponent dof)
 {
 	dofSet(dofFixed, dof, false);
 
@@ -77,22 +77,22 @@ CUDA_DEVICE void TI_External::clearDisplacement(dofComponent dof)
 	rotationChanged();
 }
 
-CUDA_DEVICE void TI_External::clearDisplacementAll()
+__device__ void VX3_External::clearDisplacementAll()
 {
 	dofSetAll(dofFixed, false);
-	extTranslation = TI_Vec3D<double>();
-	extRotation = TI_Vec3D<double>();
+	extTranslation = VX3_Vec3D<double>();
+	extRotation = VX3_Vec3D<double>();
 
 	rotationChanged();
 }
 
-CUDA_DEVICE void TI_External::rotationChanged()
+__device__ void VX3_External::rotationChanged()
 {
-	if (extRotation != TI_Vec3D<double>()){
-		_extRotationQ = TI_Quat3D<double>(extRotation);
+	if (extRotation != VX3_Vec3D<double>()){
+		_extRotationQ = VX3_Quat3D<double>(extRotation);
 	}
 	else { //rotation is zero in all axes
-		_extRotationQ = TI_Quat3D<double>();
+		_extRotationQ = VX3_Quat3D<double>();
 	}
 }
 

@@ -634,7 +634,8 @@ CVX_MaterialLink* CVoxelyze::combinedMaterial(CVX_MaterialVoxel* mat1, CVX_Mater
 	CVX_MaterialLink* newMat = new CVX_MaterialLink(mat1, mat2);
 	linkMats.push_back(newMat);
 	mat1->dependentMaterials.push_back(newMat);
-	mat2->dependentMaterials.push_back(newMat);
+	if (mat1!=mat2) // avoid push twice
+		mat2->dependentMaterials.push_back(newMat);
 
 	return newMat;
 }
