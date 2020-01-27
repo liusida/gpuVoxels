@@ -2,10 +2,12 @@
 .vscode
 compile_commands.json
 build
+build-Vox*
 workspace
 tmp
 core
 *.output
+*.pro.user
 
 # Prerequisites
 *.d
