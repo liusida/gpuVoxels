@@ -72,3 +72,21 @@ cmake --build . -j 10
 ```
 
 Now you have your `Voxelyze3` and `vx3_node_worker`, copy that to anywhere you want and run `Voxelyze3` as an entry point.
+
+## Playback history
+
+First we need to define RecordHistory in our VXD file. When recording, we should run only one job, because the data will be output to the screen.
+
+```XML
+<RecordHistory replace="VXA.Simulator.RecordHistory">
+    <RecordStepSize>100</StepSize>
+</RecordHistory>
+```
+
+Then we run the program like this:
+
+```bash
+./build/Voxelyze3/Voxelyze3 -i data -o output.xml -lf -w ./build/Voxelyze3/vx3_node_worker > data/History/0001.history
+```
+
+Now we have a `0001.history`. We can open the newest VoxCAD to see the playback. In the menu, choose Import->History.

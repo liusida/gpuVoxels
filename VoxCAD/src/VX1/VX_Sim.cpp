@@ -13,6 +13,7 @@ See <http://www.opensource.org/licenses/lgpl-3.0.html> for license details.
 #include "VXS_Bond.h"
 #include <QFileDialog>
 
+#include <QDebug>
 #include <sstream>
 
 #ifdef USE_OPEN_GL
@@ -1956,11 +1957,13 @@ bool CVX_Sim::OpenHistory(QString* pFileNameOut) {
 //        emit BCsChanged();
         if (pFileNameOut) {
 			*pFileNameOut = QFileInfo(tmpPath).baseName();
-			QFile fileHistory(*pFileNameOut);
-			if (!fileHistory.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
+			if (fileHistory) delete fileHistory;
+			fileHistory = new QFile(tmpPath);
+			// printf("%s", tmpPath.toLatin1().data());
+			if (!fileHistory->open(QIODevice::ReadOnly | QIODevice::Text)) return false;
 			if (StreamHistory) delete StreamHistory;
-			StreamHistory = new QTextStream(&fileHistory);
-	        return true;
+			StreamHistory = new QTextStream(fileHistory);
+			return true;
 		}
     }
     return false;

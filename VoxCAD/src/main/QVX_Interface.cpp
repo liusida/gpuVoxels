@@ -305,7 +305,6 @@ void QVX_Sim::RequestBeginSim()
 void QVX_Sim::SimLoop(QString* pSimMessage)
 {
 
-
 	std::string tmp; //need to link this up to get info back...
 	if (!Import(NULL, NULL, &tmp)){
 		*pSimMessage += QString::fromStdString(tmp);

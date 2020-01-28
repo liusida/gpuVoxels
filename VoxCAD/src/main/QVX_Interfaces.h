@@ -41,7 +41,7 @@ public slots:
 	void GetDim(Vec3D<>* pVec, Vec3D<>* pOff) {GetWorkSpace(pVec); *pOff = Vec3D<>(0,0,0);};
 
 	//high level file I/O functions
-	void New(void) {Close(); InitializeMatter(0.001, 10, 10, 10);};
+	void New(void) {Close(); InitializeMatter();};
 	void Save(int Compression = CP_ZLIB, bool NewLoc = false, QString* pNewFilenameOut = NULL);
 	void SaveZLib(void) {Save(CP_ZLIB);};
 	void SaveAsZLib(QString* pFilenameOut = NULL) {Save(CP_ZLIB, true, pFilenameOut);};

@@ -47,7 +47,8 @@ namespace ctool {
     }
 
     void ptree_merge(const pt::ptree& source, pt::ptree& destination) {
-        BOOST_FOREACH( pt::ptree::value_type const&v, source.get_child("") ) {
+        pt::ptree vxd = source.get_child("VXD", source);
+        BOOST_FOREACH( pt::ptree::value_type const&v, vxd.get_child("") ) {
             std::string replace = v.second.get<std::string>("<xmlattr>.replace", "");
             if (replace.length()>0) {
                 destination.put_child( replace , v.second);

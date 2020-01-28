@@ -7,7 +7,7 @@ Voxelyze is free software: you can redistribute it and/or modify it under the te
 Voxelyze is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 See <http://www.opensource.org/licenses/lgpl-3.0.html> for license details.
 *******************************************************************************/
-
+#include<QDebug>
 #include "VXS_SimGLView.h"
 #include "GL_Utils.h"
 
@@ -224,20 +224,54 @@ void CVXS_SimGLView::DrawFloor(void)
 	}
 }
 
+// Read a .history file and draw in an loop.
 void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLayer, vfloat ScaleVox) {
 	if (pSim->StreamHistory) {
+		if (pSim->StreamHistory->atEnd()) {
+			qInfo() << "reset";
+			pSim->StreamHistory->seek(0);
+		}
 		QString line = pSim->StreamHistory->readLine();
-		if (line.isNull()) {
-			if (line[0]=='[') {
-				glPushMatrix();
-				glTranslated(0, 0, 0);
-				glRotated(0, 0, 0, 0);
-				CColor ThisColor = CColor(1.0f, 0.0f, 1.0f, 1.0f);
-				CGL_Utils::DrawCube(Vec3D<>(0.001,0.001,0.001)*ScaleVox, Vec3D<>(0.0,0.0,0.0)*ScaleVox, true, true, 1.0, ThisColor);
-				glPopMatrix();
+		if (!line.isNull()) {
+			int j = 0;
+			if ((j=line.indexOf(">>>"))!=-1) {
+				CColor ThisColor = CColor(0.4f, 0.4f, 0.9f, 0.8f);
+
+				QString mline = line.mid(j+3, line.length()-j-10);
+				QStringList voxel = mline.split(";");
+				QStringList pos;
+				Vec3D<> v1, v2;
+				double p1, p2, p3;
+				double angle, r1, r2, r3;
+				for (int i=0;i<voxel.size();i++) {
+					glPushMatrix();
+					pos = voxel[i].split(",");
+					if (pos.size()<13) {
+						qWarning() << "ERROR: a voxel has pos size is " << pos.size()<<"<13.";
+						continue;
+					}
+					p1 = pos[0].toDouble();
+					p2 = pos[1].toDouble();
+					p3 = pos[2].toDouble();
+					angle = pos[3].toDouble();
+					r1 = pos[4].toDouble();
+					r2 = pos[5].toDouble();
+					r3 = pos[6].toDouble();
+					Vec3D<double> nnn,ppp;
+					nnn.x = pos[7].toDouble();
+					nnn.y = pos[8].toDouble();
+					nnn.z = pos[9].toDouble();
+					ppp.x = pos[10].toDouble();
+					ppp.y = pos[11].toDouble();
+					ppp.z = pos[12].toDouble();
+					
+					glTranslated(p1, p2, p3);
+					glRotated(angle, r1, r2, r3);
+					CGL_Utils::DrawCube(nnn*ScaleVox, ppp*ScaleVox, true, true, 1.0, ThisColor);
+					glPopMatrix();
+				}
+
 			}
-		} else {
-			pSim->StreamHistory->reset();
 		}
 	}
 }

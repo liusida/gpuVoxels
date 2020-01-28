@@ -119,6 +119,7 @@ void CVX_Object::InitializeMatter(vfloat iLattice_Dim, int xV, int yV, int zV) /
 	Lattice.SetLattice(iLattice_Dim);
 	Voxel.SetVoxName(VS_BOX);
 	Structure.CreateStructure(xV, yV, zV);
+	//set default 1 voxel
 }
 
 /*! Attempts to load "Default.vxp" in the current directory to extract the palette. If the file is not found, a singel default material is added.

@@ -302,6 +302,7 @@ public:
 
 	bool OpenHistory(QString* pFileNameOut = NULL);
 	QTextStream* StreamHistory = NULL;
+	QFile* fileHistory=NULL;
 
 
 };
