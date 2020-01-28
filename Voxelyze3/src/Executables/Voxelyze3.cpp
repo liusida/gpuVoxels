@@ -13,9 +13,11 @@ namespace pt = boost::property_tree;
 #include "ctool.h"
 
 #define APP_DESCRIPTION "\
-This application is balabalabala....\n\
-Usage:\n\
-xxx\n\
+Thank you for using Voxelyze3. This program should be run on a computer that has GPUs.\n\
+Typical Usage:\n\
+Voxelyze -i <data_path> -o <report_path> -l -f \n\
+<data_path> should contain a file named `base.vxa' and multiple files with extension `.vxa'.\n\
+<report_path> is the report file you need to place. If you want to overwrite existing report, add -f flag.\n\n\
 Allowed options\
 "
 
