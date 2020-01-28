@@ -100,21 +100,22 @@ int main(int argc, char** argv) {
 
     tr_result.put("bestfit.filename", sm.h_results[0].vxa_filename);
     tr_result.put("bestfit.distance", sm.h_results[0].distance);
-    for (auto &res: sm.h_results) {
-        std::string simulation_name = split(res.vxa_filename, '.')[0];
-        tr_result.put("detail."+simulation_name+".num_voxel", res.num_voxel);
-        tr_result.put("detail."+simulation_name+".CoM.x", res.x);
-        tr_result.put("detail."+simulation_name+".CoM.y", res.y);
-        tr_result.put("detail."+simulation_name+".CoM.z", res.z);
-        tr_result.put("detail."+simulation_name+".CoM.distance_by_size", res.distance);
-        for (auto &pos: res.voxel_position) {
-            pt::ptree t_pos;
-            t_pos.put("x", pos.x);
-            t_pos.put("y", pos.y);
-            t_pos.put("z", pos.z);
-            tr_result.add_child("detail."+simulation_name+".pos", t_pos);
-        }
-    }
+    // this will be too much to write into the report.
+    // for (auto &res: sm.h_results) {
+    //     std::string simulation_name = split(res.vxa_filename, '.')[0];
+    //     tr_result.put("detail."+simulation_name+".num_voxel", res.num_voxel);
+    //     tr_result.put("detail."+simulation_name+".CoM.x", res.x);
+    //     tr_result.put("detail."+simulation_name+".CoM.y", res.y);
+    //     tr_result.put("detail."+simulation_name+".CoM.z", res.z);
+    //     tr_result.put("detail."+simulation_name+".CoM.distance_by_size", res.distance);
+    //     for (auto &pos: res.voxel_position) {
+    //         pt::ptree t_pos;
+    //         t_pos.put("x", pos.x);
+    //         t_pos.put("y", pos.y);
+    //         t_pos.put("z", pos.z);
+    //         tr_result.add_child("detail."+simulation_name+".pos", t_pos);
+    //     }
+    // }
     pt::write_xml(output.string(), tr_result);
     return 0;
 }

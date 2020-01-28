@@ -13,8 +13,8 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         d_v3->syncVectors(); //Everytime we pass a class with VX3_vectors in it, we should sync hd_vector to d_vector first.
         d_v3->regenerateSurfaceVoxels(); //first time regenerate d_surface_voxels.
         printf(COLORCODE_GREEN "%d) Simulation %d runs: %s. with stop condition: %f. \n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename, d_v3->StopConditionValue);
-        printf("%d) Simulation %d: links %d, voxels %d.\n", device_index, i, d_v3->num_d_links, d_v3->num_d_voxels);
-        printf("%d) Simulation %d enableAttach %d.\n", device_index, i, d_v3->enableAttach);
+        // printf("%d) Simulation %d: links %d, voxels %d.\n", device_index, i, d_v3->num_d_links, d_v3->num_d_voxels);
+        // printf("%d) Simulation %d enableAttach %d.\n", device_index, i, d_v3->enableAttach);
         //
         // print check regenerateSurfaceVoxels() is correct. (TODO: shouldn't this be tested in seperate test code? :)
         // printf("all voxels:");
@@ -28,7 +28,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         //
         d_v3->updateCurrentCenterOfMass();
         d_v3->initialCenterOfMass = d_v3->currentCenterOfMass;
-        printf("Initial CoM: %f %f %f mm\n", d_v3->initialCenterOfMass.x*1000, d_v3->initialCenterOfMass.y*1000, d_v3->initialCenterOfMass.z*1000);
+        // printf("Initial CoM: %f %f %f mm\n", d_v3->initialCenterOfMass.x*1000, d_v3->initialCenterOfMass.y*1000, d_v3->initialCenterOfMass.z*1000);
         for (int j=0;j<1000000;j++) { //Maximum Steps 1000000
             if (d_v3->StopConditionMet()) break;
             if (!d_v3->doTimeStep()) {
@@ -95,7 +95,7 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
     int i = 0;
     for (auto &file : files ) {
         // Read VXD file, clone base VXA, replace parts specified in VXD, send to MainSim.ReadVXA to process.
-        printf("reading %s\n", (input_dir/file).c_str());
+        // printf("reading %s\n", (input_dir/file).c_str());
         pt::ptree pt_VXD;
         pt::read_xml( (input_dir/file).string(), pt_VXD );
         pt::ptree pt_merged = pt_baseVXA;
