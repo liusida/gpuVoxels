@@ -17,7 +17,7 @@
    <string>VoxCad</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="../../VoxCad.qrc">
     <normaloff>:/main/assets/VoxCad.ico</normaloff>:/main/assets/VoxCad.ico</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -78,6 +78,7 @@
       <string>Import</string>
      </property>
      <addaction name="actionVXA_IN"/>
+     <addaction name="actionHistory"/>
     </widget>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
@@ -287,7 +288,7 @@
   </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Open.png</normaloff>:/Icons/assets/Icons/Open.png</iconset>
    </property>
    <property name="text">
@@ -299,7 +300,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Save.png</normaloff>:/Icons/assets/Icons/Save.png</iconset>
    </property>
    <property name="text">
@@ -311,7 +312,7 @@
   </action>
   <action name="actionCenter_View">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/ZoomExtents2.png</normaloff>:/Icons/assets/Icons/ZoomExtents2.png</iconset>
    </property>
    <property name="text">
@@ -341,7 +342,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Analyze.png</normaloff>:/Icons/assets/Icons/Analyze.png</iconset>
    </property>
    <property name="text">
@@ -353,7 +354,7 @@
   </action>
   <action name="actionPerspective">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/ViewPerspective.png</normaloff>:/Icons/assets/Icons/ViewPerspective.png</iconset>
    </property>
    <property name="text">
@@ -365,7 +366,7 @@
   </action>
   <action name="actionTop">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/ViewTop.png</normaloff>:/Icons/assets/Icons/ViewTop.png</iconset>
    </property>
    <property name="text">
@@ -377,7 +378,7 @@
   </action>
   <action name="actionBottom">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/ViewBottom.png</normaloff>:/Icons/assets/Icons/ViewBottom.png</iconset>
    </property>
    <property name="text">
@@ -389,7 +390,7 @@
   </action>
   <action name="actionLeft">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/ViewLeft.png</normaloff>:/Icons/assets/Icons/ViewLeft.png</iconset>
    </property>
    <property name="text">
@@ -401,7 +402,7 @@
   </action>
   <action name="actionRight">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/ViewRight.png</normaloff>:/Icons/assets/Icons/ViewRight.png</iconset>
    </property>
    <property name="text">
@@ -413,7 +414,7 @@
   </action>
   <action name="actionFront">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/ViewFront.png</normaloff>:/Icons/assets/Icons/ViewFront.png</iconset>
    </property>
    <property name="text">
@@ -425,7 +426,7 @@
   </action>
   <action name="actionBack">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/ViewBack.png</normaloff>:/Icons/assets/Icons/ViewBack.png</iconset>
    </property>
    <property name="text">
@@ -440,7 +441,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/EditLayer.png</normaloff>:/Icons/assets/Icons/EditLayer.png</iconset>
    </property>
    <property name="text">
@@ -452,7 +453,7 @@
   </action>
   <action name="actionLayer_Back">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/LayerBack.png</normaloff>:/Icons/assets/Icons/LayerBack.png</iconset>
    </property>
    <property name="text">
@@ -464,7 +465,7 @@
   </action>
   <action name="actionLayer_Forward">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/LayerForward.png</normaloff>:/Icons/assets/Icons/LayerForward.png</iconset>
    </property>
    <property name="text">
@@ -482,7 +483,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Pencil.png</normaloff>:/Icons/assets/Icons/Pencil.png</iconset>
    </property>
    <property name="text">
@@ -497,7 +498,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Rectangle.png</normaloff>:/Icons/assets/Icons/Rectangle.png</iconset>
    </property>
    <property name="text">
@@ -512,7 +513,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Ellipse.png</normaloff>:/Icons/assets/Icons/Ellipse.png</iconset>
    </property>
    <property name="text">
@@ -527,7 +528,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Aux_View.png</normaloff>:/Icons/assets/Icons/Aux_View.png</iconset>
    </property>
    <property name="text">
@@ -542,7 +543,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Material.png</normaloff>:/Icons/assets/Icons/Material.png</iconset>
    </property>
    <property name="text">
@@ -557,7 +558,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Workspace.png</normaloff>:/Icons/assets/Icons/Workspace.png</iconset>
    </property>
    <property name="text">
@@ -572,7 +573,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Info.png</normaloff>:/Icons/assets/Icons/Info.png</iconset>
    </property>
    <property name="text">
@@ -587,7 +588,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/BCs.png</normaloff>:/Icons/assets/Icons/BCs.png</iconset>
    </property>
    <property name="text">
@@ -602,7 +603,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Section.png</normaloff>:/Icons/assets/Icons/Section.png</iconset>
    </property>
    <property name="text">
@@ -614,7 +615,7 @@
   </action>
   <action name="actionNew">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/New.png</normaloff>:/Icons/assets/Icons/New.png</iconset>
    </property>
    <property name="text">
@@ -641,7 +642,7 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Copy.png</normaloff>:/Icons/assets/Icons/Copy.png</iconset>
    </property>
    <property name="text">
@@ -653,7 +654,7 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Cut.png</normaloff>:/Icons/assets/Icons/Cut.png</iconset>
    </property>
    <property name="text">
@@ -665,7 +666,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Paste.png</normaloff>:/Icons/assets/Icons/Paste.png</iconset>
    </property>
    <property name="text">
@@ -693,7 +694,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Sandbox.png</normaloff>:/Icons/assets/Icons/Sandbox.png</iconset>
    </property>
    <property name="text">
@@ -705,7 +706,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/3DBrush.png</normaloff>:/Icons/assets/Icons/3DBrush.png</iconset>
    </property>
    <property name="text">
@@ -717,7 +718,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Tensile.png</normaloff>:/Icons/assets/Icons/Tensile.png</iconset>
    </property>
    <property name="text">
@@ -734,7 +735,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../VoxCad.qrc">
      <normaloff>:/Icons/assets/Icons/Bucket.png</normaloff>:/Icons/assets/Icons/Bucket.png</iconset>
    </property>
    <property name="text">
@@ -781,8 +782,19 @@
     <string>Show Triad</string>
    </property>
   </action>
+  <action name="actionHistory">
+   <property name="icon">
+    <iconset resource="../../VoxCad.qrc">
+     <normaloff>:/Icons/assets/Icons/Record.png</normaloff>:/Icons/assets/Icons/Record.png</iconset>
+   </property>
+   <property name="text">
+    <string>History</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../../VoxCad.qrc"/>
+ </resources>
  <connections/>
 </ui>

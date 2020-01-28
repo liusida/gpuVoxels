@@ -109,7 +109,8 @@ public slots: //global slot repository for updating things across all windows/vi
 	void SaveZLib(){MainObj.SaveZLib();}
 	void SaveAsZLib(){QString NewFileName; MainObj.SaveAsZLib(&NewFileName); SetWindowName(NewFileName);}
 	void ImportVXA(){ForceViewMode(); QString FileName; if (!MainSim.OpenVXA(&FileName)) return; FastModeChanged(false); CheckNumVox(); ZoomExtAll(); SetWindowName(FileName); UpdateAllWins();}
-	void SaveVXA(){QString NewFileName; MainSim.SaveVXA(&NewFileName); SetWindowName(NewFileName);}
+    void ImportHistory() {ForceViewMode();QString FileName; if (!MainSim.OpenHistory(&FileName)) return; FastModeChanged(false); CheckNumVox(); ZoomExtAll(); SetWindowName(FileName); UpdateAllWins(); PhysicsMode(true); }
+    void SaveVXA(){QString NewFileName; MainSim.SaveVXA(&NewFileName); SetWindowName(NewFileName);}
 
 	//Edit
 	void Copy(void);
@@ -207,6 +208,7 @@ public slots: //global slot repository for updating things across all windows/vi
 	void ImportDMU(void) {OpenDMU(&MainObj); UpdateAllWins();};
 	void ExportDMU(void) {SaveDMU(&MainObj);};
 #endif
+
 
 private:
 	Ui::VoxCadClass ui;

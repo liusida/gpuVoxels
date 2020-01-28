@@ -64,6 +64,7 @@ void CVXS_SimGLView::Draw(int Selected, bool ViewSection, int SectionLayer)
 		case RVV_DISCRETE: DrawGeometry(Selected, ViewSection, SectionLayer); break; //section view only currently enabled in voxel view mode
 		case RVV_DEFORMED: DrawVoxMesh(Selected); break;
 		case RVV_SMOOTH: DrawSurfMesh(); break;
+		case RVV_HISTORY: DrawHistory(Selected); break;
 		}
 	}
 	else { //CurViewMode == RVT_BONDS
@@ -219,6 +220,24 @@ void CVXS_SimGLView::DrawFloor(void)
 			glVertex3d(i*sX+Size, j*sY, z);
 			glVertex3d(i*sX+1.25*Size, j*sY+0.433*Size, z);
 			glEnd();
+		}
+	}
+}
+
+void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLayer, vfloat ScaleVox) {
+	if (pSim->StreamHistory) {
+		QString line = pSim->StreamHistory->readLine();
+		if (line.isNull()) {
+			if (line[0]=='[') {
+				glPushMatrix();
+				glTranslated(0, 0, 0);
+				glRotated(0, 0, 0, 0);
+				CColor ThisColor = CColor(1.0f, 0.0f, 1.0f, 1.0f);
+				CGL_Utils::DrawCube(Vec3D<>(0.001,0.001,0.001)*ScaleVox, Vec3D<>(0.0,0.0,0.0)*ScaleVox, true, true, 1.0, ThisColor);
+				glPopMatrix();
+			}
+		} else {
+			pSim->StreamHistory->reset();
 		}
 	}
 }
@@ -866,6 +885,8 @@ int CVXS_SimGLView::StatRqdToDraw() //returns the stats bitfield that we need to
 	default: return CALCSTAT_NONE;
 	}
 }
+
+
 //
 //void CVXS_SimGLView::DrawOverlay(void)
 //{

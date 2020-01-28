@@ -42,6 +42,7 @@ enum ViewColor {
 enum ViewVoxel {
 	RVV_DISCRETE, //!< Draws discrete voxels with position and orientation
 	RVV_DEFORMED, //!< Draws deformed voxels
+    RVV_HISTORY,    //!< Draws only history, experimental for Sida
 	RVV_SMOOTH //!< Draws a smooth mesh, whether provided or generated with marching cubes
 };
 
@@ -105,6 +106,7 @@ private:
 #endif
 
 	//Drawing
+	void DrawHistory(int Selected = -1, bool ViewSection=false, int SectionLayer=0, vfloat ScaleVox = 1.0);
 	void DrawGeometry(int Selected = -1, bool ViewSection=false, int SectionLayer=0, vfloat ScaleVox = 1.0);
 	void DrawSurfMesh(int Selected = -1);
 	void DrawVoxMesh(int Selected = -1);

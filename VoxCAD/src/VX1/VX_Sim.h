@@ -21,6 +21,7 @@ See <http://www.opensource.org/licenses/lgpl-3.0.html> for license details.
 #include "VX_Enums.h"
 #include <deque>
 //#include "Array3D.h"
+#include <QTextStream>
 
 #define VX2 //use the next version of voxelyze?
 
@@ -297,6 +298,10 @@ protected:
 //	ViewColor CurViewCol;
 //	ViewVoxel CurViewVox;
 //#endif
+public:
+
+	bool OpenHistory(QString* pFileNameOut = NULL);
+	QTextStream* StreamHistory = NULL;
 
 
 };

@@ -32,6 +32,16 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                 printf(COLORCODE_BOLD_RED "\n%d) Simulation %d Diverged: %s.\n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename);
                 break;
             }
+            if (d_v3->RecordStepSize) {
+                if (j%d_v3->RecordStepSize==0) {
+                    printf("[%d,",j);
+                    for (int i=0;i<d_v3->num_d_voxels;i++) {
+                        auto &v = d_v3->d_voxels[i];
+                        printf("[%f, %f, %f],", v.pos.x,v.pos.y,v.pos.z);
+                    }
+                    printf("]\n");
+                }
+            }
         }
         d_v3->updateCurrentCenterOfMass();
         printf(COLORCODE_BLUE "%d) Simulation %d ends: %s Time: %f, CoM: %f (xyz %f %f %f)\n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename, d_v3->currentTime, d_v3->currentCenterOfMass.Dist(VX3_Vec3D<double>(0,0,0)), d_v3->currentCenterOfMass.x, d_v3->currentCenterOfMass.y, d_v3->currentCenterOfMass.z);
@@ -115,6 +125,7 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         h_d_tmp.enableAttach = pt_merged.get<bool>("VXA.Simulator.AttachDetach.EnableAttach", false);
         h_d_tmp.watchDistance = pt_merged.get<double>("VXA.Simulator.AttachDetach.watchDistance", 1.0f);
         h_d_tmp.boundingRadius = pt_merged.get<double>("VXA.Simulator.AttachDetach.boundingRadius", 0.75f);
+        h_d_tmp.RecordStepSize = pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordStepSize", 0);
         VcudaMemcpy(d_voxelyze_3s[device_index] + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), cudaMemcpyHostToDevice);
         i++;
     }

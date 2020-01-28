@@ -85,6 +85,7 @@ public:
     bool* d_collisionsStale;
 
     bool enableAttach;
+    int RecordStepSize = 0;
 };
 
 

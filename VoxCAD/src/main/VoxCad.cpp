@@ -28,9 +28,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 VoxCad::VoxCad(QWidget *parent, Qt::WindowFlags flags)
 : QMainWindow(parent, flags) //, MainSim(&MainEnv, &MainMesh)
 {
-	QCoreApplication::setOrganizationName("HillerLabs");
-	QCoreApplication::setOrganizationDomain("www.VoxCAD.com");
-	QCoreApplication::setApplicationName("VoxCAD");
+	// QCoreApplication::setOrganizationName("HillerLabs");
+	// QCoreApplication::setOrganizationDomain("www.VoxCAD.com");
+	// QCoreApplication::setApplicationName("VoxCAD");
 
 	//setup main object and FEA
 	MainEnv.pObj = &MainObj; //connect environment to object
@@ -71,8 +71,9 @@ VoxCad::VoxCad(QWidget *parent, Qt::WindowFlags flags)
 	connect(ui.actionSave, SIGNAL(triggered()), this, SLOT(SaveZLib()));
 	connect(ui.actionSave_As, SIGNAL(triggered()), this, SLOT(SaveAsZLib()));
 	//..Import
-	connect(ui.actionVXA_IN, SIGNAL(triggered()), this, SLOT(ImportVXA()));
-	//..Export
+    connect(ui.actionVXA_IN, SIGNAL(triggered()), this, SLOT(ImportVXA()));
+    connect(ui.actionHistory, SIGNAL(triggered()), this, SLOT(ImportHistory()));
+    //..Export
 	connect(ui.actionVXA_OUT, SIGNAL(triggered()), this, SLOT(SaveVXA()));
 	#ifdef DMU_ENABLED
 	connect(ui.actionDMU_Out, SIGNAL(triggered()), this, SLOT(ExportDMU()));

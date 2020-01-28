@@ -11,7 +11,7 @@ See <http://www.opensource.org/licenses/lgpl-3.0.html> for license details.
 #include "VX_Sim.h"
 #include "VXS_Voxel.h"
 #include "VXS_Bond.h"
-
+#include <QFileDialog>
 
 #include <sstream>
 
@@ -1946,3 +1946,22 @@ int CVX_Sim::NumBroken(void)
 
 
 
+
+bool CVX_Sim::OpenHistory(QString* pFileNameOut) {
+    QString tmpPath = QFileDialog::getOpenFileName(NULL, "Open History File", "/home/liusida/Simulators/Voxel/gpuVoxels/data/", "History Files (*.*)");
+    if (!tmpPath.isNull()){
+//        std::string ReturnString = "";
+//        LoadVXAFile(tmpPath.toStdString(), &ReturnString);
+//        if (ReturnString != "") QMessageBox::warning(NULL, "VXA Load", QString::fromStdString(ReturnString));
+//        emit BCsChanged();
+        if (pFileNameOut) {
+			*pFileNameOut = QFileInfo(tmpPath).baseName();
+			QFile fileHistory(*pFileNameOut);
+			if (!fileHistory.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
+			if (StreamHistory) delete StreamHistory;
+			StreamHistory = new QTextStream(&fileHistory);
+	        return true;
+		}
+    }
+    return false;
+}

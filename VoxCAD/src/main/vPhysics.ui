@@ -54,7 +54,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../../VoxCad.qrc">
          <normaloff>:/Icons/assets/Icons/Record.png</normaloff>:/Icons/assets/Icons/Record.png</iconset>
        </property>
        <property name="checkable">
@@ -583,6 +583,13 @@ make inelastic (dead) collisions. 1.0 is critically damped.</string>
              <widget class="QRadioButton" name="ViewDeformedRadio">
               <property name="text">
                <string>Deformed</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="ViewHistoryRadio">
+              <property name="text">
+               <string>History</string>
               </property>
              </widget>
             </item>
@@ -1267,6 +1274,8 @@ Useful for highly unstable scenarios.</string>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../VoxCad.qrc"/>
+ </resources>
  <connections/>
 </ui>

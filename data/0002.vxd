@@ -1,4 +1,7 @@
 
+<RecordHistory replace="VXA.Simulator.RecordHistory">
+    <RecordStepSize>100</StepSize>
+</RecordHistory>
 <DtFrac replace="VXA.Simulation.Integration.DtFrac">0.001</DtFrac>
 <StopConditionValue replace="VXA.Simulator.StopCondition.StopConditionValue">1</StopConditionValue>
 <AttachDetach replace="VXA.Simulator.AttachDetach">
