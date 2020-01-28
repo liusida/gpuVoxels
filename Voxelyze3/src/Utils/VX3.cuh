@@ -49,6 +49,7 @@ inline bool u_with_ext(fs::path file, std::string ext) {
     }
     #define CUDA_ERROR_CHECK(ans) { CUDA_ERROR_CHECK_OUTPUT((ans), __FILE__, __LINE__); }
 #endif
+#define VcudaGetDeviceCount(a) {CUDA_ERROR_CHECK(cudaGetDeviceCount(a))}
 #define VcudaMemcpy(a,b,c,d)  {CUDA_ERROR_CHECK(cudaMemcpy(a,b,c,d))}
 #define VcudaMemcpyAsync(a,b,c,d,e)  {CUDA_ERROR_CHECK(cudaMemcpyAsync(a,b,c,d,e))}
 #define VcudaMalloc(a,b) {CUDA_ERROR_CHECK(cudaMalloc(a,b))}

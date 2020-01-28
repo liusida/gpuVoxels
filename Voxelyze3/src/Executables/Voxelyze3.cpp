@@ -107,8 +107,8 @@ int main(int argc, char** argv) {
         std::string command = worker.string() + " -i " + (locally/vxt).string() + " -o " + (locally/vxr).string();
 
         std::cout << command << "\n";
-        boost::process::child worker(command);
-        worker.wait();
+        boost::process::child process_worker(command);
+        process_worker.wait();
         try {
             if (fs::is_regular_file(locally/vxr)) {
                 fs::copy_file(locally/vxr, output, fs::copy_option::overwrite_if_exists);

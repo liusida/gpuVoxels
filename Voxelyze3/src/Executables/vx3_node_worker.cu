@@ -75,8 +75,8 @@ int main(int argc, char** argv) {
     }
 
     //count number of GPUs
-    int nDevices;
-    cudaGetDeviceCount(&nDevices);
+    int nDevices=0;
+    VcudaGetDeviceCount(&nDevices);
     if (nDevices<=0) {
         printf("Error: No GPU found.\n");
         return 1;
