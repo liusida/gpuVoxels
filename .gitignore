@@ -8,6 +8,7 @@ tmp
 core
 *.output
 *.pro.user
+data/batch/*.vxd
 
 # Prerequisites
 *.d
