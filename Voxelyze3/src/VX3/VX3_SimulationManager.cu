@@ -26,6 +26,9 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         //     printf(" [%d]%p ", j, d_v3->d_surface_voxels[j]);
         // }
         //
+        d_v3->updateCurrentCenterOfMass();
+        d_v3->initialCenterOfMass = d_v3->currentCenterOfMass;
+        printf("Initial CoM: %f %f %f mm\n", d_v3->initialCenterOfMass.x*1000, d_v3->initialCenterOfMass.y*1000, d_v3->initialCenterOfMass.z*1000);
         for (int j=0;j<1000000;j++) { //Maximum Steps 1000000
             if (d_v3->StopConditionMet()) break;
             if (!d_v3->doTimeStep()) {
@@ -44,7 +47,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
             }
         }
         d_v3->updateCurrentCenterOfMass();
-        printf(COLORCODE_BLUE "%d) Simulation %d ends: %s Time: %f, CoM: %f (xyz %f %f %f)\n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename, d_v3->currentTime, d_v3->currentCenterOfMass.Dist(VX3_Vec3D<double>(0,0,0)), d_v3->currentCenterOfMass.x, d_v3->currentCenterOfMass.y, d_v3->currentCenterOfMass.z);
+        printf(COLORCODE_BLUE "%d) Simulation %d ends: %s Time: %f, Dist from Init %f, CoM: (%f %f %f) mm\n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename, d_v3->currentTime, d_v3->currentCenterOfMass.Dist(d_v3->initialCenterOfMass)*1000, d_v3->currentCenterOfMass.x*1000, d_v3->currentCenterOfMass.y*1000, d_v3->currentCenterOfMass.z*1000);
     }
 }
 
@@ -114,13 +117,13 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         if (!MainSim.Import(NULL, NULL, &err_string)){
             std::cout<<err_string;
         }
-        for (auto m:MainSim.Vx.voxelMats) {
-            int i=0;
-            for (auto mm:m->dependentMaterials) {
-                printf("m:%p %d/%ld -> mm: %p\n", m, i, m->dependentMaterials.size(), mm);
-                i++;
-            }
-        }
+        // for (auto m:MainSim.Vx.voxelMats) {
+        //     int i=0;
+        //     for (auto mm:m->dependentMaterials) {
+        //         printf("m:%p %d/%ld -> mm: %p\n", m, i, m->dependentMaterials.size(), mm);
+        //         i++;
+        //     }
+        // }
         VX3_VoxelyzeKernel h_d_tmp(&MainSim);
         // More VXA settings which is new in VX3
         strcpy(h_d_tmp.vxa_filename, file.filename().c_str());

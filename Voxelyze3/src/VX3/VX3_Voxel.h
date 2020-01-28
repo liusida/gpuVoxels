@@ -138,6 +138,9 @@ public:
 
 	VX3_Vec3D<float> lastColWatchPosition;
 
+	double phaseOffset;
+	bool isDetached; //true if the voxel is on main body, false if it fell on the ground.
+
 };
 
 #endif // VX3_VOXEL_H

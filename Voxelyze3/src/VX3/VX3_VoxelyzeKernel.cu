@@ -4,7 +4,7 @@
 /* Sub GPU Threads */
 __global__ void gpu_update_force(VX3_Link** links, int num);
 __global__ void gpu_update_voxel(VX3_Voxel* voxels, int num, double dt);
-__global__ void gpu_update_temperature(VX3_Voxel* voxels, int num, double currentTemperature);
+__global__ void gpu_update_temperature(VX3_Voxel* voxels, int num, double TempAmplitude, double TempPeriod, double currentTime);
 __global__ void gpu_update_attach(VX3_Voxel** surface_voxels, int num, double watchDistance, VX3_VoxelyzeKernel* k);
 /* Host methods */
 
@@ -30,7 +30,7 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim* In) {
         int i = 0;
         std::vector<VX3_MaterialLink*> tmp_v_linkMats;
         for (CVX_MaterialLink* mat:In->Vx.linkMats) {
-            printf("mat->vox1Mat %p, mat->vox2Mat %p.\n", mat->vox1Mat, mat->vox2Mat);
+            // printf("mat->vox1Mat %p, mat->vox2Mat %p.\n", mat->vox1Mat, mat->vox2Mat);
             VX3_MaterialLink tmp_linkMat( mat, this );
             VcudaMemcpy( d_linkMats+i, &tmp_linkMat, sizeof(VX3_MaterialLink), VcudaMemcpyHostToDevice );
             tmp_v_linkMats.push_back(d_linkMats+i);
@@ -72,7 +72,7 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim* In) {
     TempBase = In->pEnv->TempBase;
     TempAmplitude = In->pEnv->TempAmplitude;
     TempPeriod = In->pEnv->TempPeriod;
-    currentTemperature = TempBase + TempAmplitude;
+    // currentTemperature = TempBase + TempAmplitude;
 
     d_surface_voxels = NULL;
 }
@@ -146,11 +146,10 @@ __device__ void VX3_VoxelyzeKernel::updateTemperature() {
     // different temperatures in different objs are not support for now.
     if (VaryTempEnabled){
 		if (TempPeriod > 0) {
-            currentTemperature = TempBase + TempAmplitude*sin(2*3.1415926/TempPeriod* currentTime);	//update the global temperature
             int blockSize = 512;
             int gridSize_voxels = (num_d_voxels + blockSize - 1) / blockSize; 
             int blockSize_voxels = num_d_voxels<blockSize ? num_d_voxels : blockSize;
-            gpu_update_temperature<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, currentTemperature - TempBase);
+            gpu_update_temperature<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, TempAmplitude, TempPeriod, currentTime);
             cudaDeviceSynchronize();        
         }
 	}
@@ -272,11 +271,14 @@ __global__ void gpu_update_voxel(VX3_Voxel* voxels, int num, double dt) {
     }
 }
 
-__global__ void gpu_update_temperature(VX3_Voxel* voxels, int num, double temperature) {
+__global__ void gpu_update_temperature(VX3_Voxel* voxels, int num, double TempAmplitude, double TempPeriod, double currentTime) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x; 
     if (gindex < num) {
+    //vfloat tmp = pEnv->GetTempAmplitude() * sin(2*3.1415926f*(CurTime/pEnv->GetTempPeriod() + pV->phaseOffset)) - pEnv->GetTempBase();
         VX3_Voxel* t = &voxels[gindex];
-        t->setTemperature(temperature);
+        double currentTemperature = TempAmplitude*sin(2*3.1415926f*(currentTime/TempPeriod + t->phaseOffset));	//update the global temperature
+        t->setTemperature(currentTemperature);
+        // t->setTemperature(0.0f);
     }
 }
 __global__ void gpu_update_attach(VX3_Voxel** surface_voxels, int num, double watchDistance, VX3_VoxelyzeKernel* k) {

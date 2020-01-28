@@ -29,6 +29,18 @@ See <http://www.opensource.org/licenses/lgpl-3.0.html> for license details.
 #include "GL_Utils.h"
 #endif
 
+/* split used in PhaseOffset TODO: find a better place for this tool */
+std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) 
+{
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) 
+    {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
 
 CVX_Object::CVX_Object(void)
 {
@@ -1798,6 +1810,39 @@ bool CVXC_Structure::ReadXML(CXML_Rip* pXML, std::string Version, std::string* R
 			IteratorIn++;
 		}
 	}
+
+	//Read PhaseOffset
+	if (pXML->FindElement("PhaseOffset")){ 
+		usingPhaseOffset = true;
+		int voxCounter = 0;
+		// std::cout << "found weights!" << std::endl;
+		InitPhaseOffsetArray(X_Voxels*Y_Voxels*Z_Voxels);
+		for (int i=0; i<Z_Voxels; i++)
+		{
+			std::string DataIn;
+			std::string RawData;
+			// std::string thisValue;
+			pXML->FindLoadElement("Layer", &RawData, true, true);
+		
+			std::vector<std::string> dataArray;
+			dataArray = split(RawData,',',dataArray);
+			for (int k=0; k<X_Voxels*Y_Voxels; k++)
+			{
+				if (pData[X_Voxels*Y_Voxels*i+k] > 0)
+				{
+					SetPhaseOffset(voxCounter,atof(dataArray[k].c_str()));
+					voxCounter++;
+				}
+			}
+		}
+		pXML->UpLevel(); //Layer
+		pXML->UpLevel(); //Weights
+	}
+	else
+	{
+		usingPhaseOffset = false;
+	}
+
 	return true;
 }
 

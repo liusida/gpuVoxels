@@ -98,6 +98,8 @@ bool CVX_Sim::Import(CVX_Environment* pEnvIn, CMesh* pSurfMeshIn, std::string* R
 		if (VxcMatIndex>=0){
 			LocalVXC.GetXYZNom(&x, &y, &z, i);
 			VoxList.push_back(Vx.setVoxel(VxcToVx2MatIndexMap[VxcMatIndex], x, y, z));
+			//PhaseOffset
+			VoxList.back()->phaseOffset = pEnv->pObj->Structure.GetPhaseOffset(VoxList.size()-1);
 		}
 	}
 

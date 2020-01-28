@@ -52,9 +52,10 @@ public:
 	bool TempEnabled; //overall flag for temperature calculations
 	bool VaryTempEnabled; //is periodic variation of temperature on?
 	double TempBase, TempAmplitude, TempPeriod; //degress celcius
-	double currentTemperature; //updated based on time... (for phase 0... individual materials now have their own current temp
+	// double currentTemperature; //updated based on time... (for phase 0... individual materials now have their own current temp
 
     VX3_Vec3D<double> currentCenterOfMass;
+    VX3_Vec3D<double> initialCenterOfMass;
 
     std::vector<CVX_Link *> h_links;
     VX3_Link * d_links;

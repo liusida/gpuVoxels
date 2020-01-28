@@ -193,10 +193,8 @@ public:
 	std::vector<CVX_Collision*>* colWatch;
 	std::vector<CVX_Voxel*>* nearby;
 
-
-	friend class CVoxelyze; //give access to private members directly
-	friend class CVXS_SimGLView; //TEMPORARY
-	friend class CVX_LinearSolver;
+	double phaseOffset;
+	bool isDetached; //true if the voxel is on main body, false if it fell on the ground.
 
 };
 

@@ -174,6 +174,12 @@ public:
 	void ResetStructure(); //erases all voxel imformation within voxel array
 	void ReplaceMaterial(int Matindex, int ReplaceWith = 0, bool ShiftDown = false); //converts a material to ReplaceWith, option to decrement all higher indices
 
+	//PhaseOffset
+	inline void SetPhaseOffset(int Index, double Value) {pPhaseOffsets[Index] = Value;} // nac: sets the material index here
+	inline double GetPhaseOffset(int Index) const {return pPhaseOffsets[Index];}
+	inline void InitPhaseOffsetArray(int Size) {pPhaseOffsets = new double[Size];}
+	inline bool GetUsingPhaseOffset(void) {return usingPhaseOffset;}
+
 protected:
 	//variable from file
 	std::string Compression;
@@ -192,6 +198,11 @@ protected:
 	//functions that should only be used locally
 	void DeleteData(void); //sandbox the creation and destruction...
 	void IniData(int Size);
+
+	//PhaseOffset
+	bool usingPhaseOffset; 
+	double* pPhaseOffsets;
+
 };
 
 //!Voxel object class.	
