@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
         std::cout << desc << "\n";
         return 1;
     }
-    std::string str_worker = "vx3_node_worker";
+    std::string str_worker = "./vx3_node_worker";
     if (vm.count("worker")) {
         str_worker = vm["worker"].as<std::string>();
     }
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
         std::string vxt = str_time + ".vxt";
         std::string vxr = str_time + ".vxr";
         pt::write_xml((locally/vxt).string(), tree);
-        std::string command = worker.string() + " -i " + (locally/vxt).string() + " -o " + (locally/vxr).string();
+        std::string command = str_worker + " -i " + (locally/vxt).string() + " -o " + (locally/vxr).string();
 
         std::cout << command << "\n";
         boost::process::child process_worker(command);
