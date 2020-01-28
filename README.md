@@ -32,3 +32,43 @@ VXA file is an important interface in this project. VXA is in XML format.
 
 [Here is an example of .VXA file.](https://github.com/liusida/gpuVoxels/blob/master/doc/misc/example.vxa)
 
+## Installation
+
+### Install on DeepGreen
+
+If you are on DeepGreen, copy my `~/apps` folder and `~/share/bin` folder, and add those three lines to your `~/.bashrc`:
+
+```bash
+# add for Voxelyze3
+export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/usr/local/cuda/lib64/:~/apps/lib64
+export CMAKE_CXX_COMPILER=/users/s/l/sliu1/apps/bin/g++
+export CMAKE_CC_COMPILER=/users/s/l/sliu1/apps/bin/gcc
+```
+and done.
+
+`./Voxelyze3 -i data -o output.xml -lf`
+
+should do the work.
+
+### Install Elsewhere
+
+There are several prerequisites:
+
+```bash
+CUDA 10.1
+cmake-3.16.2
+boost_1_66_0 #with all components (Other components may be used later.)
+gcc-8
+g++-8
+```
+
+After you installed those, clone the repo and use cmake to compile:
+
+```bash
+mkdir Voxelyze3/build
+cd Voxelyze3/build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . -j 10
+```
+
+Now you have your `Voxelyze3` and `vx3_node_worker`, copy that to anywhere you want and run `Voxelyze3` as an entry point.
