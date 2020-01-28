@@ -15,9 +15,10 @@ namespace pt = boost::property_tree;
 #define APP_DESCRIPTION "\
 Thank you for using Voxelyze3. This program should be run on a computer that has GPUs.\n\
 Typical Usage:\n\
-Voxelyze -i <data_path> -o <report_path> -l -f \n\
+Voxelyze -i <data_path> -o <report_path> -l -f \n\n\
 <data_path> should contain a file named `base.vxa' and multiple files with extension `.vxa'.\n\
-<report_path> is the report file you need to place. If you want to overwrite existing report, add -f flag.\n\n\
+<report_path> is the report file you need to place. If you want to overwrite existing report, add -f flag.\n\
+if the executable `vx3_node_worker' doesn't exist in the same path, use -w <worker> to specify the path.\n\
 Allowed options\
 "
 
