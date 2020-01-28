@@ -228,7 +228,7 @@ void CVXS_SimGLView::DrawFloor(void)
 void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLayer, vfloat ScaleVox) {
 	if (pSim->StreamHistory) {
 		if (pSim->StreamHistory->atEnd()) {
-			qInfo() << "reset";
+			// qInfo() << "reset";
 			pSim->StreamHistory->seek(0);
 		}
 		QString line = pSim->StreamHistory->readLine();
