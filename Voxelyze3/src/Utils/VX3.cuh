@@ -41,7 +41,7 @@ inline bool u_with_ext(fs::path file, std::string ext) {
 #define DEBUG_LINE_
 
 #ifndef CUDA_ERROR_CHECK
-    inline void CUDA_ERROR_CHECK_OUTPUT(cudaError_t code, const char *file, int line, bool abort=false) {
+    __device__ __host__ inline void CUDA_ERROR_CHECK_OUTPUT(cudaError_t code, const char *file, int line, bool abort=false) {
         if (code != cudaSuccess) {
             printf(COLORCODE_BOLD_RED "%s(%d): CUDA Function Error: %s \n" COLORCODE_RESET, file, line, cudaGetErrorString(code));
             if (abort) exit(code);

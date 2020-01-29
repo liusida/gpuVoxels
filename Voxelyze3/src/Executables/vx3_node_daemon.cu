@@ -11,6 +11,7 @@ namespace fs = boost::filesystem;
 #include <boost/foreach.hpp> 
 // #include <boost/process.hpp> //no! boost::process cannot use in cu file, use std::system instead.
 
+#include "VX3.cuh"
 
 int main() {
     int nDevices;
