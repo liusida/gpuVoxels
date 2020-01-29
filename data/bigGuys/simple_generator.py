@@ -12,7 +12,7 @@ for k in range(1):
     # VXA.Simulator.StopCondition.StopConditionValue = 0.5
     StopConditionValue = etree.SubElement(root, "StopConditionValue")
     StopConditionValue.set('replace', 'VXA.Simulator.StopCondition.StopConditionValue')
-    StopConditionValue.text = '0.001'
+    StopConditionValue.text = '5'
 
     structure = etree.SubElement(root, "Structure")
     structure.set('replace', 'VXA.VXC.Structure')
