@@ -18,4 +18,4 @@
 #SBATCH --output=stdout_%x_%j.out
 # change to the directory where you submitted this script
 cd ${SLURM_SUBMIT_DIR}
-time ./Voxelyze3 -i . -o output.xml -lf > 100x_good.history
+time ./Voxelyze3 -i . -o output.xml -lf > 50x_good.history
