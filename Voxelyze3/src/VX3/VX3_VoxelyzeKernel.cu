@@ -147,6 +147,8 @@ __device__ void VX3_VoxelyzeKernel::updateTemperature() {
     if (VaryTempEnabled){
 		if (TempPeriod > 0) {
             int blockSize = 512;
+            int minGridSize;
+            cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_temperature, 0, num_d_voxels); //Dynamically calculate blockSize
             int gridSize_voxels = (num_d_voxels + blockSize - 1) / blockSize; 
             int blockSize_voxels = num_d_voxels<blockSize ? num_d_voxels : blockSize;
             gpu_update_temperature<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, TempAmplitude, TempPeriod, currentTime);
@@ -172,9 +174,12 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     }
     bool Diverged = false;
 
-    int blockSize = 512;
+    int blockSize;
+    int minGridSize;
+    cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_force, 0, d_v_links.size()); //Dynamically calculate blockSize
     int gridSize_links = (d_v_links.size() + blockSize - 1) / blockSize; 
     int blockSize_links = d_v_links.size()<blockSize ? d_v_links.size() : blockSize;
+    printf("gpu_update_force<<<%d,%d>>>(...,%d);\n", gridSize_links, blockSize_links, d_v_links.size());
     gpu_update_force<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
     CUDA_CHECK_AFTER_CALL();
     cudaDeviceSynchronize();
@@ -189,6 +194,7 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
 
     if (enableAttach) updateAttach();
 
+    cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_voxel, 0, num_d_voxels); //Dynamically calculate blockSize
     int gridSize_voxels = (num_d_voxels + blockSize - 1) / blockSize; 
     int blockSize_voxels = num_d_voxels<blockSize ? num_d_voxels : blockSize;
     gpu_update_voxel<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, dt);
