@@ -4,8 +4,15 @@
 .vscode
 compile_commands.json
 build
-build/*
-*/build/
+build-Vox*
+workspace
+tmp
+core
+*.output
+*.pro.user
+data/batch/*.vxd
+.history
+bin
 
 
 # Prerequisites
