@@ -49,12 +49,14 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim* In) {
     num_d_links = In->Vx.linksList.size();
     std::vector<VX3_Link*> tmp_v_links;
     VcudaMalloc( (void **)&d_links, num_d_links * sizeof(VX3_Link));
+    VX3_Link* tmp_link_cache = (VX3_Link*) malloc(num_d_links * sizeof(VX3_Link));
     for (int i=0;i<num_d_links;i++) {
         VX3_Link tmp_link( In->Vx.linksList[i], this );
-        VcudaMemcpy( d_links+i, &tmp_link, sizeof(VX3_Link), VcudaMemcpyHostToDevice );
-        tmp_v_links.push_back(d_links+i);
+        memcpy(tmp_link_cache+i, &tmp_link, sizeof(VX3_Link));
+        tmp_v_links.push_back(d_links+i); //not copied yet, but still ok to get the address
         h_links.push_back( In->Vx.linksList[i] );
     }
+    VcudaMemcpy( d_links, tmp_link_cache, num_d_links * sizeof(VX3_Link), VcudaMemcpyHostToDevice );
     hd_v_links = VX3_hdVector<VX3_Link*>(tmp_v_links);
 
     for (int i=0;i<num_d_voxels;i++) {
