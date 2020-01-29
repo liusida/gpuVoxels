@@ -179,7 +179,7 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_force, 0, d_v_links.size()); //Dynamically calculate blockSize
     int gridSize_links = (d_v_links.size() + blockSize - 1) / blockSize; 
     int blockSize_links = d_v_links.size()<blockSize ? d_v_links.size() : blockSize;
-    printf("gpu_update_force<<<%d,%d>>>(...,%d);\n", gridSize_links, blockSize_links, d_v_links.size());
+    // printf("gpu_update_force<<<%d,%d>>>(...,%d);\n", gridSize_links, blockSize_links, d_v_links.size());
     gpu_update_force<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
     CUDA_CHECK_AFTER_CALL();
     cudaDeviceSynchronize();

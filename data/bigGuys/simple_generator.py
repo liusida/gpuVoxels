@@ -1,14 +1,14 @@
 import random
 from lxml import etree
 
-x = 10
-y = 10
-z = 10
+x = 30
+y = 30
+z = 30
 for k in range(1):
     root = etree.Element("VXD")
-    # RecordHistory = etree.SubElement(root, "RecordHistory")
-    # RecordHistory.set('replace', 'VXA.Simulator.RecordHistory')
-    # etree.SubElement(RecordHistory, "RecordStepSize").text = '100'
+    RecordHistory = etree.SubElement(root, "RecordHistory")
+    RecordHistory.set('replace', 'VXA.Simulator.RecordHistory')
+    etree.SubElement(RecordHistory, "RecordStepSize").text = '100'
 
     structure = etree.SubElement(root, "Structure")
     structure.set('replace', 'VXA.VXC.Structure')
