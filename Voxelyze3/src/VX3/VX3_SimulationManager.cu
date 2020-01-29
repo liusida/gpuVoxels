@@ -75,7 +75,7 @@ void VX3_SimulationManager::start() {
     for (int device_index=0;device_index<num_of_devices;device_index++) { //multi GPUs
         auto files = sub_batches[device_index];
         if (files.size()) {
-            cudaSetDevice(device_index);
+            VcudaSetDevice(device_index);
             printf("=== set device to %d for %ld simulations ===\n", device_index, files.size());
             // readVXA(base)
             readVXD(base, files, device_index);

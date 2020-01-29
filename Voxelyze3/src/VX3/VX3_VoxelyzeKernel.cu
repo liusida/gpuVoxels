@@ -150,6 +150,7 @@ __device__ void VX3_VoxelyzeKernel::updateTemperature() {
             int gridSize_voxels = (num_d_voxels + blockSize - 1) / blockSize; 
             int blockSize_voxels = num_d_voxels<blockSize ? num_d_voxels : blockSize;
             gpu_update_temperature<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, TempAmplitude, TempPeriod, currentTime);
+            CUDA_CHECK_AFTER_CALL();
             cudaDeviceSynchronize();        
         }
 	}
@@ -175,6 +176,7 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     int gridSize_links = (d_v_links.size() + blockSize - 1) / blockSize; 
     int blockSize_links = d_v_links.size()<blockSize ? d_v_links.size() : blockSize;
     gpu_update_force<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
+    CUDA_CHECK_AFTER_CALL();
     cudaDeviceSynchronize();
 
     for (int i = 0; i<d_v_links.size(); i++){
@@ -190,6 +192,7 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     int gridSize_voxels = (num_d_voxels + blockSize - 1) / blockSize; 
     int blockSize_voxels = num_d_voxels<blockSize ? num_d_voxels : blockSize;
     gpu_update_voxel<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, dt);
+    CUDA_CHECK_AFTER_CALL();
     cudaDeviceSynchronize();
 
     currentTime += dt;
@@ -203,6 +206,7 @@ __device__ void VX3_VoxelyzeKernel::updateAttach()
     dim3 dimBlock(blockSize, blockSize);
     dim3 dimGrid((num_d_surface_voxels + dimBlock.x - 1) / dimBlock.x, (num_d_surface_voxels + dimBlock.y - 1) / dimBlock.y);
     gpu_update_attach<<<dimGrid, dimBlock>>>(d_surface_voxels, num_d_surface_voxels, watchDistance, this); //invoke two dimensional gpu threads 'CUDA C++ Programming Guide', Nov 2019, P52.
+    CUDA_CHECK_AFTER_CALL();
 }
 
 

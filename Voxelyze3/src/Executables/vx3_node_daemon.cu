@@ -14,7 +14,7 @@ namespace fs = boost::filesystem;
 
 int main() {
     int nDevices;
-    cudaGetDeviceCount(&nDevices);
+    VcudaGetDeviceCount(&nDevices);
     if (nDevices<=0) {
         printf("This daemon should run on a node(a Server with GPU).\n");
         return 1;
