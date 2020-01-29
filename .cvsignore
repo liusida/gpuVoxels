@@ -4,6 +4,7 @@
 .vscode
 compile_commands.json
 build
+build/*
 build-Vox*
 workspace
 tmp
@@ -11,8 +12,9 @@ core
 *.output
 *.pro.user
 data/batch/*.vxd
-.history
+*.history
 bin
+core.*
 
 
 # Prerequisites
