@@ -9,8 +9,9 @@ core
 *.output
 *.pro.user
 data/batch/*.vxd
-.history
+*.history
 bin
+core.*
 
 # Prerequisites
 *.d
