@@ -12,7 +12,7 @@ class VX3_Link
 {
 public:
     VX3_Link(CVX_Link* p, VX3_VoxelyzeKernel* k);
-	__device__ VX3_Link(VX3_Voxel* voxel1, VX3_Voxel* voxel2, VX3_MaterialLink* material);
+	__device__ VX3_Link(VX3_Voxel* voxel1, linkDirection dir1, VX3_Voxel* voxel2, linkDirection dir2, linkAxis link_axis, VX3_VoxelyzeKernel* k);
 
 	__device__ void reset(); //!< Resets all current state information about this link to the initial value.
 

@@ -176,7 +176,7 @@ public:
 
 	//PhaseOffset
 	inline void SetPhaseOffset(int Index, double Value) {pPhaseOffsets[Index] = Value;} // nac: sets the material index here
-	inline double GetPhaseOffset(int Index) const {return pPhaseOffsets[Index];}
+	inline double GetPhaseOffset(int Index) const {if (pPhaseOffsets) return pPhaseOffsets[Index]; return 0.0f;}
 	inline void InitPhaseOffsetArray(int Size) {pPhaseOffsets = new double[Size];}
 	inline bool GetUsingPhaseOffset(void) {return usingPhaseOffset;}
 

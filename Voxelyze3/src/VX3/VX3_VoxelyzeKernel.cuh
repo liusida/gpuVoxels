@@ -9,6 +9,7 @@
 #include "VX3_Voxel.h"
 #include "VX3_MaterialLink.h"
 #include "VX_Enums.h"
+#include "VX3_Collision.h"
 
 
 /*
@@ -83,7 +84,8 @@ public:
 	float boundingRadius; //(in voxel units) radius to collide a voxel at
     float watchDistance; //(in voxel units) Distance between voxels (not including 2*boundingRadius for each voxel) to watch for collisions from.
 
-    bool* d_collisionsStale;
+    // bool* d_collisionsStale;
+    VX3_dVector<VX3_Collision*> d_v_collisions;
 
     bool enableAttach;
     int RecordStepSize = 0;

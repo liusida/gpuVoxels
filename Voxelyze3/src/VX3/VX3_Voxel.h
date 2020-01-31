@@ -110,7 +110,6 @@ public:
 	__device__ void enableCollisions(bool enabled, float watchRadius = 0.0f); //watchRadius in voxel units
 	__device__ bool isCollisionsEnabled() const {return boolStates & COLLISIONS_ENABLED ? true : false;}
 	__device__ void generateNearby(int linkDepth, int gindex, bool surfaceOnly = true);
-
 /* data */
     CVX_Voxel* _voxel;
 
@@ -141,6 +140,7 @@ public:
 	double phaseOffset;
 	bool isDetached; //true if the voxel is on main body, false if it fell on the ground.
 
+	VX3_Vec3D<double> contactForce;	
 };
 
 #endif // VX3_VOXEL_H

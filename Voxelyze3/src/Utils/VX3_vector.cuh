@@ -76,6 +76,15 @@ public:
         num_main+=1;
         return true;
     }
+    __device__ T inline pop_back() {
+        T ret;
+        if (main)
+            ret = main[num_main];
+        else
+            ret = default_memory[num_main];
+        num_main -= 1;
+        return ret;
+    }
     __device__ inline VX3_dVector<T>& operator= (const VX3_dVector<T>& vIn) { //TODO: Unit Test and copy to large
         if (vIn.main) {
             sizeof_chunk = vIn.sizeof_chunk;

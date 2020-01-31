@@ -562,8 +562,8 @@ void QVX_Sim::SimPauseToggle()
 		WasRunning = true;
 	//	ActuallyPaused = false; //if sim was running and we're pausing it, use this to wait until reached pause loop to return form the pause function
 	}
-
 	Paused = !Paused;
+	pSimView->HistoryPaused = Paused;
 	ReqGLUpdate();
 
 	if (WasRunning){

@@ -1968,3 +1968,11 @@ bool CVX_Sim::OpenHistory(QString* pFileNameOut) {
     }
     return false;
 }
+void CVX_Sim::LoadHistoryFile(QString tmpPath) {
+	if (fileHistory) delete fileHistory;
+	fileHistory = new QFile(tmpPath);
+	// printf("%s", tmpPath.toLatin1().data());
+	if (!fileHistory->open(QIODevice::ReadOnly | QIODevice::Text)) return;
+	if (StreamHistory) delete StreamHistory;
+	StreamHistory = new QTextStream(fileHistory);
+}

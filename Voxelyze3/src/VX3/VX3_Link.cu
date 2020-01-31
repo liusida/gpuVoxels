@@ -31,28 +31,27 @@ _stress(p->_stress)
     }
 }
 //VX3_Link can also be initialized in device
-__device__ VX3_Link::VX3_Link(VX3_Voxel* voxel1, VX3_Voxel* voxel2, VX3_MaterialLink* material) {
+__device__ VX3_Link::VX3_Link(VX3_Voxel* voxel1, linkDirection dir1, VX3_Voxel* voxel2, linkDirection dir2, linkAxis link_axis, VX3_VoxelyzeKernel* k) {
 	//TODO: is this the right orientation? let's see...
-	for (int i=0;i<6;i++) {
-		if (voxel1->links[i]==NULL) { 
-			voxel1->links[i]=this;
-			break;
-		}
-	}
-	for (int i=0;i<6;i++) {
-		if (voxel2->links[i]==NULL) { 
-			voxel2->links[i]=this;
-			break;
-		}
-	}
-	axis = X_AXIS;
-	//
 
+	voxel1->links[dir1] = this;
+	voxel2->links[dir2] = this;
+	axis = link_axis;
 	pVNeg=voxel2; pVPos=voxel1;
-	
-
-	mat=material;
-
+	// for (int i=0;i<6;i++) {
+	// 	if (voxel1->links[i]==NULL) { 
+	// 		voxel1->links[i]=this;
+	// 		break;
+	// 	}
+	// }
+	// for (int i=0;i<6;i++) {
+	// 	if (voxel2->links[i]==NULL) { 
+	// 		voxel2->links[i]=this;
+	// 		break;
+	// 	}
+	// }
+	//
+	mat = k->combinedMaterial(voxel1->material(), voxel2->material());
 	boolStates=0;
 	reset();
 }

@@ -1,0 +1,25 @@
+<VXD>
+    <AttachDetach replace="VXA.Simulator.AttachDetach">
+        <EnableAttach>1</EnableAttach>
+        <watchDistance>1.1</watchDistance>
+    </AttachDetach>
+    <StopConditionValue replace="VXA.Simulator.StopCondition.StopConditionValue">1</StopConditionValue>
+    <RecordHistory replace="VXA.Simulator.RecordHistory">
+        <RecordStepSize>50</RecordStepSize>
+    </RecordHistory>
+    <Structure replace="VXA.VXC.Structure" Compression="ASCII_READABLE">
+        <X_Voxels>10</X_Voxels>
+        <Y_Voxels>1</Y_Voxels>
+        <Z_Voxels>10</Z_Voxels>
+        <Data>
+            <Layer><![CDATA[0009000900]]></Layer>
+            <Layer><![CDATA[9000900090]]></Layer>
+            <Layer><![CDATA[0000000000]]></Layer>
+            <Layer><![CDATA[0000000000]]></Layer>
+            <Layer><![CDATA[0000000000]]></Layer>
+            <Layer><![CDATA[0000000000]]></Layer>
+            <Layer><![CDATA[0009000900]]></Layer>
+            <Layer><![CDATA[9000900090]]></Layer>
+        </Data>
+    </Structure>
+</VXD>

@@ -260,10 +260,12 @@ __device__ VX3_Vec3D<double> VX3_Voxel::force()
 	
 	//no collision yet
 	// if (isCollisionsEnabled()){
-	// 	for (int i=0;i<colWatch.size();i++){
-	// 		totalForce -= colWatch[i]->contactForce(this);
-	// 	}
+	// for (int i=0;i<colWatch.size();i++){
 	// }
+	// }
+	totalForce -= contactForce;
+	contactForce = VX3_Vec3D<double>(0,0,0);
+
 	return totalForce;
 }
 

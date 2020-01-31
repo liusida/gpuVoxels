@@ -93,7 +93,6 @@ public:
 #endif
 	CColor GetCurVoxColor(int SIndex, int Selected);
 
-private:
 
 	bool ViewForce; //look at force vectors?
 	bool ViewAngles; //look at axes for each point?
@@ -122,6 +121,9 @@ private:
 	ViewMode CurViewMode;
 	ViewColor CurViewCol;
 	ViewVoxel CurViewVox;
+
+	QString currentHistoryLine;
+	bool HistoryPaused;
 };
 
 #endif //VX_SIMGLUTILS_H

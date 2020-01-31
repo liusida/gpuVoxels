@@ -301,6 +301,8 @@ protected:
 public:
 
 	bool OpenHistory(QString* pFileNameOut = NULL);
+	void LoadHistoryFile(QString tmpPath);
+
 	QTextStream* StreamHistory = NULL;
 	QFile* fileHistory=NULL;
 

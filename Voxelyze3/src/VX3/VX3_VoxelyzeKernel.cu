@@ -84,7 +84,7 @@ void VX3_VoxelyzeKernel::cleanup() {
     MycudaFree(d_linkMats);
     MycudaFree(d_voxels);
     MycudaFree(d_links);
-    MycudaFree(d_collisionsStale);
+    // MycudaFree(d_collisionsStale);
     if (d_surface_voxels) {
         MycudaFree(d_surface_voxels); //can __device__ malloc pointer be freed by cudaFree in __host__??
     }
@@ -95,6 +95,8 @@ void VX3_VoxelyzeKernel::cleanup() {
 
 __device__ void VX3_VoxelyzeKernel::syncVectors() {
     d_v_linkMats.clear();
+    d_v_collisions.clear();
+
     for (int i=0;i<hd_v_linkMats.size();i++) {
         d_v_linkMats.push_back(hd_v_linkMats[i]);
     }
@@ -178,21 +180,23 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
 
     int blockSize;
     int minGridSize;
-    cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_force, 0, d_v_links.size()); //Dynamically calculate blockSize
-    int gridSize_links = (d_v_links.size() + blockSize - 1) / blockSize; 
-    int blockSize_links = d_v_links.size()<blockSize ? d_v_links.size() : blockSize;
-    // printf("gpu_update_force<<<%d,%d>>>(...,%d);\n", gridSize_links, blockSize_links, d_v_links.size());
-    gpu_update_force<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
-    CUDA_CHECK_AFTER_CALL();
-    cudaDeviceSynchronize();
+    if (d_v_links.size()) {
+        cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_force, 0, d_v_links.size()); //Dynamically calculate blockSize
+        int gridSize_links = (d_v_links.size() + blockSize - 1) / blockSize; 
+        int blockSize_links = d_v_links.size()<blockSize ? d_v_links.size() : blockSize;
+        // printf("gpu_update_force<<<%d,%d>>>(...,%d);\n", gridSize_links, blockSize_links, d_v_links.size());
+        gpu_update_force<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
+        CUDA_CHECK_AFTER_CALL();
+        cudaDeviceSynchronize();
 
-    for (int i = 0; i<d_v_links.size(); i++){
-        if (d_v_links[i]->axialStrain() > 100){
-            CUDA_DEBUG_LINE("Diverged.");
-            Diverged = true; //catch divergent condition! (if any thread sets true we will fail, so don't need mutex...
+        for (int i = 0; i<d_v_links.size(); i++){
+            if (d_v_links[i]->axialStrain() > 100){
+                CUDA_DEBUG_LINE("Diverged.");
+                Diverged = true; //catch divergent condition! (if any thread sets true we will fail, so don't need mutex...
+            }
         }
+        if (Diverged) return false;
     }
-    if (Diverged) return false;
 
     if (enableAttach) updateAttach();
 
@@ -293,30 +297,153 @@ __global__ void gpu_update_temperature(VX3_Voxel* voxels, int num, double TempAm
         // t->setTemperature(0.0f);
     }
 }
+__device__ bool is_neighbor(VX3_Voxel* voxel1, VX3_Voxel* voxel2, VX3_Link* incoming_link, int depth) {
+    // printf("Checking (%d,%d,%d) and (%d,%d,%d) in depth %d.\n", 
+    //             voxel1->ix, voxel1->iy, voxel1->iz,
+    //             voxel2->ix, voxel2->iy, voxel2->iz, depth);
+    if (voxel1==voxel2) {
+        // printf("found.\n");
+        return true;
+    }
+    if (depth<=0) { //cannot find in depth
+        // printf("not found.\n");
+        return false;
+    }
+    for (int i=0;i<6;i++) {
+        if (voxel1->links[i]) {
+            if (voxel1->links[i]!=incoming_link) {
+                if (voxel1->links[i]->pVNeg == voxel1) {
+                    if (is_neighbor(voxel1->links[i]->pVPos, voxel2, voxel1->links[i], depth-1)) {
+                        return true;
+                    }
+                } else {
+                    if (is_neighbor(voxel1->links[i]->pVNeg, voxel2, voxel1->links[i], depth-1)) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    // printf("not found.\n");
+    return false;
+}
 __global__ void gpu_update_attach(VX3_Voxel** surface_voxels, int num, double watchDistance, VX3_VoxelyzeKernel* k) {
     int first = threadIdx.x + blockIdx.x * blockDim.x; 
     int second = threadIdx.y + blockIdx.y * blockDim.y; 
     if (first<num && second<first) {
         VX3_Voxel* voxel1 = surface_voxels[first];
         VX3_Voxel* voxel2 = surface_voxels[second];
-        double diffx = voxel1->pos.x - voxel2->pos.x;
-        double diffy = voxel1->pos.y - voxel2->pos.y;
-        double diffz = voxel1->pos.z - voxel2->pos.z;
-        if (diffx>watchDistance || diffx<-watchDistance) return;
-        if (diffy>watchDistance || diffy<-watchDistance) return;
-        if (diffz>watchDistance || diffz<-watchDistance) return;
-        //to exclude voxels already have link between them.
-        for (int i=0;i<6;i++) {
-            if (voxel1->links[i]) {
-                if (voxel1->links[i]->pVNeg == voxel2 || voxel1->links[i]->pVPos == voxel2) return;
+        VX3_Vec3D<double> diff = voxel1->pos - voxel2->pos;
+        watchDistance = 0.5*(voxel1->baseSize(X_AXIS) + voxel2->baseSize(X_AXIS)) * watchDistance;
+
+        if (diff.x>watchDistance || diff.x<-watchDistance) return;
+        if (diff.y>watchDistance || diff.y<-watchDistance) return;
+        if (diff.z>watchDistance || diff.z<-watchDistance) return;
+        
+        if (diff.Length() > watchDistance) return;
+        
+        //to exclude voxels already have link between them. check in depth of 1, direct neighbor ignore the collision
+        if (is_neighbor(voxel1, voxel2, NULL, 1)) {
+            return ;
+        }
+        //calculate and store contact force, apply and clean in VX3_Voxel::force()
+        VX3_Collision collision(voxel1, voxel2);
+        collision.updateContactForce();
+        voxel1->contactForce += collision.contactForce(voxel1);
+        voxel2->contactForce += collision.contactForce(voxel2);
+        
+        //to exclude voxels already have link between them. check in depth 5. closely connected part ignore the link creation.
+        if (is_neighbor(voxel1, voxel2, NULL, 5)) {
+            return ;
+        }
+
+        //determine relative position
+        linkDirection link_dir_1, link_dir_2;
+        linkAxis link_axis;
+        //TODO: need to consider a and b. Quaternions! now assuming a and b are (1,0,0,0).
+        auto a = voxel1->orientation();
+        auto b = voxel2->orientation();
+        auto c = voxel1->position();
+        auto d = voxel2->position();
+        auto e = c-d;
+        auto ea = a.RotateVec3DInv(e);
+        auto eb = b.RotateVec3DInv(-e);
+
+        //first find which is the dominant axis, then determine which one is neg which one is pos.
+        VX3_Vec3D<double> f;
+        f = ea.Abs();
+        if (f.x > f.y && f.x > f.z) { //X_AXIS
+            link_axis = X_AXIS;
+            if (ea.x>0) {
+                link_dir_1 = X_NEG;
+            } else {
+                link_dir_1 = X_POS;
+            }
+        } else if (f.y > f.x && f.y > f.z) { //Y_AXIS
+            link_axis = Y_AXIS;
+            if (ea.y>0) {
+                link_dir_1 = Y_NEG;
+            } else {
+                link_dir_1 = Y_POS;
+            }
+        } else { //Z_AXIS
+            link_axis = Z_AXIS;
+            if (ea.z>0) { //voxel1 is on top
+                link_dir_1 = Z_NEG;
+            } else {
+                link_dir_1 = Z_POS;
             }
         }
-        //create a link between voxel1 and voxel2 (orientation matters?)
-        VX3_MaterialLink* mat = k->combinedMaterial(voxel1->material(), voxel2->material());
-		VX3_Link* pL = new VX3_Link(voxel1, voxel2, mat); //make the new link (change to both materials, etc.
-    
-        k->d_v_links.push_back(pL);							//add to the list
-
-        printf("hmmm.... %p %p distance=> %f %f %f\n", voxel1, voxel2, diffx, diffy, diffz);
+        f = eb.Abs();
+        if (f.x > f.y && f.x > f.z) { //X_AXIS
+            if (eb.x>0) {
+                link_dir_2 = X_NEG;
+            } else {
+                link_dir_2 = X_POS;
+            }
+        } else if (f.y > f.x && f.y > f.z) { //Y_AXIS
+            if (eb.y>0) {
+                link_dir_2 = Y_NEG;
+            } else {
+                link_dir_2 = Y_POS;
+            }
+        } else { //Z_AXIS
+            if (eb.z>0) { //voxel1 is on top
+                link_dir_2 = Z_NEG;
+            } else {
+                link_dir_2 = Z_POS;
+            }
+        }
+        
+        // order of link matters! wrong order will cause Diverge!
+        bool forbidden = false;
+        bool reverseOrder = false;
+        if (link_dir_1%2==0) {
+            if (link_dir_2%2==1) {
+                reverseOrder = true;
+            } else {
+                forbidden = true;
+            }
+        } else {
+            if (link_dir_2%2==1) {
+                forbidden = true;
+            }
+        }
+        if (forbidden) return; //cannot add two links with both POS or NEG TODO: need to solve this.
+        //Create only when there's a place to attach
+        if (voxel1->links[link_dir_1]==NULL && voxel2->links[link_dir_2]==NULL) {
+            VX3_Link* pL;
+            if (!reverseOrder) {
+                pL = new VX3_Link(voxel1, link_dir_1, voxel2, link_dir_2, link_axis, k); //make the new link (change to both materials, etc.
+            } else {
+                pL = new VX3_Link(voxel2, link_dir_2, voxel1, link_dir_1, link_axis, k); //make the new link (change to both materials, etc.
+            }
+            k->d_v_links.push_back(pL);							//add to the list
+            printf("createLink.... %p %p distance=> %f %f %f (%f), watchDistance %f.\n", voxel1, voxel2, diff.x, diff.y, diff.z, diff.Length(), watchDistance);
+            printf("newLink: rest %f.\n", pL->currentRestLength);
+            printf("between (%d,%d,%d) and (%d,%d,%d).\n", 
+            voxel1->ix, voxel1->iy, voxel1->iz,
+            voxel2->ix, voxel2->iy, voxel2->iz);
+        }
     }
 }

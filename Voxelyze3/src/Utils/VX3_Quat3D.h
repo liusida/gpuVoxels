@@ -11,7 +11,9 @@ Voxelyze is free software: you can redistribute it and/or modify it under the te
 Voxelyze is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 See <http://www.opensource.org/licenses/lgpl-3.0.html> for license details.
 *******************************************************************************/
-
+//
+// Learning resource: refer to https://eater.net/quaternions/video/intro , The visualization and tutorial on Quanernions.
+//
 #include <math.h>
 #include <float.h>
 #include "Quat3D.h"
