@@ -418,19 +418,19 @@ __global__ void gpu_update_attach(VX3_Voxel** surface_voxels, int num, double wa
         // order of link matters! wrong order will cause Diverge!
         bool forbidden = false;
         bool reverseOrder = false;
-        if (link_dir_1%2==0) {
-            if (link_dir_2%2==1) {
+        if (link_dir_1%2==0) { //link_dir_1 is POS
+            if (link_dir_2%2==1) { //link_dir_2 is NEG
                 reverseOrder = true;
-            } else {
+            } else { //two POSs
                 forbidden = true;
             }
         } else {
-            if (link_dir_2%2==1) {
+            if (link_dir_2%2==1) { //two NEGs
                 forbidden = true;
             }
         }
         if (forbidden) return; //cannot add two links with both POS or NEG TODO: need to solve this.
-        //Create only when there's a place to attach
+        // Create only when there's a right place to attach
         if (voxel1->links[link_dir_1]==NULL && voxel2->links[link_dir_2]==NULL) {
             VX3_Link* pL;
             if (!reverseOrder) {
@@ -442,8 +442,8 @@ __global__ void gpu_update_attach(VX3_Voxel** surface_voxels, int num, double wa
             printf("createLink.... %p %p distance=> %f %f %f (%f), watchDistance %f.\n", voxel1, voxel2, diff.x, diff.y, diff.z, diff.Length(), watchDistance);
             printf("newLink: rest %f.\n", pL->currentRestLength);
             printf("between (%d,%d,%d) and (%d,%d,%d).\n", 
-            voxel1->ix, voxel1->iy, voxel1->iz,
-            voxel2->ix, voxel2->iy, voxel2->iz);
+                                voxel1->ix, voxel1->iy, voxel1->iz,
+                                voxel2->ix, voxel2->iy, voxel2->iz);
         }
     }
 }
