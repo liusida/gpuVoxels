@@ -116,7 +116,10 @@ class CVX_Material {
 	int b; //!< Blue color value of this material from 0-255. Default is -1 (invalid/not set).
 	int a; //!< Alpha value of this material from 0-255. Default is -1 (invalid/not set).
 
+	int matid;
+
 	//material model
+	bool fixed;
 	bool linear; //!< Set to true if this material is specified as linear.
 	float E; //!< Young's modulus (stiffness) in Pa.
 	float sigmaYield; //!< Yield stress in Pa.

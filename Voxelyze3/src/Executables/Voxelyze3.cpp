@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
             if (fs::is_regular_file(locally/vxr)) {
                 fs::copy_file(locally/vxr, output, fs::copy_option::overwrite_if_exists);
             } else {
-                printf("File not exist: %s.\n", (locally/vxr).c_str());
+                printf("File not exist: %s. Worker failed to finish the job.\n", (locally/vxr).c_str());
             }
         } catch(...) {
             printf("ERROR: Failed to copy result file: %s.\n", (locally/vxr).c_str());

@@ -1177,6 +1177,8 @@ CVXC_Material& CVXC_Material::operator=(const CVXC_Material& RefMat)
 	Blue = RefMat.Blue;
 	Alpha = RefMat.Alpha;
 
+	Fixed = RefMat.Fixed;
+
 	Elastic_Mod = RefMat.Elastic_Mod;
 	Plastic_Mod = RefMat.Plastic_Mod;
 	Yield_Stress = RefMat.Yield_Stress;
@@ -1399,6 +1401,7 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 					pXML->UpLevel();
 
 				}
+				if (!pXML->FindLoadElement("Fixed", &Fixed)) Fixed = 0;
 				if (!pXML->FindLoadElement("Elastic_Mod", &Elastic_Mod)) Elastic_Mod = 0;
 				if (!pXML->FindLoadElement("Plastic_Mod", &Plastic_Mod)) Plastic_Mod = 0;
 				if (!pXML->FindLoadElement("Yield_Stress", &Yield_Stress)) Yield_Stress = 0;

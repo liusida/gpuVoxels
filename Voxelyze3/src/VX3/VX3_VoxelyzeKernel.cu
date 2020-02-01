@@ -15,11 +15,14 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim* In) {
     num_d_voxelMats = In->Vx.voxelMats.size();
     VcudaMalloc((void **)&d_voxelMats, num_d_voxelMats * sizeof(VX3_MaterialVoxel));
     {
+        // push all h first, since there will be reference below
+        for (auto mat: In->Vx.voxelMats) {
+            h_voxelMats.push_back(mat);
+        }
         int i=0;
         for (auto mat: In->Vx.voxelMats) {
             VX3_MaterialVoxel tmp_voxelMat( mat, this );
             VcudaMemcpy( d_voxelMats+i, &tmp_voxelMat, sizeof(VX3_MaterialVoxel), VcudaMemcpyHostToDevice );
-            h_voxelMats.push_back(mat);
             i++;
         }
     }
@@ -283,6 +286,7 @@ __global__ void gpu_update_voxel(VX3_Voxel* voxels, int num, double dt) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x; 
     if (gindex < num) {
         VX3_Voxel* t = &voxels[gindex];
+        if (t->mat->fixed) return; //fixed voxels, no need to update position
         t->timeStep(dt);
     }
 }
@@ -292,6 +296,7 @@ __global__ void gpu_update_temperature(VX3_Voxel* voxels, int num, double TempAm
     if (gindex < num) {
     //vfloat tmp = pEnv->GetTempAmplitude() * sin(2*3.1415926f*(CurTime/pEnv->GetTempPeriod() + pV->phaseOffset)) - pEnv->GetTempBase();
         VX3_Voxel* t = &voxels[gindex];
+        if (t->mat->fixed) return; //fixed voxels, no need to update temperature
         double currentTemperature = TempAmplitude*sin(2*3.1415926f*(currentTime/TempPeriod + t->phaseOffset));	//update the global temperature
         t->setTemperature(currentTemperature);
         // t->setTemperature(0.0f);
@@ -351,7 +356,10 @@ __global__ void gpu_update_attach(VX3_Voxel** surface_voxels, int num, double wa
         collision.updateContactForce();
         voxel1->contactForce += collision.contactForce(voxel1);
         voxel2->contactForce += collision.contactForce(voxel2);
-        
+
+        // fixed voxels, no need to look further for attachment
+        if (voxel1->mat->fixed || voxel2->mat->fixed) return; 
+
         //to exclude voxels already have link between them. check in depth 5. closely connected part ignore the link creation.
         if (is_neighbor(voxel1, voxel2, NULL, 5)) {
             return ;

@@ -35,7 +35,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                 printf(COLORCODE_BOLD_RED "\n%d) Simulation %d Diverged: %s.\n" COLORCODE_RESET, device_index, i, d_v3->vxa_filename);
                 break;
             }
-            if (d_v3->RecordStepSize) {
+            if (d_v3->RecordStepSize) { // output History file
                 if (j%d_v3->RecordStepSize==0) {
                     printf("<<<%d>>>",j);
                     for (int i=0;i<d_v3->num_d_voxels;i++) {
@@ -46,6 +46,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                         nnn = v.cornerOffset(NNN);
                         ppp = v.cornerOffset(PPP);
                         printf("%f,%f,%f,%f,%f,%f,",nnn.x,nnn.y,nnn.z, ppp.x,ppp.y,ppp.z );
+                        printf("%d,",v.mat->matid); //for coloring
                         printf(";");
                     }
                     printf("<<<>>>\n");

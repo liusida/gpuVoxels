@@ -85,6 +85,7 @@ bool CVX_Sim::Import(CVX_Environment* pEnvIn, CMesh* pSurfMeshIn, std::string* R
 		VxcToVx2MatIndexMap[i-1]->setInternalDamping(BondDampingZ);
 		VxcToVx2MatIndexMap[i-1]->setGlobalDamping(SlowDampingZ);
 		VxcToVx2MatIndexMap[i-1]->setCollisionDamping(ColDampingZ);
+		VxcToVx2MatIndexMap[i-1]->matid = i;
 
 		muMemory.push_back(LocalVXC.GetBaseMat(i)->GetPoissonsRatio()); //remember for toggleing volume effects on and off.
 	}
@@ -293,6 +294,7 @@ bool CVX_Sim::IsFeatureEnabled(const int VXSFEAT)
 
 void CVX_Sim::CopyMat(CVXC_Material* pOld, CVX_Material* pNew) //copies parameters from pOld to pNew
 {
+	pNew->fixed = (bool)pOld->Fixed;
 	pNew->setName(pOld->GetName().c_str());
 	pNew->setColor(pOld->GetRedi(), pOld->GetGreeni(), pOld->GetBluei(), pOld->GetAlphai());
 	switch (pOld->GetMatModel()){

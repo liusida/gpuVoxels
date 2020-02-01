@@ -243,7 +243,18 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
 			if (!line.isNull()) {
 				int j = 0;
 				if ((j=line.indexOf(">>>"))!=-1) {
-					CColor ThisColor = CColor(0.4f, 0.4f, 0.9f, 0.8f);
+					CColor colorMap[10];
+					colorMap[0] = CColor(0.9f, 0.2f, 0.29f, 0.8f);
+					colorMap[1] = CColor(0.6f, 0.6f, 0.5f, 0.8f);
+					colorMap[2] = CColor(0.85f, 0.75f, 0.24f, 0.8f);
+					colorMap[3] = CColor(0.41f, 0.73f, 0.49f, 0.8f);
+					colorMap[4] = CColor(0.30f, 0.70f, 0.37f, 0.8f);
+					colorMap[5] = CColor(0.17f, 0.23f, 0.20f, 0.8f);
+					colorMap[6] = CColor(0.35f, 0.56f, 0.39f, 0.8f);
+					colorMap[7] = CColor(0.82f, 0.61f, 0.49f, 0.8f);
+					colorMap[8] = CColor(0.85f, 0.76f, 0.39f, 0.8f);
+					colorMap[9] = CColor(0.97f, 0.55f, 0.19f, 0.8f);
+					
 
 					QString mline = line.mid(j+3, line.length()-j-10);
 					QStringList voxel = mline.split(";");
@@ -251,6 +262,7 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
 					Vec3D<> v1, v2;
 					double p1, p2, p3;
 					double angle, r1, r2, r3;
+					int matid;
 					for (int i=0;i<voxel.size();i++) {
 						glPushMatrix();
 						pos = voxel[i].split(",");
@@ -272,10 +284,12 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
 						ppp.x = pos[10].toDouble();
 						ppp.y = pos[11].toDouble();
 						ppp.z = pos[12].toDouble();
+						matid = pos[13].toInt();
+						if (matid<0 || matid>=10) {matid=0;}
 						
 						glTranslated(p1, p2, p3);
 						glRotated(angle, r1, r2, r3);
-						CGL_Utils::DrawCube(nnn*ScaleVox, ppp*ScaleVox, true, true, 1.0, ThisColor);
+						CGL_Utils::DrawCube(nnn*ScaleVox, ppp*ScaleVox, true, true, 1.0, colorMap[matid]);
 						glPopMatrix();
 					}
 					currentHistoryLine = line;
