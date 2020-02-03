@@ -15,7 +15,6 @@ data/batch/*.vxd
 *.history
 bin
 core.*
-data/*
 
 # Prerequisites
 *.d
