@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(VoxCAD LANGUAGES CXX)
-
+include_directories(/usr/include)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
