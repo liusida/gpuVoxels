@@ -466,7 +466,9 @@ public:
 	* MaterialTemp - local storage of the temperature of each material (units in degrees C)
 	* MaterialTempPhase - the relative response phase of the temperature change of each material - allows certain materials to heat up before other to get more complicated movements (units in radians)
 	*/
+	int matid=0;
 	int Fixed=0;
+	int sticky=0;
 	vfloat Density, Elastic_Mod, Yield_Stress, Plastic_Mod, Fail_Stress, Fail_Strain, Poissons_Ratio, CTE, CurMaterialTemp, MaterialTempPhase, uStatic, uDynamic;
 	std::vector<vfloat> DStress, DStrain; //arbitrary stress/strain values for material model (in tension only for now)
 

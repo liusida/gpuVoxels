@@ -359,8 +359,9 @@ __global__ void gpu_update_attach(VX3_Voxel** surface_voxels, int num, double wa
 
         // fixed voxels, no need to look further for attachment
         if (voxel1->mat->fixed || voxel2->mat->fixed) return; 
-        // different material, no need to attachment
+        // different material, no need to attach
         if (voxel1->mat != voxel2->mat) return;
+        if (!voxel1->mat->sticky) return;
 
         //to exclude voxels already have link between them. check in depth 5. closely connected part ignore the link creation.
         if (is_neighbor(voxel1, voxel2, NULL, 5)) {

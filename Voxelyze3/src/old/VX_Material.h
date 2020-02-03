@@ -119,7 +119,8 @@ class CVX_Material {
 	int matid;
 
 	//material model
-	bool fixed;
+	bool fixed = false;
+	bool sticky = false;
 	bool linear; //!< Set to true if this material is specified as linear.
 	float E; //!< Young's modulus (stiffness) in Pa.
 	float sigmaYield; //!< Yield stress in Pa.

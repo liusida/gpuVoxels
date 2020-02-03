@@ -1177,7 +1177,9 @@ CVXC_Material& CVXC_Material::operator=(const CVXC_Material& RefMat)
 	Blue = RefMat.Blue;
 	Alpha = RefMat.Alpha;
 
+	matid = RefMat.matid;
 	Fixed = RefMat.Fixed;
+	sticky = RefMat.sticky;
 
 	Elastic_Mod = RefMat.Elastic_Mod;
 	Plastic_Mod = RefMat.Plastic_Mod;
@@ -1358,7 +1360,7 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 {
 	DStrain.clear();
 	DStress.clear();
-
+	pXML->GetElAttribute("ID", &matid);
 	if (!pXML->FindLoadElement("MatType", &MatType)){ //if there's not a MatType tag, we need some detective work...
 		if (pXML->FindElement("Structure")) {pXML->UpLevel(); MatType = INTERNAL;}
 		if (pXML->FindElement("RandIndex1")) {pXML->UpLevel(); MatType = DITHER;}
@@ -1402,6 +1404,7 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 
 				}
 				if (!pXML->FindLoadElement("Fixed", &Fixed)) Fixed = 0;
+				if (!pXML->FindLoadElement("Sticky", &sticky)) sticky = 0;
 				if (!pXML->FindLoadElement("Elastic_Mod", &Elastic_Mod)) Elastic_Mod = 0;
 				if (!pXML->FindLoadElement("Plastic_Mod", &Plastic_Mod)) Plastic_Mod = 0;
 				if (!pXML->FindLoadElement("Yield_Stress", &Yield_Stress)) Yield_Stress = 0;

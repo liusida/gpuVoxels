@@ -28,6 +28,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         //
         d_v3->updateCurrentCenterOfMass();
         d_v3->initialCenterOfMass = d_v3->currentCenterOfMass;
+        printf("recommendedTimeStep(): %f .\n",d_v3->recommendedTimeStep());
         // printf("Initial CoM: %f %f %f mm\n", d_v3->initialCenterOfMass.x*1000, d_v3->initialCenterOfMass.y*1000, d_v3->initialCenterOfMass.z*1000);
         for (int j=0;j<1000000;j++) { //Maximum Steps 1000000
             if (d_v3->StopConditionMet()) break;
