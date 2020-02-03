@@ -36,7 +36,7 @@ print(control.shape , morphology.shape)
 # print(morphology)
 
 sticky_robot = morphology.copy()
-sticky_robot[sticky_robot==9]=3 # defined in vxa material
+sticky_robot[sticky_robot==9]=2 # defined in vxa material
 robot = morphology.copy()
 robot[robot==9]=4 # defined in vxa material
 
@@ -44,12 +44,12 @@ x = 20
 y = 20
 z = 6
 world_morphology = np.zeros(shape=(z,x,y), dtype=int)
-# world_morphology[1:,-6:,-13:-7] = sticky_robot
+world_morphology[1:,-6:,-13:-7] = sticky_robot
 world_morphology[1:,-6:,-6:] = robot
 
 world_control = np.zeros(shape=(z,x,y), dtype=float)
-world_control[1:,-6:,-6:] = control
 world_control[1:,-6:,-13:-7] = control
+world_control[1:,-6:,-6:] = control
 
 world_morphology[0,:5,:] = 1 # floor
 world_morphology[1,0,5] = 2 # sticky cell on the ground, default phaseoffset=0
@@ -68,7 +68,7 @@ etree.SubElement(AttachDetach, 'watchDistance').text = '1'
 # Enable Record History
 RecordHistory = etree.SubElement(root, "RecordHistory")
 RecordHistory.set('replace', 'VXA.Simulator.RecordHistory')
-etree.SubElement(RecordHistory, "RecordStepSize").text = '150'
+etree.SubElement(RecordHistory, "RecordStepSize").text = '100'
 # Stop Condition 2 sec
 StopConditionValue = etree.SubElement(root, "StopConditionValue")
 StopConditionValue.set('replace', 'VXA.Simulator.StopCondition.StopConditionValue')
@@ -99,14 +99,14 @@ from mpl_toolkits.mplot3d import Axes3D
 fig = plt.figure()
 ax = plt.axes(projection='3d')
 
-print(world_morphology.shape)
+print(world_control.shape)
 xs=[]
 ys=[]
 zs=[]
-for x in range(world_morphology.shape[0]):
-    for y in range(world_morphology.shape[1]):
-        for z in range(world_morphology.shape[2]):
-            if (world_morphology[x,y,z]>0):
+for x in range(world_control.shape[0]):
+    for y in range(world_control.shape[1]):
+        for z in range(world_control.shape[2]):
+            if (world_control[x,y,z]>0):
                 xs.append(x)
                 ys.append(y)
                 zs.append(z)

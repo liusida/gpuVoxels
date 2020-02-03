@@ -28,7 +28,8 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         //
         d_v3->updateCurrentCenterOfMass();
         d_v3->initialCenterOfMass = d_v3->currentCenterOfMass;
-        printf("recommendedTimeStep(): %f .\n",d_v3->recommendedTimeStep());
+        int real_stepsize = int(d_v3->RecordStepSize / (10000 * d_v3->recommendedTimeStep() * d_v3->DtFrac));
+        printf("real_stepsize: %d ; recommendedTimeStep %f; d_v3->DtFrac %f . \n", real_stepsize, d_v3->recommendedTimeStep(), d_v3->DtFrac);
         // printf("Initial CoM: %f %f %f mm\n", d_v3->initialCenterOfMass.x*1000, d_v3->initialCenterOfMass.y*1000, d_v3->initialCenterOfMass.z*1000);
         for (int j=0;j<1000000;j++) { //Maximum Steps 1000000
             if (d_v3->StopConditionMet()) break;
@@ -37,7 +38,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                 break;
             }
             if (d_v3->RecordStepSize) { // output History file
-                if (j%d_v3->RecordStepSize==0) {
+                if (j%real_stepsize==0) {
                     printf("<<<%d>>>",j);
                     for (int i=0;i<d_v3->num_d_voxels;i++) {
                         auto &v = d_v3->d_voxels[i];
