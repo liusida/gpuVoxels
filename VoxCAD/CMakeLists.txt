@@ -66,7 +66,7 @@ if (GLUT_FOUND)
     target_link_libraries(VoxCAD PRIVATE ${GLUT_LIBRARIES} glut)
 endif()
 
-find_package(glm CONFIG REQUIRED) # glm
+find_package(GLM CONFIG REQUIRED) # glm
 if (GLM_FOUND)
     message(STATUS "GLM FOUND")
     target_include_directories(VoxCAD PRIVATE ${GLM_INCLUDE_DIRS})
