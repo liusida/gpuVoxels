@@ -25,6 +25,9 @@ add_executable(VoxCAD VoxCad.qrc ${VOXCAD_MAIN_SRC} ${VX2_SRC} ${VX1_SRC} ${QTUT
 
 add_definitions(-DQT_XML_LIB -DQT_OPENGL_LIB -DUSE_ZLIB_COMPRESSION -DUSE_OPEN_GL -DQT_DLL -DPREC_MED -DUSE_OMP)
 
+# Add module path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 target_include_directories(VoxCAD PUBLIC ${VOXCAD_MAIN} ${VX2}/include ${VX1} ${QTUTILS})
 find_package(Qt5 COMPONENTS Core Gui Xml OpenGL Concurrent Widgets REQUIRED)
 target_link_libraries(VoxCAD PRIVATE Qt5::Core Qt5::Gui Qt5::Xml Qt5::OpenGL Qt5::Concurrent Qt5::Widgets)
@@ -63,16 +66,11 @@ if (GLUT_FOUND)
     target_link_libraries(VoxCAD PRIVATE ${GLUT_LIBRARIES} glut)
 endif()
 
-# lower cmake version cannot find glm, set path manually
-SET(glm_DIR
-    "/usr/include"
-    "/usr/local/include")
-
 find_package(glm CONFIG REQUIRED) # glm
-if (glm_FOUND)
+if (GLM_FOUND)
     message(STATUS "GLM FOUND")
-    target_include_directories(VoxCAD PRIVATE ${glm_INCLUDE_DIRS})
-    target_link_libraries(VoxCAD PRIVATE ${glm_LIBRARIES} glm)
+    target_include_directories(VoxCAD PRIVATE ${GLM_INCLUDE_DIRS})
+    target_link_libraries(VoxCAD PRIVATE ${GLM_LIBRARIES} GLM)
 endif()
 
 

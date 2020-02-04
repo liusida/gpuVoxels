@@ -24,7 +24,14 @@ sudo apt install -y gcc-8 g++-8
 # change default g++ to g++-8 (Compilers)
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 10
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 10
-# install cmake 3.5+ (Building tool)
+# install cmake 3.16 (Building tool)
+wget https://github.com/Kitware/CMake/releases/download/v3.16.3/cmake-3.16.3-Linux-x86_64.tar.gz
+tar -xf cmake-3.16.3-Linux-x86_64.tar.gz
+cd cmake-3.16.3-Linux-x86_64
+sudo cp bin /usr/ -r
+sudo cp man /usr/share/ -r
+sudo cp share /usr/ -r
+
 sudo apt install cmake
 # install boost (C++ common library)
 sudo apt install libboost-all-dev
