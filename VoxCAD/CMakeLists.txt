@@ -64,7 +64,7 @@ if (GLUT_FOUND)
 endif()
 
 # lower cmake version cannot find glm, set path manually
-SET(_glm_HEADER_SEARCH_DIRS
+SET(glm_DIR
     "/usr/include"
     "/usr/local/include")
 
