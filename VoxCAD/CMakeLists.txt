@@ -63,6 +63,11 @@ if (GLUT_FOUND)
     target_link_libraries(VoxCAD PRIVATE ${GLUT_LIBRARIES} glut)
 endif()
 
+# lower cmake version cannot find glm, set path manually
+SET(_glm_HEADER_SEARCH_DIRS
+    "/usr/include"
+    "/usr/local/include")
+
 find_package(glm CONFIG REQUIRED) # glm
 if (glm_FOUND)
     message(STATUS "GLM FOUND")

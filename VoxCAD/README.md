@@ -21,17 +21,17 @@ cd build
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 sudo apt update
 sudo apt install -y gcc-8 g++-8 
-# change default g++ to g++-8
+# change default g++ to g++-8 (Compilers)
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 10
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 10
-# install cmake 3.5+
+# install cmake 3.5+ (Building tool)
 sudo apt install cmake
-# install boost
+# install boost (C++ common library)
 sudo apt install libboost-all-dev
-
-# install 
-wget https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2.tar.gz
-tar -xf cmake-3.16.2.tar.gz
-cd cmake-3.16.2
-./bootstrap --parallel=10 
+# install qt5 (GUI Window)
+sudo apt-get install qt5-default
+# install GLFW3 GLUT GLM (OpenGL related)
+sudo apt install libglfw3-dev
+sudo apt install freeglut3-dev
+sudo apt install libglm-dev
 ```
