@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 
 project(VoxCAD LANGUAGES CXX)
 include_directories(/usr/include)
@@ -23,7 +23,7 @@ file(GLOB QTUTILS_SRC ${QTUTILS}/*.c* ${QTUTILS}/*.h)
 
 add_executable(VoxCAD VoxCad.qrc ${VOXCAD_MAIN_SRC} ${VX2_SRC} ${VX1_SRC} ${QTUTILS_SRC})
 
-add_compile_definitions(QT_XML_LIB QT_OPENGL_LIB USE_ZLIB_COMPRESSION USE_OPEN_GL QT_DLL PREC_MED USE_OMP)
+add_definitions(-DQT_XML_LIB -DQT_OPENGL_LIB -DUSE_ZLIB_COMPRESSION -DUSE_OPEN_GL -DQT_DLL -DPREC_MED -DUSE_OMP)
 
 target_include_directories(VoxCAD PUBLIC ${VOXCAD_MAIN} ${VX2}/include ${VX1} ${QTUTILS})
 find_package(Qt5 COMPONENTS Core Gui Xml OpenGL Concurrent Widgets REQUIRED)

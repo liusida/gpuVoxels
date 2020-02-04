@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.12.0)
 project(Voxelyze VERSION 0.1.0)
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
@@ -8,4 +8,4 @@ add_executable(Voxelyze main.cpp ${SRC})
 
 target_include_directories(Voxelyze PUBLIC ${INCLUDE_DIR})
 
-add_compile_definitions(USE_OMP)
+add_definitions(-DUSE_OMP)
