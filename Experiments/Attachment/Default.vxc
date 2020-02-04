@@ -43,21 +43,16 @@
       </Mechanical>
     </Material>
   </Palette>
-  <Structure Compression="ZLIB">
-    <X_Voxels>10</X_Voxels>
-    <Y_Voxels>10</Y_Voxels>
-    <Z_Voxels>10</Z_Voxels>
-    <Data>
-      <Layer><![CDATA[eJxjZKA9AAAAyAAC]]></Layer>
-      <Layer><![CDATA[eJxjYKA9AAAAZAAB]]></Layer>
-      <Layer><![CDATA[eJxjYKA9AAAAZAAB]]></Layer>
-      <Layer><![CDATA[eJxjYKA9AAAAZAAB]]></Layer>
-      <Layer><![CDATA[eJxjYKA9AAAAZAAB]]></Layer>
-      <Layer><![CDATA[eJxjYKA9AAAAZAAB]]></Layer>
-      <Layer><![CDATA[eJxjYKA9AAAAZAAB]]></Layer>
-      <Layer><![CDATA[eJxjYKA9AAAAZAAB]]></Layer>
-      <Layer><![CDATA[eJxjYKA9AAAAZAAB]]></Layer>
-      <Layer><![CDATA[eJxjYKA9AAAAZAAB]]></Layer>
-    </Data>
-  </Structure>
+  <Structure Compression="ASCII_READABLE">
+      <X_Voxels>6</X_Voxels>
+      <Y_Voxels>6</Y_Voxels>
+      <Z_Voxels>5</Z_Voxels>
+      <Data>
+        <Layer><![CDATA[110011110011000000000000110011110011]]></Layer>
+        <Layer><![CDATA[110011110011000000000000110011110011]]></Layer>
+        <Layer><![CDATA[111111111111111111111111111111111111]]></Layer>
+        <Layer><![CDATA[111111111111111111111111111111111111]]></Layer>
+        <Layer><![CDATA[111111111111111111111111111111111111]]></Layer>
+      </Data>
+    </Structure>
 </VXC>

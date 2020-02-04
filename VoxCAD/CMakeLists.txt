@@ -23,7 +23,8 @@ file(GLOB QTUTILS_SRC ${QTUTILS}/*.c* ${QTUTILS}/*.h)
 
 add_executable(VoxCAD VoxCad.qrc ${VOXCAD_MAIN_SRC} ${VX2_SRC} ${VX1_SRC} ${QTUTILS_SRC})
 
-add_definitions(-DQT_XML_LIB -DQT_OPENGL_LIB -DUSE_ZLIB_COMPRESSION -DUSE_OPEN_GL -DQT_DLL -DPREC_MED -DUSE_OMP)
+# add_definitions(-DQT_XML_LIB -DQT_OPENGL_LIB -DUSE_ZLIB_COMPRESSION -DUSE_OPEN_GL -DQT_DLL -DPREC_MED -DUSE_OMP)
+add_definitions(-DQT_XML_LIB -DQT_OPENGL_LIB -DUSE_OPEN_GL -DQT_DLL -DPREC_MED -DUSE_OMP)
 
 # Add module path
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -74,6 +75,6 @@ if (glm_FOUND)
 endif()
 
 
-#for zlib
-find_package(ZLIB)
-target_link_libraries(VoxCAD PRIVATE ${ZLIB_LIBRARIES})
+# #for zlib
+# find_package(ZLIB)
+# target_link_libraries(VoxCAD PRIVATE ${ZLIB_LIBRARIES})
