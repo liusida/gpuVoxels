@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12.0)
+cmake_minimum_required(VERSION 3.5.0)
 project(Voxelyze VERSION 0.1.0)
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
