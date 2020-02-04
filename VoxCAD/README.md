@@ -10,12 +10,10 @@ password: 123456
 ```bash
 sudo apt update
 sudo apt upgrade
+# clone the repo
 git clone https://github.com/liusida/gpuVoxels.git
 cd gpuVoxels
 git checkout dev-CUDA-0.1
-cd VoxCAD/
-mkdir build
-cd build
 
 # install gcc g++ 8.0
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
@@ -31,14 +29,23 @@ cd cmake-3.16.3-Linux-x86_64
 sudo cp bin /usr/ -r
 sudo cp man /usr/share/ -r
 sudo cp share /usr/ -r
+sudo mkdir /usr/lib/cmake
+# install glm
+sudo apt install libglm-dev
+cd VoxCAD/
+sudo mkdir /usr/lib/cmake/glm
+cp cmake/* /usr/lib/cmake/glm/ #glm need to be placed manually. wired!
 
-sudo apt install cmake
 # install boost (C++ common library)
 sudo apt install libboost-all-dev
-# install qt5 (GUI Window)
+# install qt5 (Window GUI)
 sudo apt-get install qt5-default
 # install GLFW3 GLUT GLM (OpenGL related)
 sudo apt install libglfw3-dev
 sudo apt install freeglut3-dev
-sudo apt install libglm-dev
+#
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . -j 10
 ```
