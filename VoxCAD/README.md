@@ -1,11 +1,6 @@
-# Install Steps
+# Installation
 
-Ubuntu 16.04 LTS
-
-Install a Ubuntu 16.04 Desktop LTS to VirtualBox
-
-User: voxcad
-password: 123456
+This is an example of installation on a clean Ubuntu 16.04 LTS
 
 ```bash
 sudo apt update
