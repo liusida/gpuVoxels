@@ -14,6 +14,8 @@ data/batch/*.vxd
 bin
 core.*
 data/*/VoxCAD
+data/*/Voxelyze3
+data/*/vx3_node_*
 
 # Prerequisites
 *.d
