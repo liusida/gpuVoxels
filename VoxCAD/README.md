@@ -49,3 +49,5 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . -j 10
 ```
+
+![VoxCAD](https://github.com/liusida/gpuVoxels/blob/dev-CUDA-0.1/doc/misc/VoxCAD.png?raw=true)
