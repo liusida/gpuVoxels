@@ -38,7 +38,8 @@ sudo apt-get install qt5-default
 # install GLFW3 GLUT GLM (OpenGL related)
 sudo apt install libglfw3-dev
 sudo apt install freeglut3-dev
-#
+
+# Finally, ready to build!
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
