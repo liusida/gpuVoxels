@@ -16,11 +16,11 @@ namespace pt = boost::property_tree;
 Thank you for using Voxelyze3. This program should be run on a computer that has GPUs.\n\
 Typical Usage:\n\
 Voxelyze -i <data_path> -o <report_path> -l -f \n\n\
-<data_path> should contain a file named `base.vxa' and multiple files with extension `.vxa'.\n\
-<report_path> is the report file you need to place. If you want to overwrite existing report, add -f flag.\n\
-if the executable `vx3_node_worker' doesn't exist in the same path, use -w <worker> to specify the path.\n\
 Allowed options\
 "
+//<data_path> should contain a file named `base.vxa' and multiple files with extension `.vxa'.\n\
+//<report_path> is the report file you need to place. If you want to overwrite existing report, add -f flag.\n\
+//if the executable `vx3_node_worker' doesn't exist in the same path, use -w <worker> to specify the path.\n\
 
 int main(int argc, char** argv) {
 
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     desc.add_options()
     ("help,h", "produce help message")
     ("locally,l", "If this machine already has GPUs, locally run tasks on this machine.")
-    ("nodes,n", po::value<int>(), "The number of nodes you want to start simultaneously.")
+    ("nodes,n", po::value<int>(), "The number of nodes you want to start simultaneously. (Not implemented.)")
     ("input,i", po::value<std::string>(), "Set input directory path which contains a generation of VXA files.")
     ("output,o", po::value<std::string>(), "Set output file path for report. (e.g. report_1.xml)")
     ("worker,w", po::value<std::string>(), "Specify which worker you want to use. vx3_node_worker by default.")
@@ -39,27 +39,32 @@ int main(int argc, char** argv) {
     po::notify(vm);    
 
     //check parameters
-    if (vm.count("help") || !vm.count("input") || !vm.count("output")) {
+    if (vm.count("help") || !vm.count("input")) {
         std::cout << desc << "\n";
         return 1;
     }
+    bool has_output = (bool)vm.count("output");
+    bool run_locally = true;
     if (vm.count("nodes") && vm.count("locally")) {
         std::cout << "ERROR: -n and -s cannot use together.\n";
         std::cout << desc << "\n";
         return 1;
     }
-    if (!vm.count("nodes") && !vm.count("locally")) {
-        std::cout << "ERROR: must choose to run locally(-l) or envoke nodes to run(-n).\n";
-        std::cout << vm.count("locally");
-        std::cout << desc << "\n";
-        return 1;
+    if (!vm.count("nodes")) {
+        std::cout << "Running simulation locally by default.\n";
+        run_locally = true;
+    } else {
+        run_locally = false;
     }
     fs::path input(vm["input"].as<std::string>());
-    fs::path output(vm["output"].as<std::string>());
-    if (fs::is_regular_file(output) && !vm.count("force") ) {
-        std::cout << "Error: output file exists.\n\n";
-        std::cout << desc << "\n";
-        return 1;
+    fs::path output;
+    if (has_output) {
+        output = fs::path(vm["output"].as<std::string>());
+        if (fs::is_regular_file(output) && !vm.count("force") ) {
+            std::cout << "Error: output file exists.\n\n";
+            std::cout << desc << "\n";
+            return 1;
+        }
     }
     if (!fs::is_directory(input)) {
         std::cout << "Error: input directory not found.\n\n";
@@ -88,7 +93,7 @@ int main(int argc, char** argv) {
     catch(...){}
 
     //Do evocations: locally or distributedly
-    if (vm.count("locally")) { //Produce a vxt file and pass that to vx3_node_worker
+    if (run_locally) { //Produce a vxt file and pass that to vx3_node_worker
         fs::path locally(workspace/"locally");
         try {
             fs::create_directory(locally);
@@ -111,7 +116,9 @@ int main(int argc, char** argv) {
         process_worker.wait();
         try {
             if (fs::is_regular_file(locally/vxr)) {
-                fs::copy_file(locally/vxr, output, fs::copy_option::overwrite_if_exists);
+                if (has_output) {
+                    fs::copy_file(locally/vxr, output, fs::copy_option::overwrite_if_exists);
+                }
             } else {
                 printf("File not exist: %s. Worker failed to finish the job.\n", (locally/vxr).c_str());
             }
