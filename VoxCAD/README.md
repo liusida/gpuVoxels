@@ -1,6 +1,8 @@
 # Installation
 
-This is an example of installation on a clean Ubuntu 16.04 LTS
+This is an example of installing ONLY the VoxCAD on a clean Ubuntu 16.04 LTS.
+
+(Voxelyze3 will need GPU and CUDA, so usually on our laptop, we only need to install VoxCAD.)
 
 ```bash
 sudo apt update
