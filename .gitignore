@@ -16,7 +16,13 @@ core.*
 data/*/VoxCAD
 data/*/Voxelyze3
 data/*/vx3_node_*
+data/**/gen*.vxd
+
 output.xml
+Experiments/*/VoxCAD
+Experiments/*/Voxelyze3
+Experiments/*/vx3_node_*
+Experiments/**/gen*.vxd
 
 # Prerequisites
 *.d
