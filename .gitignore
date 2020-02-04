@@ -16,6 +16,7 @@ core.*
 data/*/VoxCAD
 data/*/Voxelyze3
 data/*/vx3_node_*
+output.xml
 
 # Prerequisites
 *.d
