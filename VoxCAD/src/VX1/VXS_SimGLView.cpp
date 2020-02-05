@@ -266,8 +266,8 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
 					for (int i=0;i<voxel.size();i++) {
 						glPushMatrix();
 						pos = voxel[i].split(",");
-						if (pos.size()<13) {
-							qWarning() << "ERROR: a voxel has pos size is " << pos.size()<<"<13.";
+						if (pos.size()<14) {
+							qWarning() << "ERROR: a voxel has pos size is " << pos.size()<<"<14.";
 							continue;
 						}
 						p1 = pos[0].toDouble();

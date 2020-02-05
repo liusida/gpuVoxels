@@ -3,7 +3,7 @@ TARGET = VoxCAD
 QT += core gui xml opengl concurrent
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += debug
-DEFINES += QT_XML_LIB QT_OPENGL_LIB USE_ZLIB_COMPRESSION USE_OPEN_GL QT_DLL PREC_MED
+DEFINES += QT_XML_LIB QT_OPENGL_LIB USE_OPEN_GL QT_DLL PREC_MED
 INCLUDEPATH += \
     ./src/ui \
     ./src/VX1 \

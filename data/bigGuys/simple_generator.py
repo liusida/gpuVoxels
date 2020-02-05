@@ -1,9 +1,9 @@
 import random
 from lxml import etree
 
-x = 50
-y = 50
-z = 50
+x = 100
+y = 100
+z = 100
 for k in range(1):
     root = etree.Element("VXD")
     RecordHistory = etree.SubElement(root, "RecordHistory")

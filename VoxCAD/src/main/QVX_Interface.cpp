@@ -311,7 +311,7 @@ void QVX_Sim::SimLoop(QString* pSimMessage)
 		emit SimEndedInternally(*pSimMessage);
 		return;
 	}
-
+	if (Vx.voxelCount()==0) return;
 //	Vx.loadJSON("tensile.json");
 //	Vx.saveJSON("tensileSandbox.json");
 
