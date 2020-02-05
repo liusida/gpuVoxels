@@ -64,6 +64,7 @@ public:
     int num_d_links;
     VX3_dVector<VX3_Link*> d_v_links;
     VX3_hdVector<VX3_Link*> hd_v_links;
+    std::map<CVX_Link*, VX3_Link*> h_lookup_links;
 
     std::vector<CVX_Voxel *> h_voxels;
     VX3_Voxel * d_voxels;

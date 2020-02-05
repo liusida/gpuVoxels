@@ -27,6 +27,7 @@ public:
     void collectResults(int num_simulation, int device_index);
     void sortResults();
     void printResults();
+    void enlargeGPUHeapSize();
 
     /* DATA */
     int num_of_devices; //Total number of GPUs on one single node. One DeepGreen node has 8 GPUs.

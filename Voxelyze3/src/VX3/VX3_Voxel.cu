@@ -23,12 +23,13 @@ previousDt(p->previousDt), phaseOffset(p->phaseOffset), isDetached(p->isDetached
 
 	for (unsigned i=0;i<6;i++) {
 		if (p->links[i]) {
-			for (int j=0;j<k->num_d_links;j++) {
-				if (p->links[i] == k->h_links[j]) {
-					links[i] = &k->d_links[j];
-					continue;
-				}
-			}
+			links[i] = k->h_lookup_links[p->links[i]];
+			// for (int j=0;j<k->num_d_links;j++) {
+			// 	if (p->links[i] == k->h_links[j]) {
+			// 		links[i] = &k->d_links[j];
+			// 		continue;
+			// 	}
+			// }
 		} else {
 			links[i] = NULL;
 		}

@@ -203,6 +203,21 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
     //     }
     // }
 
+//GPU Heap is for in-kernel malloc(). Refer to https://stackoverflow.com/a/34795830/7001199
+void VX3_SimulationManager::enlargeGPUHeapSize() {
+    size_t HeapSize = 1;
+    double ratio = 0.1; // make 10% of the total GPU memory to be heap memory
+    size_t free, total;
+    VcudaMemGetInfo(&free, &total);
+    printf("Total GPU memory %ld bytes.\n", total);
+    for (int i=0;i<100;i++) {
+        if (HeapSize>=total*ratio) break;
+        HeapSize *= 2;
+    }
+    HeapSize += 1024; // add some additional size
+    printf("Set GPU heap size to be %ld bytes.\n", HeapSize);
+    VcudaDeviceSetLimit(cudaLimitMallocHeapSize, HeapSize); // Set Heap Memory to 1G, instead of merely 8M.
+}
 
 void VX3_SimulationManager::startKernel(int num_simulation, int device_index) {
     int threadsPerBlock = 512;
@@ -212,6 +227,7 @@ void VX3_SimulationManager::startKernel(int num_simulation, int device_index) {
     // printf("Starting kernel on device %d. passing d_voxelyze_3s[device_index] %p.\n", device_index, d_voxelyze_3s[device_index]);
     VX3_VoxelyzeKernel* result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(num_simulation * sizeof(VX3_VoxelyzeKernel));
     VcudaMemcpy( result_voxelyze_kernel, d_voxelyze_3s[device_index], num_simulation * sizeof(VX3_VoxelyzeKernel), cudaMemcpyDeviceToHost );
+    enlargeGPUHeapSize();
     CUDA_Simulation<<<numBlocks,threadsPerBlock>>>(d_voxelyze_3s[device_index], num_simulation, device_index);
     CUDA_CHECK_AFTER_CALL();
 }

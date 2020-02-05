@@ -62,6 +62,9 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim* In) {
     }
     VcudaMemcpy( d_links, tmp_link_cache, num_d_links * sizeof(VX3_Link), VcudaMemcpyHostToDevice );
     hd_v_links = VX3_hdVector<VX3_Link*>(tmp_v_links);
+    for (int i=0;i<num_d_links;i++) {
+        h_lookup_links[In->Vx.linksList[i]] = d_links+i;
+    }
 
     for (int i=0;i<num_d_voxels;i++) {
         //set values for GPU memory space
