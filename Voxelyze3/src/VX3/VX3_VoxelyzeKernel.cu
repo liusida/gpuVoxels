@@ -47,6 +47,7 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim* In) {
     VcudaMalloc( (void **)&d_voxels, num_d_voxels * sizeof(VX3_Voxel));
     for (int i=0;i<num_d_voxels;i++) {
         h_voxels.push_back( In->Vx.voxelsList[i] );
+        h_lookup_voxels[In->Vx.voxelsList[i]] = d_voxels+i;
     }
 
     num_d_links = In->Vx.linksList.size();

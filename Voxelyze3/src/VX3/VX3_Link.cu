@@ -15,14 +15,17 @@ currentRestLength(p->currentRestLength), currentTransverseArea(p->currentTransve
 currentTransverseStrainSum(p->currentTransverseStrainSum),
 _stress(p->_stress)
 {
-	for (int i=0;i<k->num_d_voxels;i++) {
-		if (k->h_voxels[i] == p->pVNeg) {
-			pVNeg = &k->d_voxels[i];
-		}
-		if (k->h_voxels[i] == p->pVPos) {
-			pVPos = &k->d_voxels[i];
-		}
-	}
+	pVNeg = k->h_lookup_voxels[p->pVNeg];
+	pVPos = k->h_lookup_voxels[p->pVPos];
+	// for (int i=0;i<k->num_d_voxels;i++) {
+	// 	if (k->h_voxels[i] == p->pVNeg) {
+	// 		pVNeg = &k->d_voxels[i];
+	// 		assert(pVNeg == k->h_lookup_voxels[p->pVNeg]);
+	// 	}
+	// 	if (k->h_voxels[i] == p->pVPos) {
+	// 		pVPos = &k->d_voxels[i];
+	// 	}
+	// }
 
 	for (int i=0;i<k->num_d_linkMats;i++) {
         if (k->h_linkMats[i] == p->mat) {

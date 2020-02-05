@@ -63,6 +63,7 @@ inline bool u_with_ext(fs::path file, std::string ext) {
 #include "Utils/VX3_Vec3D.h"
 #include "Utils/VX3_Quat3D.h"
 #include "Utils/VX3_vector.cuh"
+#include "Utils/VX3_dictionary.cuh"
 #include "VX3/VX3_SimulationResult.h"
 
 #endif // VX3_H

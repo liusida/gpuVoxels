@@ -69,6 +69,7 @@ public:
     int num_d_voxels;
     VX3_Voxel ** d_surface_voxels; //an array of pointer d_surface_voxels[i] -> d_voxels[j]
     int num_d_surface_voxels;
+    std::map<CVX_Voxel*, VX3_Voxel*> h_lookup_voxels;
 
     std::vector<CVX_MaterialVoxel *> h_voxelMats;
     VX3_MaterialVoxel* d_voxelMats;
