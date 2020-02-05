@@ -1,5 +1,6 @@
 #if !defined(VX3_VOXELYZE_KERNEL_H)
 #define VX3_VOXELYZE_KERNEL_H
+#include <map>
 #include "VX3.cuh"
 #include "VX_Sim.h" //readVXA
 
