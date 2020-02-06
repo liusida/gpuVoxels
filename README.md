@@ -90,3 +90,7 @@ Then we run the program like this:
 ```
 
 Now we have a `0001.history`. We can open the newest VoxCAD to see the playback. In the menu, choose Import->History.
+
+This is a sample screenshot of a playback:
+
+![Big Guy Runs](https://github.com/liusida/gpuVoxels/blob/dev-CUDA-0.1/doc/misc/bigGuys.png?raw=true)
