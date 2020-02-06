@@ -42,15 +42,16 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                     printf("<<<%d>>>",j);
                     for (int i=0;i<d_v3->num_d_voxels;i++) {
                         auto &v = d_v3->d_voxels[i];
-                        if (!v.isSurface()) continue;
-                        printf("%f,%f,%f,", v.pos.x,v.pos.y,v.pos.z);
-                        printf("%f,%f,%f,%f,", v.orient.AngleDegrees(), v.orient.x, v.orient.y, v.orient.z);
-                        VX3_Vec3D<double> ppp, nnn;
-                        nnn = v.cornerOffset(NNN);
-                        ppp = v.cornerOffset(PPP);
-                        printf("%f,%f,%f,%f,%f,%f,",nnn.x,nnn.y,nnn.z, ppp.x,ppp.y,ppp.z );
-                        printf("%d,",v.mat->matid); //for coloring
-                        printf(";");
+                        if (v.isSurface()) {
+                            printf("%f,%f,%f,", v.pos.x,v.pos.y,v.pos.z);
+                            printf("%f,%f,%f,%f,", v.orient.AngleDegrees(), v.orient.x, v.orient.y, v.orient.z);
+                            VX3_Vec3D<double> ppp, nnn;
+                            nnn = v.cornerOffset(NNN);
+                            ppp = v.cornerOffset(PPP);
+                            printf("%f,%f,%f,%f,%f,%f,",nnn.x,nnn.y,nnn.z, ppp.x,ppp.y,ppp.z );
+                            printf("%d,",v.mat->matid); //for coloring
+                            printf(";");
+                        }
                     }
                     printf("<<<>>>\n");
                 }
