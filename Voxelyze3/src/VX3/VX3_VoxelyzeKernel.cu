@@ -170,6 +170,8 @@ __device__ void VX3_VoxelyzeKernel::updateTemperature() {
 }
 
 __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
+    // clock_t time_measures[10];
+    // time_measures[0] = clock();
     updateTemperature();
     CurStepCount++;
 	if (dt==0) return true;
@@ -191,20 +193,19 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
         cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_force, 0, d_v_links.size()); //Dynamically calculate blockSize
         int gridSize_links = (d_v_links.size() + blockSize - 1) / blockSize; 
         int blockSize_links = d_v_links.size()<blockSize ? d_v_links.size() : blockSize;
-        // printf("gpu_update_force<<<%d,%d>>>(...,%d);\n", gridSize_links, blockSize_links, d_v_links.size());
         gpu_update_force<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
         CUDA_CHECK_AFTER_CALL();
         cudaDeviceSynchronize();
 
-        for (int i = 0; i<d_v_links.size(); i++){
-            if (d_v_links[i]->axialStrain() > 100){
-                CUDA_DEBUG_LINE("Diverged.");
-                Diverged = true; //catch divergent condition! (if any thread sets true we will fail, so don't need mutex...
-            }
+        // checking every link for diverge is too wasteful! using random sampling.
+        int r = random(d_v_links.size(), clock());
+        if (d_v_links[r]->axialStrain() > 100){
+            CUDA_DEBUG_LINE("Diverged.");
+            Diverged = true; //catch divergent condition! (if any thread sets true we will fail, so don't need mutex...
         }
         if (Diverged) return false;
     }
-
+    
     if (enableAttach) updateAttach();
 
     cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_voxel, 0, num_d_voxels); //Dynamically calculate blockSize
@@ -215,6 +216,10 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     cudaDeviceSynchronize();
 
     currentTime += dt;
+    // time_measures[1] = clock();
+    // printf("running time for each step: \n");
+    // for (int i=0;i<1;i++)
+    //     printf("\t%d) %ld clock cycles.\n", i, time_measures[i+1]-time_measures[i]);
     return true;
 }
 

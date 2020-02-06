@@ -30,6 +30,14 @@ inline bool u_with_ext(fs::path file, std::string ext) {
     return ext==ext_file;
 }
 
+#include <curand.h>
+#include <curand_kernel.h>
+__device__ __inline__ int random(int max, int random_seed=0) {
+    curandState_t state;
+    curand_init(random_seed, 0, 0, &state);
+    return curand(&state) % max;
+}
+
 #define COLORCODE_RED "\033[0;31m" 
 #define COLORCODE_BOLD_RED "\033[1;31m\n" 
 #define COLORCODE_GREEN "\033[0;32m" 
