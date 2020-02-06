@@ -1,6 +1,6 @@
 # gpuVoxels
 
-(We need a well written introduction with pics. But basically this is a tool for us run experiments on Deep Green.)
+![Voxelyze3](https://github.com/liusida/gpuVoxels/blob/dev-CUDA-0.1/doc/misc/bigGuys_small.png?raw=true)
 
 ## Typical User Case
 
