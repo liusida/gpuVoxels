@@ -23,6 +23,7 @@ Experiments/*/VoxCAD
 Experiments/*/Voxelyze3
 Experiments/*/vx3_node_*
 Experiments/**/gen*.vxd
+*.sh
 
 # Prerequisites
 *.d

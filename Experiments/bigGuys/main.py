@@ -35,7 +35,7 @@ control = np.array(control).reshape(5,6,6)
 print(control.shape , morphology.shape)
 print(morphology.shape)
 
-scaleup = 1
+scaleup = 5
 big_robot = morphology.repeat(scaleup, axis=0).repeat(scaleup, axis=1).repeat(scaleup, axis=2)
 big_control = control.repeat(scaleup, axis=0).repeat(scaleup, axis=1).repeat(scaleup, axis=2)
 print(big_robot.shape)
