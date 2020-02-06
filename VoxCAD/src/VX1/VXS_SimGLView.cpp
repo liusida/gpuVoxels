@@ -264,12 +264,13 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
 					double angle, r1, r2, r3;
 					int matid;
 					for (int i=0;i<voxel.size();i++) {
-						glPushMatrix();
 						pos = voxel[i].split(",");
+						if (pos.size()<=1) continue;
 						if (pos.size()<14) {
-							qWarning() << "ERROR: a voxel has pos size is " << pos.size()<<"<14.";
+							qWarning() << "ERROR: a voxel has pos size is " << pos.size()<<"<14." << voxel[i];
 							continue;
 						}
+						glPushMatrix();
 						p1 = pos[0].toDouble();
 						p2 = pos[1].toDouble();
 						p3 = pos[2].toDouble();
