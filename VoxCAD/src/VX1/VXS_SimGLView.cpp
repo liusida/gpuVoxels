@@ -231,8 +231,9 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
 	if (pSim->StreamHistory) {
 		while(1) {
 			if (pSim->StreamHistory->atEnd()) {
-				qInfo() << "history loop";
-				pSim->StreamHistory->seek(0);
+				qInfo() << "history loop, reload the file.";
+				pSim->LoadHistoryFile(pSim->fileHistory->fileName());
+				// pSim->StreamHistory->seek(0);
 			}
 			QString line;
 			if (HistoryPaused) {
