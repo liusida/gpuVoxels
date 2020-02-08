@@ -15,7 +15,11 @@ struct VX3_SimulationResult {
         distance = sqrt(x*x + y*y + z*z)/voxSize;
     }
     static bool compareDistance(VX3_SimulationResult i1, VX3_SimulationResult i2) // for sorting results
-    { 
-        return (i1.distance > i2.distance); 
+    {
+        // Diverged.
+        if (isnan(i2.distance)) return true;
+        if (isnan(i1.distance)) return false;
+        // Not Diverged.
+        return (i1.distance > i2.distance);
     } 
 };
