@@ -1,6 +1,9 @@
-# Experiment: Attachment
+# Experiment: Evolution
 
-This is a demo experiment. In this experiment, a pre-trained robot is running and will hit two different voxels on the ground, one will stick on the robot and the other won't.
+This is a demo experiment. In this experiment, a population of initially random designs evolves using Compositional Pattern-Producing Networks (CPPNs) and Age-Fitness Pareto Optimization (AFPO).
+
+Bug Sam for more details...
+
 
 File Structure:
 
