@@ -112,6 +112,7 @@ int main(int argc, char** argv) {
         tr_result.put("report.detail."+simulation_name+".Init.y", res.initialCenterOfMass.y);
         tr_result.put("report.detail."+simulation_name+".Init.z", res.initialCenterOfMass.z);
         tr_result.put("report.detail."+simulation_name+".distance_by_size", res.distance);
+        tr_result.put("report.detail."+simulation_name+".distance_by_size_xy", res.distance_xy);
         // for (auto &pos: res.voxel_position) {
         //     pt::ptree t_pos;
         //     t_pos.put("x", pos.x);

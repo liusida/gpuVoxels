@@ -8,6 +8,7 @@ struct VX3_SimulationResult {
     double voxSize;
     int num_voxel;
     double distance; //a unitless distance
+    double distance_xy;
     std::string vxa_filename;
     std::vector<Vec3D<double>> voxel_position;
     Vec3D<double> initialCenterOfMass;
@@ -15,7 +16,12 @@ struct VX3_SimulationResult {
 
     void computeDisplacement() {
         // distance = sqrt(x*x + y*y + z*z)/voxSize;
+        Vec3D<double> init_xy = initialCenterOfMass;
+        init_xy.z = 0;
+        Vec3D<double> current_xy = currentCenterOfMass;
+        current_xy.z = 0;
         distance = currentCenterOfMass.Dist(initialCenterOfMass) / voxSize;
+        distance_xy = current_xy.Dist(init_xy) /voxSize;
     }
     static bool compareDistance(VX3_SimulationResult i1, VX3_SimulationResult i2) // for sorting results
     {
