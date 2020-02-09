@@ -20,9 +20,10 @@ add_library(voxelyze.3.0 ${VX3_SRC_cu} ${VX3_SRC_cpp} ${VXA_SRC_cpp} ${OLD_SRC})
 add_executable(Voxelyze3 src/Executables/Voxelyze3.cpp)
 add_executable(vx3_node_worker src/Executables/vx3_node_worker.cu)
 add_executable(vx3_node_daemon src/Executables/vx3_node_daemon.cu)
+add_executable(vx3_test src/Executables/vx3_test.cpp)
 
 target_link_libraries(vx3_node_worker PUBLIC voxelyze.3.0)
-
+target_link_libraries(vx3_test PUBLIC voxelyze.3.0)
 # for Boost
 set(Boost_USE_STATIC_LIBS   ON)
 find_package(Boost REQUIRED COMPONENTS filesystem thread chrono program_options)
