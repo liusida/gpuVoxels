@@ -18,7 +18,7 @@ data/*/Voxelyze3
 data/*/vx3_node_*
 data/**/gen*.vxd
 *.bak
-output.xml
+output*.xml
 Experiments/*/VoxCAD
 Experiments/*/Voxelyze3
 Experiments/*/vx3_node_*
