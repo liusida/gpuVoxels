@@ -97,17 +97,21 @@ int main(int argc, char** argv) {
 
     pt::ptree tr_result;
     
-
-    tr_result.put("bestfit.filename", sm.h_results[0].vxa_filename);
-    tr_result.put("bestfit.distance", sm.h_results[0].distance);
+    tr_result.put("report.inputdir", input_dir.filename().string());
+    tr_result.put("report.bestfit.filename", sm.h_results[0].vxa_filename);
+    tr_result.put("report.bestfit.distance", sm.h_results[0].distance);
     // this will be too much to write into the report.
     for (auto &res: sm.h_results) {
         std::string simulation_name = split(res.vxa_filename, '.')[0];
-        tr_result.put("detail."+simulation_name+".num_voxel", res.num_voxel);
-        tr_result.put("detail."+simulation_name+".CoM.x", res.x);
-        tr_result.put("detail."+simulation_name+".CoM.y", res.y);
-        tr_result.put("detail."+simulation_name+".CoM.z", res.z);
-        tr_result.put("detail."+simulation_name+".CoM.distance_by_size", res.distance);
+        tr_result.put("report.detail."+simulation_name+".num_voxel", res.num_voxel);
+        tr_result.put("report.detail."+simulation_name+".voxSize", res.voxSize);
+        tr_result.put("report.detail."+simulation_name+".CoM.x", res.x);
+        tr_result.put("report.detail."+simulation_name+".CoM.y", res.y);
+        tr_result.put("report.detail."+simulation_name+".CoM.z", res.z);
+        tr_result.put("report.detail."+simulation_name+".Init.x", res.initialCenterOfMass.x);
+        tr_result.put("report.detail."+simulation_name+".Init.y", res.initialCenterOfMass.y);
+        tr_result.put("report.detail."+simulation_name+".Init.z", res.initialCenterOfMass.z);
+        tr_result.put("report.detail."+simulation_name+".distance_by_size", res.distance);
         // for (auto &pos: res.voxel_position) {
         //     pt::ptree t_pos;
         //     t_pos.put("x", pos.x);

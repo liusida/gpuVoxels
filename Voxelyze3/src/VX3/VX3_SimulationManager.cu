@@ -243,6 +243,9 @@ void VX3_SimulationManager::collectResults(int num_simulation, int device_index)
         tmp.x = result_voxelyze_kernel[i].currentCenterOfMass.x;
         tmp.y = result_voxelyze_kernel[i].currentCenterOfMass.y;
         tmp.z = result_voxelyze_kernel[i].currentCenterOfMass.z;
+        result_voxelyze_kernel[i].initialCenterOfMass.copyTo(tmp.initialCenterOfMass);
+        result_voxelyze_kernel[i].currentCenterOfMass.copyTo(tmp.currentCenterOfMass);
+        
         tmp.voxSize = result_voxelyze_kernel[i].voxSize;
         tmp.num_voxel = result_voxelyze_kernel[i].num_d_voxels;
         tmp.vxa_filename = result_voxelyze_kernel[i].vxa_filename;

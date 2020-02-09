@@ -26,6 +26,8 @@ public:
 
 	//Constructors
 	VX3_Vec3D(const Vec3D<T>& s) {x = s.x; y = s.y; z = s.z;} // Convert from Vec3D
+	void copyTo(Vec3D<T>& s) {s.x=x; s.y=y; s.z=z;}
+	
 	__device__ VX3_Vec3D() :x(0), y(0), z(0) {} //!< Constructor. Initialzes x, y, z to zero.
 	__device__ VX3_Vec3D(const T dx, const T dy, const T dz) {x = dx; y = dy; z = dz;} //!< Constructor with specified individual values.
 	__device__ VX3_Vec3D(const VX3_Vec3D<T>& s) {x = s.x; y = s.y; z = s.z;} //!< Copy constructor.
