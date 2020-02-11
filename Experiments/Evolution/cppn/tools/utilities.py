@@ -2,9 +2,11 @@ import numpy as np
 import itertools
 import re
 import zlib
+import networkx as nx
+from scipy.spatial.ckdtree import cKDTree
 from collections import defaultdict
 import scipy.ndimage as ndimage
-from scipy.spatial.distance import cdist, directed_hausdorff
+from scipy.spatial.distance import directed_hausdorff
 
 
 def identity(x):
@@ -248,11 +250,11 @@ def count_occurrences(x, keys):
 
 
 def one_muscle(output_state):
-    mat = np.greater(output_state, 0)
-    return make_one_shape_only(mat) * 3
+    return make_one_shape_only(output_state) * 3
 
 
-def muscle_fat(output_state, empty_less_than=-0.3, fat_greater_than=0.3, muscle_id=4, fat_id=5):
+def muscle_fat(output_state, empty_less_than=-0.3, fat_greater_than=0.3, muscle_id=3, fat_id=1):
+    # doesn't check for one shape only
     empty = np.less_equal(output_state, empty_less_than)
     fat = np.greater_equal(output_state, fat_greater_than)
     mat = muscle_id*np.ones(output_state.shape, dtype=int)
@@ -331,7 +333,7 @@ def make_material_tree_single_muscle_patches(this_softbot, *args, **kwargs):
     return make_one_shape_only(material["state"]) * material["state"]
 
 
-def make_one_shape_only(output_state, mask=None):
+def make_one_shape_only(output_state):
     """Find the largest continuous arrangement of True elements after applying boolean mask.
 
     Avoids multiple disconnected softbots in simulation counted as a single individual.
@@ -341,61 +343,33 @@ def make_one_shape_only(output_state, mask=None):
     output_state : numpy.ndarray
         Network output
 
-    mask : bool mask
-        Threshold function applied to output_state
-
     Returns
     -------
     part_of_ind : bool
         True if component of individual
 
     """
-    if mask is None:
-        def mask(u): return np.greater(u, 0)
+    one_shape = np.zeros(output_state.shape, dtype=np.int8)
 
-    # print output_state
-    # sys.exit(0)
-
-    one_shape = np.zeros(output_state.shape, dtype=np.int32)
-
-    if np.sum(mask(output_state)) < 2:
-        one_shape[np.where(mask(output_state))] = 1
+    if np.sum(output_state > 0) < 2:
+        one_shape[np.where(output_state)] = 1
         return one_shape
 
-    else:
-        not_yet_checked = []
-        for x in range(output_state.shape[0]):
-            for y in range(output_state.shape[1]):
-                for z in range(output_state.shape[2]):
-                    not_yet_checked.append((x, y, z))
+    # find coordinates
+    cs = np.argwhere(output_state > 0)
 
-        largest_shape = []
-        queue_to_check = []
-        while len(not_yet_checked) > len(largest_shape):
-            queue_to_check.append(not_yet_checked.pop(0))
-            this_shape = []
-            if mask(output_state[queue_to_check[0]]):
-                this_shape.append(queue_to_check[0])
+    # build k-d tree
+    kdt = cKDTree(cs)
+    edges = kdt.query_pairs(1)
 
-            while len(queue_to_check) > 0:
-                this_voxel = queue_to_check.pop(0)
-                x = this_voxel[0]
-                y = this_voxel[1]
-                z = this_voxel[2]
-                for neighbor in [(x+1, y, z), (x-1, y, z), (x, y+1, z), (x, y-1, z), (x, y, z+1), (x, y, z-1)]:
-                    if neighbor in not_yet_checked:
-                        not_yet_checked.remove(neighbor)
-                        if mask(output_state[neighbor]):
-                            queue_to_check.append(neighbor)
-                            this_shape.append(neighbor)
+    # create graph
+    G = nx.from_edgelist(edges)
 
-            if len(this_shape) > len(largest_shape):
-                largest_shape = this_shape
+    largest_cc = max(nx.connected_components(G), key=len)
 
-        for loc in largest_shape:
-            one_shape[loc] = 1
+    one_shape[cs[list(largest_cc)]] = 1
 
-        return one_shape
+    return one_shape
 
 
 def count_neighbors(output_state, mask=None):
