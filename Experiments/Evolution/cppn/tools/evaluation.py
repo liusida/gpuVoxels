@@ -6,9 +6,12 @@ import numpy as np
 
 def evaluate_population(pop, record_history=False):
 
-    # remove old sim output.xml and clear old .vxd robot files from the data directory
-    sub.call("rm output.xml", shell=True)
+    # clear old .vxd robot files from the data directory
     sub.call("rm data/*.vxd", shell=True)
+
+    # remove old sim output.xml if we are saving new stats
+    if not record_history:
+        sub.call("rm output.xml", shell=True)
 
     num_evaluated_this_gen = 0
 
@@ -51,7 +54,10 @@ def evaluate_population(pop, record_history=False):
                 data = etree.SubElement(structure, name)
                 for i in range(flattened_state.shape[0]):
                     layer = etree.SubElement(data, "Layer")
-                    str_layer = "".join([str(c) for c in flattened_state[i]])
+                    if name == "Data":
+                        str_layer = "".join([str(c) for c in flattened_state[i]])
+                    else:
+                        str_layer = "".join([str(c)+", " for c in flattened_state[i]])
                     layer.text = etree.CDATA(str_layer)
 
             # md5 so we don't eval the same vxd more than once

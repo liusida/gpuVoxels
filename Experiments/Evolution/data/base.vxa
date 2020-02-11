@@ -3,7 +3,7 @@
   <Simulator>
     <Integration>
       <Integrator>0</Integrator>
-      <DtFrac>0.95</DtFrac>
+      <DtFrac>0.98</DtFrac>
     </Integration>
     <Damping>
       <BondDampingZ>1</BondDampingZ>
@@ -77,7 +77,7 @@
     <Palette>
       <Material ID="1">
         <MatType>0</MatType>
-        <Name>Fixed</Name>
+        <Name>Fat</Name>
         <Display>
           <Red>0</Red>
           <Green>1</Green>
@@ -85,15 +85,14 @@
           <Alpha>1</Alpha>
         </Display>
         <Mechanical>
-          <Fixed>1</Fixed>
           <MatModel>0</MatModel>
-          <Elastic_Mod>5e+06</Elastic_Mod>
+          <Elastic_Mod>1e+07</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
           <Yield_Stress>0</Yield_Stress>
           <FailModel>0</FailModel>
           <Fail_Stress>0</Fail_Stress>
           <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
+          <Density>5e+05</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
           <CTE>0</CTE>
           <MaterialTempPhase>0</MaterialTempPhase>
@@ -103,7 +102,7 @@
       </Material>
       <Material ID="2">
         <MatType>0</MatType>
-        <Name>StickyHeartCell</Name>
+        <Name>Bone</Name>
         <Display>
           <Red>0</Red>
           <Green>0</Green>
@@ -111,17 +110,16 @@
           <Alpha>1</Alpha>
         </Display>
         <Mechanical>
-          <Sticky>1</Sticky>
           <MatModel>0</MatModel>
-          <Elastic_Mod>3e+08</Elastic_Mod>
+          <Elastic_Mod>5e+08</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
           <Yield_Stress>0</Yield_Stress>
           <FailModel>0</FailModel>
           <Fail_Stress>0</Fail_Stress>
           <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
+          <Density>5e+05</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.01</CTE>
+          <CTE>0</CTE>
           <MaterialTempPhase>0</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>
@@ -129,7 +127,7 @@
       </Material>
       <Material ID="3">
         <MatType>0</MatType>
-        <Name>StickySkinCell</Name>
+        <Name>MuscleOne</Name>
         <Display>
           <Red>1</Red>
           <Green>0</Green>
@@ -137,17 +135,16 @@
           <Alpha>1</Alpha>
         </Display>
         <Mechanical>
-          <Sticky>1</Sticky>
           <MatModel>0</MatModel>
-          <Elastic_Mod>2e+07</Elastic_Mod>
+          <Elastic_Mod>5e+07</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
           <Yield_Stress>0</Yield_Stress>
           <FailModel>0</FailModel>
           <Fail_Stress>0</Fail_Stress>
           <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
+          <Density>5e+05</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0</CTE>
+          <CTE>0.01</CTE>
           <MaterialTempPhase>0</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>
@@ -155,82 +152,7 @@
       </Material>
       <Material ID="4">
         <MatType>0</MatType>
-        <Name>HeartCell</Name>
-        <Display>
-          <Red>1</Red>
-          <Green>0</Green>
-          <Blue>0</Blue>
-          <Alpha>1</Alpha>
-        </Display>
-        <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>3e+07</Elastic_Mod>
-          <Plastic_Mod>0</Plastic_Mod>
-          <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
-          <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
-          <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.01</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
-          <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
-        </Mechanical>
-      </Material>
-      <Material ID="5">
-        <MatType>0</MatType>
-        <Name>SkinCell</Name>
-        <Display>
-          <Red>0</Red>
-          <Green>0</Green>
-          <Blue>1</Blue>
-          <Alpha>1</Alpha>
-        </Display>
-        <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>2e+07</Elastic_Mod>
-          <Plastic_Mod>0</Plastic_Mod>
-          <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
-          <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
-          <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
-          <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
-        </Mechanical>
-      </Material>
-      <Material ID="6">
-        <MatType>0</MatType>
-        <Name>Head_Active_+</Name>
-        <Display>
-          <Red>1</Red>
-          <Green>1</Green>
-          <Blue>0</Blue>
-          <Alpha>1</Alpha>
-        </Display>
-        <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>5e+06</Elastic_Mod>
-          <Plastic_Mod>0</Plastic_Mod>
-          <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
-          <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
-          <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.01</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
-          <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
-        </Mechanical>
-      </Material>
-      <Material ID="7">
-        <MatType>0</MatType>
-        <Name>TouchSensor</Name>
+        <Name>MuscleTwo</Name>
         <Display>
           <Red>0</Red>
           <Green>1</Green>
@@ -239,91 +161,16 @@
         </Display>
         <Mechanical>
           <MatModel>0</MatModel>
-          <Elastic_Mod>1e+07</Elastic_Mod>
+          <Elastic_Mod>5e+07</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
           <Yield_Stress>0</Yield_Stress>
           <FailModel>0</FailModel>
           <Fail_Stress>0</Fail_Stress>
           <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
+          <Density>5e+05</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
           <CTE>0.01</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
-          <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
-        </Mechanical>
-      </Material>
-      <Material ID="8">
-        <MatType>0</MatType>
-        <Name>Filler</Name>
-        <Display>
-          <Red>1</Red>
-          <Green>1</Green>
-          <Blue>0</Blue>
-          <Alpha>1</Alpha>
-        </Display>
-        <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>1e+07</Elastic_Mod>
-          <Plastic_Mod>0</Plastic_Mod>
-          <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
-          <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
-          <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.01</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
-          <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
-        </Mechanical>
-      </Material>
-      <Material ID="9">
-        <MatType>0</MatType>
-        <Name>Base</Name>
-        <Display>
-          <Red>1</Red>
-          <Green>0.078</Green>
-          <Blue>0.576</Blue>
-          <Alpha>1</Alpha>
-        </Display>
-        <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>3e+07</Elastic_Mod>
-          <Plastic_Mod>0</Plastic_Mod>
-          <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
-          <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
-          <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.01</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
-          <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
-        </Mechanical>
-      </Material>
-      <Material ID="10">
-        <MatType>0</MatType>
-        <Name>Will_Injure</Name>
-        <Display>
-          <Red>0.498039</Red>
-          <Green>0.141176</Green>
-          <Blue>0.129412</Blue>
-          <Alpha>1</Alpha>
-        </Display>
-        <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>3e+07</Elastic_Mod>
-          <Plastic_Mod>0</Plastic_Mod>
-          <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
-          <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
-          <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.01</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
+          <MaterialTempPhase>1</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>
         </Mechanical>
@@ -334,12 +181,19 @@
       <Y_Voxels>6</Y_Voxels>
       <Z_Voxels>5</Z_Voxels>
       <Data>
-        <Layer><![CDATA[::00::::0099000000000000990099::00::]]></Layer>
-        <Layer><![CDATA[::00::::0099000000000000990099990099]]></Layer>
-        <Layer><![CDATA[999999999999999999999999999999999999]]></Layer>
-        <Layer><![CDATA[999999999999999999999999999999999999]]></Layer>
-        <Layer><![CDATA[999999999999999999999999999999999999]]></Layer>
+        <Layer><![CDATA[::00::::3333333333333333333333::00::]]></Layer>
+        <Layer><![CDATA[::00::::3333333333333333333333333333]]></Layer>
+        <Layer><![CDATA[333333333333333333333333333333333333]]></Layer>
+        <Layer><![CDATA[333333333333333333333333333333333333]]></Layer>
+        <Layer><![CDATA[333333333333333333333333333333333333]]></Layer>
       </Data>
+      <PhaseOffset>
+      <Layer><![CDATA[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]]></Layer>
+      <Layer><![CDATA[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]]></Layer>
+      <Layer><![CDATA[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]]></Layer>
+      <Layer><![CDATA[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]]></Layer>
+      <Layer><![CDATA[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]]></Layer>
+      </PhaseOffset>
     </Structure>
   </VXC>
 </VXA>

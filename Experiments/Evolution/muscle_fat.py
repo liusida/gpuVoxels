@@ -1,25 +1,31 @@
 # from lxml import etree
+import random
 import numpy as np
+import sys
 
 from cppn.networks import CPPN
 from cppn.softbot import Genotype, Phenotype, Population
 from cppn.tools.algorithms import Optimizer
-from cppn.tools.utilities import count_occurrences, make_material_tree, muscle_fat
+from cppn.tools.utilities import count_occurrences, make_material_tree, muscle_fat, one_muscle
 from cppn.objectives import ObjectiveDict
 from cppn.tools.evaluation import evaluate_population
 from cppn.tools.mutation import create_new_children_through_mutation
 from cppn.tools.selection import pareto_selection
 
 
-GENS = 100  # 1000
-POPSIZE = 31  # 250  # +1 for the randomly generated robot that is added each gen
+SEED = 1  # int(sys.argv[1])
+random.seed(SEED)
+np.random.seed(SEED)
 
-IND_SIZE = (30, 30, 30)  # (50, 50, 40)
+GENS = 0  # 1000
+POPSIZE = 2  # 250  # +1 for the randomly generated robot that is added each gen
+
+IND_SIZE = (50, 50, 40)  # (50, 50, 40) for 100,000...
 MIN_PERCENT_FULL = 0.1
 MIN_PERCENT_MUSCLE = 0.1
 MAX_PERCENT_MUSCLE = 0.9
 
-CHECKPOINT_EVERY = GENS-1  # ie. last gen only
+CHECKPOINT_EVERY = GENS+1  # ie. never  # GENS-1  # ie. last gen only
 
 DIRECTORY = "."
 
@@ -32,11 +38,9 @@ class MyGenotype(Genotype):
 
     Each individual must have the following properties:
 
-    The genotype consists of a single Compositional Pattern Producing Network (CPPN),
-    with multiple inter-dependent outputs determining the material constituting each voxel
-    (e.g. two types of active voxels, actuated in counter phase, and two passive voxel types, fat and bone)
-    The material IDs in the phenotype mapping dependencies refer to a predefined palette of materials:
-    (0: empty, 1: passiveSoft, 2: passiveHard, 3: active+, 4:active-)
+    The genotype consists of a Compositional Pattern Producing Network (CPPN),
+
+    which dictates whether a voxel is present/absent and if present whether it is muscle or fat
 
     """
     def __init__(self):
@@ -45,27 +49,7 @@ class MyGenotype(Genotype):
 
         self.add_network(CPPN(output_node_names=["Data"]))
 
-        # tmp: muscle/fat
         self.to_phenotype_mapping.add_map(name="Data", tag="<Data>", func=muscle_fat, output_type=int)
-
-        # # todo: add these materials: bone, fat, muscle 1, muscle 2 (counter phase)
-        # self.add_network(CPPN(output_node_names=["shape", "muscleOrTissue", "muscleType", "tissueType"]))
-        #
-        # self.to_phenotype_mapping.add_map(name="Data", tag="<Data>", func=make_material_tree,
-        #                                   dependency_order=["shape", "muscleOrTissue", "muscleType", "tissueType"],
-        #                                   output_type=int)
-        #
-        # self.to_phenotype_mapping.add_output_dependency(name="shape", dependency_name=None, requirement=None,
-        #                                                 material_if_true=None, material_if_false="0")
-        #
-        # self.to_phenotype_mapping.add_output_dependency(name="muscleOrTissue", dependency_name="shape",
-        #                                                 requirement=True, material_if_true=None, material_if_false=None)
-        #
-        # self.to_phenotype_mapping.add_output_dependency(name="tissueType", dependency_name="muscleOrTissue",
-        #                                                 requirement=False, material_if_true="1", material_if_false="2")
-        #
-        # self.to_phenotype_mapping.add_output_dependency(name="muscleType", dependency_name="muscleOrTissue",
-        #                                                 requirement=True, material_if_true="3", material_if_false="4")
 
 
 class MyPhenotype(Phenotype):

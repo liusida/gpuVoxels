@@ -57,3 +57,5 @@ submit*.sh
 *.exe
 *.out
 *.app
+.idea/
+*.pyc
