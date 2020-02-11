@@ -94,6 +94,8 @@ public:
 
     bool enableAttach;
     int RecordStepSize = 0;
+    int RecordLink = 0;
+    int RecordVoxel = 0;
 
     // Force Field
     VX3_ForceField force_field;

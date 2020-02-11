@@ -101,10 +101,10 @@ public:
     __device__ float b2() const;
     __device__ float b3() const;
 
-    __device__ VX3_Quat3D<double> orientLink(
-        /*double restLength*/); // updates pos2, angle1, angle2, and smallAngle.
-                                // returns the rotation quaternion (after
-                                // toAxisX) used to get to this orientation
+    __device__ VX3_Quat3D<double> orientLink();
+    // updates pos2, angle1, angle2, and smallAngle.
+    // returns the rotation quaternion (after
+    // toAxisX) used to get to this orientation
 
     // unwind a coordinate as if the bond was in the the positive X direction
     // (and back...)
@@ -218,11 +218,11 @@ public:
     // quaternion (after toAxisX) used to get to this orientation
 
     // template <typename T>
-    // __device__ VX3_Vec3D<T> toAxisX		(const VX3_Vec3D<T>& v)	const {switch
-    // (axis){case Y_AXIS: return VX3_Vec3D<T>(v.y, -v.x, v.z); case Z_AXIS:
-    // return VX3_Vec3D<T>(v.z, v.y, -v.x); default: return v;}} //transforms a
-    // VX3_Vec3D in the original orientation of the bond to that as if the bond
-    // was in +X direction
+    // __device__ VX3_Vec3D<T> toAxisX		(const VX3_Vec3D<T>& v)	const
+    // {switch (axis){case Y_AXIS: return VX3_Vec3D<T>(v.y, -v.x, v.z); case
+    // Z_AXIS: return VX3_Vec3D<T>(v.z, v.y, -v.x); default: return v;}}
+    // //transforms a VX3_Vec3D in the original orientation of the bond to that
+    // as if the bond was in +X direction
 
     /*data*/
 
@@ -234,8 +234,8 @@ public:
     float maxStrain,
         /*maxStrainRatio,*/ strainOffset; // keep track of the maximums for
                                           // yield/fail/nonlinear materials (and
-                                          // the ratio of the maximum from 0 to 1
-                                          // [all positive end strain to all
+                                          // the ratio of the maximum from 0 to
+                                          // 1 [all positive end strain to all
                                           // negative end strain])
 
     linkState boolStates; // single int to store many boolean state values as

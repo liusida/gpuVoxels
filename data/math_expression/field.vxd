@@ -1,6 +1,6 @@
 <VXD>
     <ForceField replace="VXA.Environment.ForceField">
-        <x_prime>
+        <x_forcefield>
             <plus>
                 <sin>
                     <plus>
@@ -10,12 +10,12 @@
                 </sin>
                 <constant value="1" />
             </plus>
-        </x_prime>
-        <y_prime>
+        </x_forcefield>
+        <y_forcefield>
             <constant value="0" />
-        </y_prime>
-        <z_prime>
+        </y_forcefield>
+        <z_forcefield>
             <constant value="0" />
-        </z_prime>
+        </z_forcefield>
     </ForceField>
 </VXD>

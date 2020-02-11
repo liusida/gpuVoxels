@@ -234,6 +234,9 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
         int gridSize_links = (d_v_links.size() + blockSize - 1) / blockSize;
         int blockSize_links =
             d_v_links.size() < blockSize ? d_v_links.size() : blockSize;
+        // if (d_v_links.size() > 1024) {
+        //     printf("debug");
+        // }
         gpu_update_force<<<gridSize_links, blockSize_links>>>(&d_v_links[0],
                                                               d_v_links.size());
         CUDA_CHECK_AFTER_CALL();
@@ -442,11 +445,14 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num,
         }
         // calculate and store contact force, apply and clean in
         // VX3_Voxel::force()
-        VX3_Collision collision(voxel1, voxel2);
-        collision.updateContactForce();
-        voxel1->contactForce += collision.contactForce(voxel1);
-        voxel2->contactForce += collision.contactForce(voxel2);
-
+        // if (voxel1->mat !=
+        //     voxel2->mat) { // disable same material collision for now
+        if (true) {
+            VX3_Collision collision(voxel1, voxel2);
+            collision.updateContactForce();
+            voxel1->contactForce += collision.contactForce(voxel1);
+            voxel2->contactForce += collision.contactForce(voxel2);
+        }
         // fixed voxels, no need to look further for attachment
         if (voxel1->mat->fixed || voxel2->mat->fixed)
             return;
@@ -465,8 +471,6 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num,
         // determine relative position
         linkDirection link_dir_1, link_dir_2;
         linkAxis link_axis;
-        // TODO: need to consider a and b. Quaternions! now assuming a and b are
-        // (1,0,0,0).
         auto a = voxel1->orientation();
         auto b = voxel2->orientation();
         auto c = voxel1->position();
@@ -478,86 +482,70 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num,
         // first find which is the dominant axis, then determine which one is
         // neg which one is pos.
         VX3_Vec3D<double> f;
+        bool reverseOrder = false;
         f = ea.Abs();
         if (f.x >= f.y && f.x >= f.z) { // X_AXIS
             link_axis = X_AXIS;
             if (ea.x < 0) {
                 link_dir_1 = X_NEG;
+                link_dir_2 = X_POS;
+                reverseOrder = true;
             } else {
                 link_dir_1 = X_POS;
+                link_dir_2 = X_NEG;
             }
         } else if (f.y >= f.x && f.y >= f.z) { // Y_AXIS
             link_axis = Y_AXIS;
             if (ea.y < 0) {
                 link_dir_1 = Y_NEG;
+                link_dir_2 = Y_POS;
+                reverseOrder = true;
             } else {
                 link_dir_1 = Y_POS;
+                link_dir_2 = Y_NEG;
             }
         } else { // Z_AXIS
             link_axis = Z_AXIS;
             if (ea.z < 0) { // voxel1 is on top
                 link_dir_1 = Z_NEG;
+                link_dir_2 = Z_POS;
+                reverseOrder = true;
             } else {
                 link_dir_1 = Z_POS;
-            }
-        }
-        f = eb.Abs();
-        if (f.x >= f.y && f.x >= f.z) { // X_AXIS
-            if (eb.x < 0) {
-                link_dir_2 = X_NEG;
-            } else {
-                link_dir_2 = X_POS;
-            }
-        } else if (f.y >= f.x && f.y >= f.z) { // Y_AXIS
-            if (eb.y < 0) {
-                link_dir_2 = Y_NEG;
-            } else {
-                link_dir_2 = Y_POS;
-            }
-        } else {            // Z_AXIS
-            if (eb.z < 0) { // voxel1 is on top
                 link_dir_2 = Z_NEG;
-            } else {
-                link_dir_2 = Z_POS;
             }
         }
 
-        // order of link matters! wrong order will cause Diverge!
-        // bool forbidden = false;
-        // bool reverseOrder = false;
-        // if (link_dir_1%2==0) { //link_dir_1 is POS
-        //     if (link_dir_2%2==1) { //link_dir_2 is NEG
-        //         reverseOrder = true;
-        //     } else { //two POSs
-        //         forbidden = true;
-        //     }
-        // } else {
-        //     if (link_dir_2%2==1) { //two NEGs
-        //         forbidden = true;
-        //     }
-        // }
-        // if (forbidden) return; //cannot add two links with both POS or NEG
         // TODO: need to solve this. Create only when there's a right place to
         // attach
         if (voxel1->links[link_dir_1] == NULL &&
             voxel2->links[link_dir_2] == NULL) {
             VX3_Link *pL;
-            pL = new VX3_Link(
-                voxel1, link_dir_1, voxel2, link_dir_2, link_axis,
-                k); // make the new link (change to both materials, etc.
-
-            pL->isNewLink = 10000;
+            if (reverseOrder) {
+                pL = new VX3_Link(
+                    voxel1, link_dir_1, voxel2, link_dir_2, link_axis,
+                    k); // make the new link (change to both materials, etc.
+            } else {
+                pL = new VX3_Link(
+                    voxel2, link_dir_2, voxel1, link_dir_1, link_axis,
+                    k); // make the new link (change to both materials, etc.
+            }
+            if (!pL) {
+                printf("ERROR: Out of memory. Link not created.\n");
+                return;
+            }
+            pL->isNewLink = 500;
             k->d_v_links.push_back(pL); // add to the list
-            printf("createLink.... %p %p distance=> %f %f %f (%f), dir (%d and "
-                   "%d), watchDistance %f.\n",
-                   voxel1, voxel2, diff.x, diff.y, diff.z, diff.Length(),
-                   link_dir_1, link_dir_2, watchDistance);
-            printf("orientation (%f; %f, %f, %f) and (%f; %f, %f, %f).\n", a.w,
-                   a.x, a.y, a.z, b.w, b.x, b.y, b.z);
-            printf("ea, after inv rotate (%f, %f, %f)", ea.x, ea.y, ea.z);
-            printf("newLink: rest %f.\n", pL->currentRestLength);
-            printf("between (%d,%d,%d) and (%d,%d,%d).\n", voxel1->ix,
-                   voxel1->iy, voxel1->iz, voxel2->ix, voxel2->iy, voxel2->iz);
+            // printf("createLink.... %p %p distance=> %f %f %f (%f), dir (%d and "
+            //        "%d), watchDistance %f.\n",
+            //        voxel1, voxel2, diff.x, diff.y, diff.z, diff.Length(),
+            //        link_dir_1, link_dir_2, watchDistance);
+            // printf("orientation (%f; %f, %f, %f) and (%f; %f, %f, %f).\n", a.w,
+            //        a.x, a.y, a.z, b.w, b.x, b.y, b.z);
+            // printf("ea, after inv rotate (%f, %f, %f)", ea.x, ea.y, ea.z);
+            // printf("newLink: rest %f.\n", pL->currentRestLength);
+            // printf("between (%d,%d,%d) and (%d,%d,%d).\n", voxel1->ix,
+            //        voxel1->iy, voxel1->iz, voxel2->ix, voxel2->iy, voxel2->iz);
         }
     }
 }

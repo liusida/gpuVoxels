@@ -1,15 +1,12 @@
 from lxml import etree
 import numpy as np
-np.random.seed(2)
-world = np.random.random(size=[1,100,100])
-world[world<0.5]=0
-world[world>=0.5]=2
-world = world.astype(int)
-# world = np.zeros(shape=[1,10,10], dtype=int)
-# world[0,5,0] = 2
-# world[0,7,0] = 2
-# world[0,9,0] = 3
-world_flatten = world.reshape([1, 10000])
+
+world = np.zeros(shape=[1,10,10], dtype=int)
+world[0,0,9] = 9
+world[0,1,3] = 3
+world[0,0,5] = 3
+world[0,1,5] = 3
+world_flatten = world.reshape([1, 100])
 
 # generate VXD
 root = etree.Element("VXD")
@@ -18,40 +15,31 @@ child = etree.SubElement  # a shortcut
 AttachDetach = child(root, "AttachDetach")
 AttachDetach.set('replace', 'VXA.Simulator.AttachDetach')
 child(AttachDetach, 'EnableAttach').text = '1'
-child(AttachDetach, 'EnableCollision').text = '1' # not implemented yet
 child(AttachDetach, 'watchDistance').text = '1'
 # Enable Record History
 RecordHistory = child(root, "RecordHistory")
 RecordHistory.set('replace', 'VXA.Simulator.RecordHistory')
-child(RecordHistory, "RecordStepSize").text = '100'
-child(RecordHistory, "RecordVoxel").text = '1'
-child(RecordHistory, "RecordLink").text = '0'
+child(RecordHistory, "RecordStepSize").text = '50'
 # Stop Condition 2 sec
 StopConditionValue = child(root, "StopConditionValue")
 StopConditionValue.set(
     'replace', 'VXA.Simulator.StopCondition.StopConditionValue')
-StopConditionValue.text = '10'
+StopConditionValue.text = '5'
 # ForceField
 ForceField = child(root, "ForceField")
 ForceField.set('replace', "VXA.Simulator.ForceField")
 x_forcefield = child(ForceField, "x_forcefield")
-a = child(x_forcefield, "mtADD")
-m = child(a, "mtMUL")
-child(m, "mtCONST").text = "-90"
-child(m, "mtVAR").text = "x"
-m = child(a, "mtMUL")
-child(m, "mtCONST").text = "90"
-child(m, "mtVAR").text = "y"
-
+sub = child(x_forcefield, "mtSUB")
+child(sub, "mtCONST").text = "0"
+mul = child(sub, "mtMUL")
+child(mul, "mtCONST").text = "100"
+child(mul, "mtVAR").text = "x"
 y_forcefield = child(ForceField, "y_forcefield")
-a = child(y_forcefield, "mtADD")
-m = child(a, "mtMUL")
-child(m, "mtCONST").text = "-90"
-child(m, "mtVAR").text = "x"
-m = child(a, "mtMUL")
-child(m, "mtCONST").text = "-90"
-child(m, "mtVAR").text = "y"
-
+sub = child(y_forcefield, "mtSUB")
+child(sub, "mtCONST").text = "0"
+mul = child(sub, "mtMUL")
+child(mul, "mtCONST").text = "100"
+child(mul, "mtVAR").text = "y"
 # Main Structure and PhaseOffset
 structure = child(root, "Structure")
 structure.set('replace', 'VXA.VXC.Structure')

@@ -7,7 +7,7 @@
     </Integration>
     <Damping>
       <BondDampingZ>1</BondDampingZ>
-      <ColDampingZ>0.8</ColDampingZ>
+      <ColDampingZ>0.9</ColDampingZ>
       <SlowDampingZ>0.01</SlowDampingZ>
     </Damping>
     <Collisions>

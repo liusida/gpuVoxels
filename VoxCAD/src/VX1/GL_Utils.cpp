@@ -72,11 +72,12 @@ void CGL_Utils::DrawCubeFace()
 		glNewList(BoxFaceList[CurContextID], GL_COMPILE);
 
 		glBegin(GL_QUADS);
-		glNormal3f(1.0,0,0); //+X face
-		glVertex3d(0.5,-0.5,-0.5);
-		glVertex3d(0.5, 0.5,-0.5);
-		glVertex3d(0.5, 0.5, 0.5);
-		glVertex3d(0.5,-0.5, 0.5);
+		// Comment out temperarily for debug, so I can notice the orientation of the voxels.
+		// glNormal3f(1.0,0,0); //+X face
+		// glVertex3d(0.5,-0.5,-0.5);
+		// glVertex3d(0.5, 0.5,-0.5);
+		// glVertex3d(0.5, 0.5, 0.5);
+		// glVertex3d(0.5,-0.5, 0.5);
 
 		glNormal3f(-1,0,0); //-X face
 		glVertex3d(-0.5,-0.5,-0.5);

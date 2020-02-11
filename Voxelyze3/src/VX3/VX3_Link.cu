@@ -74,15 +74,37 @@ __device__ void VX3_Link::reset() {
     updateTransverseInfo();
 }
 
-__device__ VX3_Quat3D<double> VX3_Link::orientLink(
-    /*double restLength*/) // updates pos2, angle1, angle2, and smallAngle
-{
-    pos2 = toAxisX(VX3_Vec3D<double>(
-        pVPos->position() -
-        pVNeg->position())); // digit truncation happens here...
+__device__ float VX3_Link::axialStrain(bool positiveEnd) const {
+    return positiveEnd ? 2.0f * strain * strainRatio / (1.0f + strainRatio)
+                       : 2.0f * strain / (1.0f + strainRatio);
+}
 
-    angle1 = toAxisX(pVNeg->orientation());
-    angle2 = toAxisX(pVPos->orientation());
+__device__ bool VX3_Link::isYielded() const {
+    return mat->isYielded(maxStrain);
+}
+
+__device__ bool VX3_Link::isFailed() const { return mat->isFailed(maxStrain); }
+
+__device__ void VX3_Link::updateRestLength() {
+    currentRestLength = 0.5 * (pVNeg->baseSize(axis) + pVPos->baseSize(axis));
+}
+
+__device__ void VX3_Link::updateTransverseInfo() {
+    currentTransverseArea =
+        0.5f * (pVNeg->transverseArea(axis) + pVPos->transverseArea(axis));
+    currentTransverseStrainSum = 0.5f * (pVNeg->transverseStrainSum(axis) +
+                                         pVPos->transverseStrainSum(axis));
+}
+
+__device__ VX3_Quat3D<double>
+VX3_Link::orientLink() // updates pos2, angle1, angle2, and smallAngle
+{
+    VX3_Vec3D<> _pos2 = pVPos->position() - pVNeg->position();
+    pos2 = toAxisX(_pos2); // digit truncation happens here...
+    VX3_Quat3D<> _angle1 = pVNeg->orientation();
+    angle1 = toAxisX(_angle1);
+    VX3_Quat3D<> _angle2 = pVPos->orientation();
+    angle2 = toAxisX(_angle2);
 
     VX3_Quat3D<double> totalRot =
         angle1.Conjugate(); // keep track of the total rotation of this bond
@@ -128,44 +150,19 @@ __device__ VX3_Quat3D<double> VX3_Link::orientLink(
     return totalRot;
 }
 
-__device__ float VX3_Link::axialStrain(bool positiveEnd) const {
-    return positiveEnd ? 2.0f * strain * strainRatio / (1.0f + strainRatio)
-                       : 2.0f * strain / (1.0f + strainRatio);
-}
-
-__device__ bool VX3_Link::isYielded() const {
-    return mat->isYielded(maxStrain);
-}
-
-__device__ bool VX3_Link::isFailed() const { return mat->isFailed(maxStrain); }
-
-__device__ void VX3_Link::updateRestLength() {
-    currentRestLength = 0.5 * (pVNeg->baseSize(axis) + pVPos->baseSize(axis));
-}
-
-__device__ void VX3_Link::updateTransverseInfo() {
-    currentTransverseArea =
-        0.5f * (pVNeg->transverseArea(axis) + pVPos->transverseArea(axis));
-    currentTransverseStrainSum = 0.5f * (pVNeg->transverseStrainSum(axis) +
-                                         pVPos->transverseStrainSum(axis));
-}
-
 __device__ void VX3_Link::updateForces() {
-    // time start 0us
     VX3_Vec3D<double> oldPos2 = pos2;
     VX3_Vec3D<double> oldAngle1v = angle1v;
     VX3_Vec3D<double> oldAngle2v =
         angle2v; // remember the positions/angles from last timestep to
                  // calculate velocity
 
-    orientLink(/*restLength*/); // sets pos2, angle1, angle2
-    // time 87.876us
+    orientLink(); // sets pos2, angle1, angle2
     VX3_Vec3D<double> dPos2 =
         0.5 * (pos2 - oldPos2); // deltas for local damping. velocity at center
                                 // is half the total velocity
     VX3_Vec3D<double> dAngle1 = 0.5 * (angle1v - oldAngle1v);
     VX3_Vec3D<double> dAngle2 = 0.5 * (angle2v - oldAngle2v);
-    // time 87.651us
     // if volume effects..
     if (!mat->isXyzIndependent() ||
         currentTransverseStrainSum !=
@@ -173,15 +170,12 @@ __device__ void VX3_Link::updateForces() {
                  // poissons mid-simulation
         // updateTransverseInfo();
     }
-    // time 110.08us
     _stress = updateStrain((float)(pos2.x / currentRestLength));
-    // time 119.13us
     if (isFailed()) {
         forceNeg = forcePos = momentNeg = momentPos =
             VX3_Vec3D<double>(0, 0, 0);
         return;
     }
-    // time 120.48us
     float b1 = mat->_b1, b2 = mat->_b2, b3 = mat->_b3,
           a2 = mat->_a2; // local copies
     // Beam equations. All relevant terms are here, even though some are zero
@@ -190,9 +184,10 @@ __device__ void VX3_Link::updateForces() {
     forceNeg = VX3_Vec3D<double>(
         _stress * currentTransverseArea, // currentA1*pos2.x,
         b1 * pos2.y - b2 * (angle1v.z + angle2v.z),
-        b1 * pos2.z + b2 * (angle1v.y +
-                            angle2v.y)); // Use Curstress instead of -a1*Pos2.x
-                                         // to account for non-linear deformation
+        b1 * pos2.z +
+            b2 * (angle1v.y +
+                  angle2v.y)); // Use Curstress instead of -a1*Pos2.x
+                               // to account for non-linear deformation
     forcePos = -forceNeg;
 
     momentNeg =
@@ -245,23 +240,18 @@ __device__ void VX3_Link::updateForces() {
     toAxisOriginal(&forcePos);
     toAxisOriginal(&momentNeg);
     toAxisOriginal(&momentPos);
-    // time 214.72us
-
+    // printf("momentNeg: (%f, %f, %f).\n", momentNeg.x, momentNeg.y,
+    // momentNeg.z);
+    if (isNewLink) {
+        // for debug
+        momentNeg = VX3_Vec3D<>();
+        momentPos = VX3_Vec3D<>();
+        isNewLink -= 1;
+    }
     // assert(!(forceNeg.x != forceNeg.x) || !(forceNeg.y != forceNeg.y) ||
     // !(forceNeg.z != forceNeg.z)); //assert non QNAN assert(!(forcePos.x !=
     // forcePos.x) || !(forcePos.y != forcePos.y) || !(forcePos.z !=
-	// forcePos.z)); //assert non QNAN
-	//
-	// This trick is not working. TODO: Need dive deeper.
-    // if (isNewLink) {
-	// 	// printf("first time calculate new link.\n");
-	// 	double trick_damp = 1.0/isNewLink;
-	// 	forceNeg *= trick_damp;
-	// 	forcePos *= trick_damp;
-	// 	momentNeg *= trick_damp;
-	// 	momentPos *= trick_damp;
-    //     isNewLink -= 1;
-    // }
+    // forcePos.z)); //assert non QNAN
 }
 
 __device__ float VX3_Link::updateStrain(float axialStrain) {

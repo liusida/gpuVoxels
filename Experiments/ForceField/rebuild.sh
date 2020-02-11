@@ -29,7 +29,7 @@ if $BuildVoxelyze3; then
     fi
     cd build
     if $RebuildAll; then
-        cmake -DCMAKE_BUILD_TYPE=Release ..
+        cmake -DCMAKE_BUILD_TYPE=Release -DCUDA_DEBUG=OFF ..
     fi
     cmake --build . -j 10
     cd $cwd
@@ -49,7 +49,7 @@ if $BuildVoxCAD; then
     fi
     cd build
     if $RebuildAll; then
-        cmake -DCMAKE_BUILD_TYPE=Release ..
+        cmake -DCMAKE_BUILD_TYPE=Release -DCUDA_DEBUG=OFF ..
     fi
     cmake --build . -j 10
     cd $cwd

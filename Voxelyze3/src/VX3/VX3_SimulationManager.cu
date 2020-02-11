@@ -10,16 +10,16 @@
 
 __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3,
                                 int num_simulation, int device_index) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < num_simulation) {
-        VX3_VoxelyzeKernel *d_v3 = &d_voxelyze_3[i];
+    int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
+    if (thread_index < num_simulation) {
+        VX3_VoxelyzeKernel *d_v3 = &d_voxelyze_3[thread_index];
         d_v3->syncVectors(); // Everytime we pass a class with VX3_vectors in
                              // it, we should sync hd_vector to d_vector first.
         d_v3->regenerateSurfaceVoxels(); // first time regenerate
                                          // d_surface_voxels.
         printf(COLORCODE_GREEN "%d) Simulation %d runs: %s. with stop "
                                "condition: %f. \n" COLORCODE_RESET,
-               device_index, i, d_v3->vxa_filename, d_v3->StopConditionValue);
+               device_index, thread_index, d_v3->vxa_filename, d_v3->StopConditionValue);
         // printf("%d) Simulation %d: links %d, voxels %d.\n", device_index, i,
         // d_v3->num_d_links, d_v3->num_d_voxels); printf("%d) Simulation %d
         // enableAttach %d.\n", device_index, i, d_v3->enableAttach);
@@ -51,38 +51,56 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3,
             if (!d_v3->doTimeStep()) {
                 printf(COLORCODE_BOLD_RED
                        "\n%d) Simulation %d Diverged: %s.\n" COLORCODE_RESET,
-                       device_index, i, d_v3->vxa_filename);
+                       device_index, thread_index, d_v3->vxa_filename);
                 break;
             }
             if (d_v3->RecordStepSize) { // output History file
                 if (j % real_stepsize == 0) {
-                    printf("<<<%d>>>", j);
-                    for (int i = 0; i < d_v3->num_d_voxels; i++) {
-                        auto &v = d_v3->d_voxels[i];
-                        if (v.isSurface()) {
-                            printf("%.4f,%.4f,%.4f,", v.pos.x, v.pos.y,
-                                   v.pos.z);
-                            printf("%.1f,%.4f,%.4f,%.4f,",
-                                   v.orient.AngleDegrees(), v.orient.x,
-                                   v.orient.y, v.orient.z);
-                            VX3_Vec3D<double> ppp, nnn;
-                            nnn = v.cornerOffset(NNN);
-                            ppp = v.cornerOffset(PPP);
-                            printf("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,", nnn.x,
-                                   nnn.y, nnn.z, ppp.x, ppp.y, ppp.z);
-                            printf("%d,", v.mat->matid); // for coloring
+                    if (d_v3->RecordVoxel) {
+                        // Voxels
+                        printf("<<<%d>>>", j);
+                        for (int i = 0; i < d_v3->num_d_voxels; i++) {
+                            auto &v = d_v3->d_voxels[i];
+                            if (v.isSurface()) {
+                                printf("%.4f,%.4f,%.4f,", v.pos.x, v.pos.y,
+                                       v.pos.z);
+                                printf("%.1f,%.4f,%.4f,%.4f,",
+                                       v.orient.AngleDegrees(), v.orient.x,
+                                       v.orient.y, v.orient.z);
+                                VX3_Vec3D<double> ppp, nnn;
+                                nnn = v.cornerOffset(NNN);
+                                ppp = v.cornerOffset(PPP);
+                                printf("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,", nnn.x,
+                                       nnn.y, nnn.z, ppp.x, ppp.y, ppp.z);
+                                printf("%d,", v.mat->matid); // for coloring
+                                printf(";");
+                            }
+                        }
+                        printf("<<<>>>");
+                    }
+                    if (d_v3->RecordLink) {
+                        // Links
+                        printf("|[[[%d]]]", j);
+                        for (int i = 0; i < d_v3->d_v_links.size(); i++) {
+                            auto l = d_v3->d_v_links[i];
+                            auto v1 = l->pVPos;
+                            printf("%.4f,%.4f,%.4f,", v1->pos.x, v1->pos.y,
+                                   v1->pos.z);
+                            auto v2 = l->pVNeg;
+                            printf("%.4f,%.4f,%.4f,", v2->pos.x, v2->pos.y,
+                                   v2->pos.z);
                             printf(";");
                         }
+                        printf("[[[]]]");
                     }
-                    // TODO: Consider also print Links and Colors
-                    printf("<<<>>>\n");
+                    printf("\n");
                 }
             }
         }
         d_v3->updateCurrentCenterOfMass();
         printf(COLORCODE_BLUE "%d) Simulation %d ends: %s Time: %f, Dist from "
                               "Init %f, CoM: (%f %f %f) mm\n" COLORCODE_RESET,
-               device_index, i, d_v3->vxa_filename, d_v3->currentTime,
+               device_index, thread_index, d_v3->vxa_filename, d_v3->currentTime,
                d_v3->currentCenterOfMass.Dist(d_v3->initialCenterOfMass) * 1000,
                d_v3->currentCenterOfMass.x * 1000,
                d_v3->currentCenterOfMass.y * 1000,
@@ -154,7 +172,7 @@ void VX3_SimulationManager::ParseForceField(VX3_MathTreeToken *field_ptr,
             std::string op = v_child.first.data();
             boost::trim_right(op);
 
-            std::cout << op << ":" << value << "\n";
+            // std::cout << op << ":" << value << "\n";
             tokens.push(make_pair(op, value));
             frontier.push(v_child.second);
         }
@@ -278,14 +296,19 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files,
             "VXA.Simulator.AttachDetach.boundingRadius", 0.75f);
         h_d_tmp.RecordStepSize =
             pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordStepSize", 0);
-        ParseForceField(h_d_tmp.force_field.token_x_prime,
-                        sizeof(h_d_tmp.force_field.token_x_prime), "x_prime",
+        h_d_tmp.RecordLink =
+            pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordLink", 0);
+        h_d_tmp.RecordVoxel =
+            pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordVoxel", 0);
+
+        ParseForceField(h_d_tmp.force_field.token_x_forcefield,
+                        sizeof(h_d_tmp.force_field.token_x_forcefield), "x_forcefield",
                         pt_merged);
-        ParseForceField(h_d_tmp.force_field.token_y_prime,
-                        sizeof(h_d_tmp.force_field.token_y_prime), "y_prime",
+        ParseForceField(h_d_tmp.force_field.token_y_forcefield,
+                        sizeof(h_d_tmp.force_field.token_y_forcefield), "y_forcefield",
                         pt_merged);
-        ParseForceField(h_d_tmp.force_field.token_z_prime,
-                        sizeof(h_d_tmp.force_field.token_z_prime), "z_prime",
+        ParseForceField(h_d_tmp.force_field.token_z_forcefield,
+                        sizeof(h_d_tmp.force_field.token_z_forcefield), "z_forcefield",
                         pt_merged);
 
         VcudaMemcpy(d_voxelyze_3s[device_index] + i, &h_d_tmp,
@@ -367,7 +390,7 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files,
 // https://stackoverflow.com/a/34795830/7001199
 void VX3_SimulationManager::enlargeGPUHeapSize() {
     size_t HeapSize = 1;
-    double ratio = 0.1; // make 10% of the total GPU memory to be heap memory
+    double ratio = 0.5; // make 10% of the total GPU memory to be heap memory
     size_t free, total;
     VcudaMemGetInfo(&free, &total);
     printf("Total GPU memory %ld bytes.\n", total);
@@ -390,11 +413,11 @@ void VX3_SimulationManager::startKernel(int num_simulation, int device_index) {
         threadsPerBlock = num_simulation;
     // printf("Starting kernel on device %d. passing d_voxelyze_3s[device_index]
     // %p.\n", device_index, d_voxelyze_3s[device_index]);
-    VX3_VoxelyzeKernel *result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(
-        num_simulation * sizeof(VX3_VoxelyzeKernel));
-    VcudaMemcpy(result_voxelyze_kernel, d_voxelyze_3s[device_index],
-                num_simulation * sizeof(VX3_VoxelyzeKernel),
-                cudaMemcpyDeviceToHost);
+    // VX3_VoxelyzeKernel *result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(
+    //     num_simulation * sizeof(VX3_VoxelyzeKernel));
+    // VcudaMemcpy(result_voxelyze_kernel, d_voxelyze_3s[device_index],
+    //             num_simulation * sizeof(VX3_VoxelyzeKernel),
+    //             cudaMemcpyDeviceToHost);
     enlargeGPUHeapSize();
     CUDA_Simulation<<<numBlocks, threadsPerBlock>>>(
         d_voxelyze_3s[device_index], num_simulation, device_index);

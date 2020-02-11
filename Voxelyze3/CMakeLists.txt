@@ -20,7 +20,7 @@ add_library(voxelyze.3.0 ${VX3_SRC_cu} ${VX3_SRC_cpp} ${VXA_SRC_cpp} ${OLD_SRC})
 add_executable(Voxelyze3 src/Executables/Voxelyze3.cpp)
 add_executable(vx3_node_worker src/Executables/vx3_node_worker.cu)
 add_executable(vx3_node_daemon src/Executables/vx3_node_daemon.cu)
-add_executable(vx3_test src/Executables/vx3_test.cpp)
+add_executable(vx3_test src/Executables/vx3_test.cu)
 
 target_link_libraries(vx3_node_worker PUBLIC voxelyze.3.0)
 target_link_libraries(vx3_test PUBLIC voxelyze.3.0)
@@ -34,13 +34,24 @@ target_link_libraries(vx3_node_daemon PUBLIC ${Boost_LIBRARIES})
 
 
 # CUDA options
+if(NOT DEFINED CUDA_DEBUG)
+  set(CUDA_DEBUG "-G or not" ON)
+  message("Set CUDA_DEBUG to ON.")
+endif(NOT DEFINED CUDA_DEBUG)
 set_target_properties(voxelyze.3.0 PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(vx3_node_worker PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(vx3_test PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
     #-G means debug info in GPU, so you can step in GPU kernels
-    # target_compile_options(voxelyze.3.0 PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-G -arch=compute_60 -code=compute_60>)
-    # target_compile_options(vx3_node_worker PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-G -arch=compute_60 -code=compute_60>)
-    target_compile_options(voxelyze.3.0 PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=compute_60 -code=compute_60>)
-    target_compile_options(vx3_node_worker PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=compute_60 -code=compute_60>)
+    if (CUDA_DEBUG)
+      message("Compile with debug information.")
+      target_compile_options(voxelyze.3.0     PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-G -arch=compute_60 -code=compute_60>)
+      target_compile_options(vx3_node_worker  PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-G -arch=compute_60 -code=compute_60>)
+      target_compile_options(vx3_test         PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-G -arch=compute_60 -code=compute_60>)
+    else (CUDA_DEBUG)
+      target_compile_options(voxelyze.3.0     PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=compute_60 -code=compute_60>)
+      target_compile_options(vx3_node_worker  PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=compute_60 -code=compute_60>)
+      target_compile_options(vx3_test         PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=compute_60 -code=compute_60>)
+    endif(CUDA_DEBUG)
 list(APPEND CMAKE_CUDA_FLAGS "-gencode=arch=compute_60,code=sm_60")
 
 
