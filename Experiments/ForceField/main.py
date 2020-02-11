@@ -1,7 +1,7 @@
 from lxml import etree
 import numpy as np
 np.random.seed(2)
-world = np.random.random(size=[1,100,100])
+world = np.random.random(size=[1,1000,1000])
 world[world<0.5]=0
 world[world>=0.5]=2
 world = world.astype(int)
@@ -9,7 +9,7 @@ world = world.astype(int)
 # world[0,5,0] = 2
 # world[0,7,0] = 2
 # world[0,9,0] = 3
-world_flatten = world.reshape([1, 10000])
+world_flatten = world.reshape([1, 1000000])
 
 # generate VXD
 root = etree.Element("VXD")
