@@ -1090,6 +1090,7 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection,
     colorMap[7] = CColor(0.82f, 0.61f, 0.49f, 0.5f);
     colorMap[8] = CColor(0.85f, 0.76f, 0.39f, 0.5f);
     colorMap[9] = CColor(0.97f, 0.55f, 0.19f, 1.0f);
+    // If it doesn't start play, check the Default.vxc file
     if (pSim->StreamHistory) {
         while (1) {
             if (pSim->StreamHistory->atEnd()) {
@@ -1190,8 +1191,8 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection,
                         glPopMatrix();
                     }
                     currentHistoryLine = line;
+                    return;
                 }
-                return;
             }
         }
     }
