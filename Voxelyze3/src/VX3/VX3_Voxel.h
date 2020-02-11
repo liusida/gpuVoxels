@@ -29,7 +29,7 @@ public:
 	__device__ bool externalExists() {return ext?true:false;} //!< Returns true if this voxel has had its VX3_External object created. This does not mecessarily imply that this external object actually contains any fixes or forces.
 	__device__ VX3_External* external() {if (!ext) ext = new VX3_External(); return ext;} //!< Returns a pointer to this voxel's unique external object that contains fixes, forces, and/or displacements. Allocates a new empty one if it doesn't already exist. Use externalExists() to determine if external() has been previously called at any time.
 
-	__device__ void timeStep(float dt); //!< Advances this voxel's state according to all forces and moments acting on it. Large timesteps will cause instability. Use CVoxelyze::recommendedTimeStep() to get the recommended largest stable timestep. @param[in] dt Timestep (in second) to advance.
+	__device__ void timeStep(double dt, double currentTime, VX3_VoxelyzeKernel* k); //!< Advances this voxel's state according to all forces and moments acting on it. Large timesteps will cause instability. Use CVoxelyze::recommendedTimeStep() to get the recommended largest stable timestep. @param[in] dt Timestep (in second) to advance.
 
 	//physical location
 	__device__ VX3_Vec3D<double> position() const {return pos;} //!< Returns the center position of this voxel in meters (GCS). This is the origin of the local coordinate system (LCS).

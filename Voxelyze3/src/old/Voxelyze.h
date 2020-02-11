@@ -139,7 +139,6 @@ public:
 	//info
 	float stateInfo(stateInfoType info, valueType type); //!< Returns a specific piece of information about the current state of the simulation. This method is not gaurenteed threadafe. @param[in] info The class of information desired. @param[in] type The type of the value to be returned.
 
-private:
 	double voxSize; //lattice size
 	float currentTime; //current time of the simulation in seconds
 	float ambientTemp;

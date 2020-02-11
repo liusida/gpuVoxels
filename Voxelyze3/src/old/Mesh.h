@@ -61,7 +61,7 @@ struct CFacet {
 	inline CFacet& operator=(const CFacet& p) { vi[0]=p.vi[0]; vi[1]=p.vi[1]; vi[2]=p.vi[2]; n=p.n; FColor = p.FColor; Name = p.Name; return *this;}; //overload equals
 	CFacet(const CFacet& p) {*this = p;}
 
-	Vec3D<> n; //normal
+	Vec3D<float> n; //normal
 	CColor FColor;
 	int vi[3]; //vertex indices
 	int Name; //my name (for GL picking)

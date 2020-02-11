@@ -6,6 +6,8 @@
 
 #include "VX3_vector.cuh"
 
+#include "VX3_ForceField.h"
+
 #include "VX3_Link.h"
 #include "VX3_Voxel.h"
 #include "VX3_MaterialLink.h"
@@ -92,6 +94,9 @@ public:
 
     bool enableAttach;
     int RecordStepSize = 0;
+
+    // Force Field
+    VX3_ForceField force_field;
 };
 
 
