@@ -447,7 +447,7 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num,
         // VX3_Voxel::force()
         // if (voxel1->mat !=
         //     voxel2->mat) { // disable same material collision for now
-        if (true) {
+        if (false) {
             VX3_Collision collision(voxel1, voxel2);
             collision.updateContactForce();
             voxel1->contactForce += collision.contactForce(voxel1);
@@ -534,7 +534,7 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num,
                 printf("ERROR: Out of memory. Link not created.\n");
                 return;
             }
-            pL->isNewLink = 500;
+            pL->isNewLink = k->SafetyGuard;
             k->d_v_links.push_back(pL); // add to the list
             // printf("createLink.... %p %p distance=> %f %f %f (%f), dir (%d and "
             //        "%d), watchDistance %f.\n",

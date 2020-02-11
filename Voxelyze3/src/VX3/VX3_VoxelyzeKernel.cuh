@@ -97,8 +97,12 @@ public:
     int RecordLink = 0;
     int RecordVoxel = 0;
 
+    // Safety Guard during the creation of new link
+    int SafetyGuard = 500;
+
     // Force Field
     VX3_ForceField force_field;
+    
 };
 
 

@@ -244,8 +244,10 @@ __device__ void VX3_Link::updateForces() {
     // momentNeg.z);
     if (isNewLink) {
         // for debug
-        momentNeg = VX3_Vec3D<>();
-        momentPos = VX3_Vec3D<>();
+        forceNeg = forceNeg * 0.01;
+        forcePos = forcePos * 0.01;
+        momentNeg = momentNeg * 0.01;
+        momentPos = momentPos * 0.01;
         isNewLink -= 1;
     }
     // assert(!(forceNeg.x != forceNeg.x) || !(forceNeg.y != forceNeg.y) ||

@@ -1,7 +1,7 @@
 from lxml import etree
 import numpy as np
 np.random.seed(2)
-world = np.random.random(size=[1,1000,1000])
+world = np.random.random(size=[1,100,100])
 world[world<0.5]=0
 world[world>=0.5]=2
 world = world.astype(int)
@@ -9,7 +9,7 @@ world = world.astype(int)
 # world[0,5,0] = 2
 # world[0,7,0] = 2
 # world[0,9,0] = 3
-world_flatten = world.reshape([1, 1000000])
+world_flatten = world.reshape([1, 10000])
 
 # generate VXD
 root = etree.Element("VXD")
@@ -18,26 +18,29 @@ child = etree.SubElement  # a shortcut
 AttachDetach = child(root, "AttachDetach")
 AttachDetach.set('replace', 'VXA.Simulator.AttachDetach')
 child(AttachDetach, 'EnableAttach').text = '1'
-child(AttachDetach, 'EnableCollision').text = '1' # not implemented yet
+child(AttachDetach, 'OnlyEnableCollision').text = '1' # not implemented yet
 child(AttachDetach, 'watchDistance').text = '1'
+
+# Stop Condition 2 sec
+StopConditionValue = child(root, "StopConditionValue")
+StopConditionValue.set(
+    'replace', 'VXA.Simulator.StopCondition.StopConditionValue')
+StopConditionValue.text = '10'
+
 # Enable Record History
 RecordHistory = child(root, "RecordHistory")
 RecordHistory.set('replace', 'VXA.Simulator.RecordHistory')
 child(RecordHistory, "RecordStepSize").text = '100'
 child(RecordHistory, "RecordVoxel").text = '1'
 child(RecordHistory, "RecordLink").text = '0'
-# Stop Condition 2 sec
-StopConditionValue = child(root, "StopConditionValue")
-StopConditionValue.set(
-    'replace', 'VXA.Simulator.StopCondition.StopConditionValue')
-StopConditionValue.text = '10'
+
 # ForceField
 ForceField = child(root, "ForceField")
 ForceField.set('replace', "VXA.Simulator.ForceField")
 x_forcefield = child(ForceField, "x_forcefield")
 a = child(x_forcefield, "mtADD")
 m = child(a, "mtMUL")
-child(m, "mtCONST").text = "-90"
+child(m, "mtCONST").text = "-190"
 child(m, "mtVAR").text = "x"
 m = child(a, "mtMUL")
 child(m, "mtCONST").text = "90"
@@ -49,7 +52,7 @@ m = child(a, "mtMUL")
 child(m, "mtCONST").text = "-90"
 child(m, "mtVAR").text = "x"
 m = child(a, "mtMUL")
-child(m, "mtCONST").text = "-90"
+child(m, "mtCONST").text = "-190"
 child(m, "mtVAR").text = "y"
 
 # Main Structure and PhaseOffset
