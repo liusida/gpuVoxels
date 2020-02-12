@@ -60,6 +60,22 @@ def evaluate_population(pop, record_history=False):
                         str_layer = "".join([str(c)+", " for c in flattened_state[i]])
                     layer.text = etree.CDATA(str_layer)
 
+            # hacky code to make sure the muscles actuate in counter phase; need to implement in voxelyze #
+            if pop.material_wide_phase_offset:
+                for name, details in ind.genotype.to_phenotype_mapping.items():
+                    state = details["state"]
+                    flattened_state = state.reshape(z, x * y)
+                    if name == "Data":
+                        mat_phase = np.zeros((z, x * y), dtype=np.int8)
+                        mat_phase[flattened_state == 3] = 1
+                        mat_phase[flattened_state == 4] = -1
+                        data = etree.SubElement(structure, "PhaseOffset")
+                        for i in range(mat_phase.shape[0]):
+                            layer = etree.SubElement(data, "Layer")
+                            str_layer = "".join([str(c) + ", " for c in mat_phase[i]])
+                            layer.text = etree.CDATA(str_layer)
+            # end hack #
+
             # md5 so we don't eval the same vxd more than once
             m = hashlib.md5()
             m.update(etree.tostring(root))
