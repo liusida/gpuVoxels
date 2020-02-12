@@ -6,7 +6,7 @@ from time import time
 from cppn.networks import CPPN
 from cppn.softbot import Genotype, Phenotype, Population
 from cppn.tools.algorithms import Optimizer
-from cppn.tools.utilities import count_occurrences, make_material_tree
+from cppn.tools.utilities import make_material_tree
 from cppn.objectives import ObjectiveDict
 from cppn.tools.evaluation import evaluate_population
 from cppn.tools.mutation import create_new_children_through_mutation
@@ -18,12 +18,9 @@ random.seed(SEED)
 np.random.seed(SEED)
 
 GENS = 0  # 500 to 1000
-POPSIZE = 5  # 49 or 99  # +1 for the randomly generated robot that is added each gen
+POPSIZE = 2  # 49 or 99  # +1 for the randomly generated robot that is added each gen
 
 IND_SIZE = (100, 100, 100)  # (100, 100, 100) 17 minutes for two guys on half a gpu
-MIN_PERCENT_FULL = 0.01
-MIN_PERCENT_MUSCLE = 0.01
-MAX_PERCENT_MUSCLE = 1.0  # no limit
 
 CHECKPOINT_EVERY = GENS+1  # ie. never  # GENS-1  # ie. last gen only
 
@@ -75,19 +72,17 @@ class MyPhenotype(Phenotype):
     def is_valid(self):
         for name, details in self.genotype.to_phenotype_mapping.items():
             if np.isnan(details["state"]).any():
+                print "INVALID: Nans in phenotype."
                 return False
 
             if name == "Data":
                 state = details["state"]
 
-                if np.sum(state>0) < np.product(self.genotype.orig_size_xyz) * MIN_PERCENT_FULL:
+                # just make sure there is some material to simulate, even if all passive.
+                if np.sum(state) == 0:
+                    print "INVALID: Empty sim."
                     return False
 
-                if count_occurrences(state, [3, 4]) < np.product(self.genotype.orig_size_xyz) * MIN_PERCENT_MUSCLE:
-                    return False
-
-                if count_occurrences(state, [3, 4]) > np.product(self.genotype.orig_size_xyz) * MAX_PERCENT_MUSCLE:
-                    return False
         return True
 
 
