@@ -24,6 +24,7 @@ Experiments/*/Voxelyze3
 Experiments/*/vx3_node_*
 Experiments/**/gen*.vxd
 submit*.sh
+generation01/
 
 # Prerequisites
 *.d
