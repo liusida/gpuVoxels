@@ -2,7 +2,7 @@
 # Specify a partition
 #SBATCH --partition=dg-jup
 # Request nodes
-#SBATCH --nodes=4
+#SBATCH --nodes=1
 # Request some processor cores
 #SBATCH --ntasks=4
 # Request GPUs

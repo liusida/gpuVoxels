@@ -4,3 +4,12 @@ Randomly generate 100 phaseoffset parameters.
 
 Run 100 experiments and get the results.
 
+# Execute
+
+```bash
+git pull
+sh rebuild.sh -3f
+sbatch deepgreen.sh
+```
+
+result will be in `output.xml`.
