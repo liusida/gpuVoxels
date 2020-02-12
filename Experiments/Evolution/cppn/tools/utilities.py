@@ -2,8 +2,7 @@ import numpy as np
 import itertools
 import re
 import zlib
-import networkx as nx
-from scipy.spatial.ckdtree import cKDTree
+from scipy.ndimage.measurements import label
 from collections import defaultdict
 import scipy.ndimage as ndimage
 from scipy.spatial.distance import directed_hausdorff
@@ -349,27 +348,21 @@ def make_one_shape_only(output_state):
         True if component of individual
 
     """
-    one_shape = np.zeros(output_state.shape, dtype=np.int8)
-
-    if np.sum(output_state > 0) < 2:
-        one_shape[np.where(output_state)] = 1
-        return one_shape
+    if np.sum(output_state) == 0:
+        return output_state
 
     # find coordinates
-    cs = np.argwhere(output_state > 0)
+    array = output_state > 0
+    labeled, ncomponents = label(array)
 
-    # build k-d tree
-    kdt = cKDTree(cs)
-    edges = kdt.query_pairs(1)
+    largest_count = 0
+    largest_label = 0
+    for n in range(ncomponents):
+        this_count = np.sum(labeled == n)
+        if this_count > largest_count:
+            largest_label = n
 
-    # create graph
-    G = nx.from_edgelist(edges)
-
-    largest_cc = max(nx.connected_components(G), key=len)
-
-    one_shape[cs[list(largest_cc)]] = 1
-
-    return one_shape
+    return labeled == largest_label
 
 
 def count_neighbors(output_state, mask=None):
