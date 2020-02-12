@@ -357,10 +357,11 @@ def make_one_shape_only(output_state):
 
     largest_count = 0
     largest_label = 0
-    for n in range(ncomponents):
+    for n in range(ncomponents+1):
         this_count = np.sum(labeled == n)
         if this_count > largest_count:
             largest_label = n
+            largest_count = this_count
 
     return labeled == largest_label
 
