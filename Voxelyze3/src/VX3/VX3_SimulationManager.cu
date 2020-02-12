@@ -160,7 +160,7 @@ void VX3_SimulationManager::ParseForceField(VX3_MathTreeToken *field_ptr,
     auto root =
         tree.get_child_optional("VXA.Simulator.ForceField." + field_name);
     if (!root) {
-        printf("ERROR: No field %s in VXA.\n", field_name.c_str());
+        // printf("ERROR: No field %s in VXA.\n", field_name.c_str());
         return;
     }
     frontier.push(tree.get_child("VXA.Simulator.ForceField." + field_name));

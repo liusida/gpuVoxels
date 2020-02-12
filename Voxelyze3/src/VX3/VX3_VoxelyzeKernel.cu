@@ -157,6 +157,12 @@ __device__ double VX3_VoxelyzeKernel::recommendedTimeStep() {
     // simulation will experience, then multiply by 2*pi and invert to get the
     // optimally largest timestep that should retain stability
     double MaxFreq2 = 0.0f; // maximum frequency in the simulation in rad/sec
+    if (!num_d_links) {
+        printf("WARNING: No links.\n");
+    }
+    if (!num_d_voxels) {
+        printf("ERROR: No voxels.\n");
+    }
     for (int i = 0; i < num_d_links; i++) {
         VX3_Link *pL = d_links + i;
         // axial
@@ -219,7 +225,8 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
         }
         if (OptimalDt < 1e-10) {
             CUDA_DEBUG_LINE("recommendedTimeStep is zero.");
-            return false;
+            OptimalDt = 1e-10;
+            // return false;
         }
         dt = DtFrac * OptimalDt;
     }
