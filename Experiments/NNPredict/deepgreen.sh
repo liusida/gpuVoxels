@@ -1,6 +1,6 @@
 #!/bin/bash
 # Specify a partition
-#SBATCH --partition=dg-jup
+#SBATCH --partition=dggpu
 # Request nodes
 #SBATCH --nodes=1
 # Request some processor cores
