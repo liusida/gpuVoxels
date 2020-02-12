@@ -3,6 +3,7 @@
 #
 from lxml import etree
 import numpy as np
+import shutil, os
 
 root = etree.parse("assets/robot.data")
 morphology = []
@@ -27,6 +28,10 @@ z,y,x = morphology.shape
 #%%
 # generate random control for each voxel
 #
+try:
+    os.mkdir("generation01")
+except:
+    pass
 for robot_id in range(100):
     control = np.random.random(size=morphology.shape)  * 2 - 1
     control[morphology==0]=0
@@ -58,7 +63,6 @@ for robot_id in range(100):
     with open(f'generation01/robot_{robot_id:03}.vxd', 'wb') as file:
         file.write(etree.tostring(root))
 
-import shutil 
 try:
     shutil.copyfile("./base.vxa", "./generation01/base.vxa")
 except:

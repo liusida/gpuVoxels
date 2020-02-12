@@ -9,6 +9,7 @@ Run 100 experiments and get the results.
 ```bash
 git pull
 sh rebuild.sh -3f
+python main.py
 sbatch deepgreen.sh
 ```
 
