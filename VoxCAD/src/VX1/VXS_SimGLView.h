@@ -124,6 +124,8 @@ public:
 
 	QString currentHistoryLine;
 	bool HistoryPaused;
+
+	Vec3D<> HistoryCM;
 };
 
 #endif //VX_SIMGLUTILS_H

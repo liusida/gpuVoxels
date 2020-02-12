@@ -1189,6 +1189,9 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection,
                         CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox,
                                             true, true, 1.0, colorMap[matid]);
                         glPopMatrix();
+                        //Update camera view center, but gentlely.
+                        if (i == int(voxel.size()/2))
+                            HistoryCM= HistoryCM*0.95 + Vec3D<>(p1,p2,p3)* 0.05;
                     }
                     currentHistoryLine = line;
                     return;

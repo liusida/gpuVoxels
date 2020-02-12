@@ -306,6 +306,7 @@ public:
 	QTextStream* StreamHistory = NULL;
 	QFile* fileHistory=NULL;
 
+	bool ViewingHistory = true;
 
 };
 

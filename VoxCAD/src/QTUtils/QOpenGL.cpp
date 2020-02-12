@@ -1,4 +1,5 @@
 #include "QOpenGL.h"
+#include <QtDebug>
 #include <QMouseEvent>
 #include <QFileDialog>
 #include <QMessageBox>

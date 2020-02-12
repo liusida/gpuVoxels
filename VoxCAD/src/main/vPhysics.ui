@@ -742,6 +742,9 @@ Strain</string>
          <property name="text">
           <string>Lock view to center of mass</string>
          </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
