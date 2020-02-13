@@ -18,14 +18,27 @@ random.seed(SEED)
 np.random.seed(SEED)
 
 GENS = 0  # 500 to 1000
-POPSIZE = 2  # 49 or 99  # +1 for the randomly generated robot that is added each gen
+POPSIZE = 12  # 49 or 99  # +1 for the randomly generated robot that is added each gen
 
-IND_SIZE = (100, 100, 100)  # (100, 100, 100) 17 minutes for two guys on half a gpu
+IND_SIZE = (10, 10, 10)  # (100, 100, 100) 17 minutes for two guys on half a gpu
 
 CHECKPOINT_EVERY = GENS+1  # ie. never  # GENS-1  # ie. last gen only
 
 DIRECTORY = "."
 start_time = time()
+
+
+# def favor_appendages(thrown_object_displacement, ind):
+#     total_vox = 0
+#     total_neigh = 0
+#     for name, details in ind.genotype.to_phenotype_mapping.items():
+#         if name == "material":
+#             locations = details['state'] > 0
+#             total_vox = np.sum(locations)
+#             neigh = np.reshape(count_neighbors(details['state']), IND_SIZE)
+#             total_neigh = np.sum(neigh[locations])
+#     # print total_vox, float(total_neigh), thrown_object_displacement
+#     return total_vox / float(total_neigh) * thrown_object_displacement
 
 
 class MyGenotype(Genotype):
@@ -100,6 +113,9 @@ my_objective_dict.add_objective(name="age", maximize=False, tag=None)
 
 # Initializing a population of SoftBots
 my_pop = Population(my_objective_dict, MyGenotype, MyPhenotype, pop_size=POPSIZE)
+
+# hack: see evaluation.py lines 63-77
+my_pop.material_wide_phase_offset = True
 
 # quick test here to make sure evaluation is working properly:
 # evaluate_population(my_pop)
