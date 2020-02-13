@@ -35,8 +35,8 @@ z,y,x = morphology.shape
 #%%
 # generate random control for each voxel
 #
-num_generation = 1000
-population_per_generation = 100
+num_generation = 400
+population_per_generation = 400
 mutation_ratio = 0.1
 best_robot = None
 
@@ -109,7 +109,7 @@ for generation_id in range(num_generation):
     report = etree.parse(f"{path_gene}output.xml")
     #  data = root.findall(".//Data")[0]
     filename = report.findall(".//filename")[0].text
-    distance = report.findall(".//distance")[0].text
+    fitness_score = report.findall(".//fitness_score")[0].text
     best_fit_robot_id = int(filename[len("robot_"):len("robot_")+5])
     best_robot = robots[best_fit_robot_id]
-    print(f"done. best fit distance: {distance}.", flush=True)
+    print(f"done. best fitness_score: {fitness_score}.", flush=True)
