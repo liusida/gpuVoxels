@@ -33,7 +33,7 @@ num_generation = 1000
 population_per_generation = 1000
 best_robot = None
 
-prefix = "generated_data_v2/"
+prefix = "generated_data_v3/"
 for generation_id in range(num_generation):
     print(f"Starting generation {generation_id}..." , end="", flush=True)
     robots = []
