@@ -1834,6 +1834,9 @@ bool CVXC_Structure::ReadXML(CXML_Rip* pXML, std::string Version, std::string* R
 			dataArray = split(RawData,',',dataArray);
 			for (int k=0; k<X_Voxels*Y_Voxels; k++)
 			{
+				if (dataArray.size()<=k) {
+					printf("ERROR: Data in PhaseOffset.Layers is too short.\n");
+				}
 				if (pData[X_Voxels*Y_Voxels*i+k] > 0)
 				{
 					SetPhaseOffset(voxCounter,atof(dataArray[k].c_str()));
