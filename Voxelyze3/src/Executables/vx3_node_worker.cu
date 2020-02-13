@@ -100,9 +100,12 @@ int main(int argc, char** argv) {
     tr_result.put("report.inputdir", input_dir.filename().string());
     tr_result.put("report.bestfit.filename", sm.h_results[0].vxa_filename);
     tr_result.put("report.bestfit.distance", sm.h_results[0].distance);
+    tr_result.put("report.bestfit.fitness_score", sm.h_results[0].fitness_score);
+
     // this will be too much to write into the report.
     for (auto &res: sm.h_results) {
         std::string simulation_name = split(res.vxa_filename, '.')[0];
+        tr_result.put("report.detail."+simulation_name+".fitness_score", res.fitness_score);
         tr_result.put("report.detail."+simulation_name+".num_voxel", res.num_voxel);
         tr_result.put("report.detail."+simulation_name+".voxSize", res.voxSize);
         tr_result.put("report.detail."+simulation_name+".CoM.x", res.x);

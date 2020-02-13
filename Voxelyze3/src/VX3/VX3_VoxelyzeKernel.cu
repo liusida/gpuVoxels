@@ -3,13 +3,9 @@
 
 /* Sub GPU Threads */
 __global__ void gpu_update_force(VX3_Link **links, int num);
-__global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt,
-                                 double currentTime, VX3_VoxelyzeKernel *k);
-__global__ void gpu_update_temperature(VX3_Voxel *voxels, int num,
-                                       double TempAmplitude, double TempPeriod,
-                                       double currentTime);
-__global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num,
-                                  double watchDistance, VX3_VoxelyzeKernel *k);
+__global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt, double currentTime, VX3_VoxelyzeKernel *k);
+__global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime);
+__global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double watchDistance, VX3_VoxelyzeKernel *k);
 /* Host methods */
 
 VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
@@ -17,8 +13,7 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
     voxSize = In->Vx.voxSize;
 
     num_d_voxelMats = In->Vx.voxelMats.size();
-    VcudaMalloc((void **)&d_voxelMats,
-                num_d_voxelMats * sizeof(VX3_MaterialVoxel));
+    VcudaMalloc((void **)&d_voxelMats, num_d_voxelMats * sizeof(VX3_MaterialVoxel));
     {
         // push all h first, since there will be reference below
         for (auto mat : In->Vx.voxelMats) {
@@ -27,15 +22,13 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
         int i = 0;
         for (auto mat : In->Vx.voxelMats) {
             VX3_MaterialVoxel tmp_voxelMat(mat, this);
-            VcudaMemcpy(d_voxelMats + i, &tmp_voxelMat,
-                        sizeof(VX3_MaterialVoxel), VcudaMemcpyHostToDevice);
+            VcudaMemcpy(d_voxelMats + i, &tmp_voxelMat, sizeof(VX3_MaterialVoxel), VcudaMemcpyHostToDevice);
             i++;
         }
     }
 
     num_d_linkMats = In->Vx.linkMats.size();
-    VcudaMalloc((void **)&d_linkMats,
-                num_d_linkMats * sizeof(VX3_MaterialLink));
+    VcudaMalloc((void **)&d_linkMats, num_d_linkMats * sizeof(VX3_MaterialLink));
     {
         int i = 0;
         std::vector<VX3_MaterialLink *> tmp_v_linkMats;
@@ -43,8 +36,7 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
             // printf("mat->vox1Mat %p, mat->vox2Mat %p.\n", mat->vox1Mat,
             // mat->vox2Mat);
             VX3_MaterialLink tmp_linkMat(mat, this);
-            VcudaMemcpy(d_linkMats + i, &tmp_linkMat, sizeof(VX3_MaterialLink),
-                        VcudaMemcpyHostToDevice);
+            VcudaMemcpy(d_linkMats + i, &tmp_linkMat, sizeof(VX3_MaterialLink), VcudaMemcpyHostToDevice);
             tmp_v_linkMats.push_back(d_linkMats + i);
             h_linkMats.push_back(mat);
             i++;
@@ -62,17 +54,14 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
     num_d_links = In->Vx.linksList.size();
     std::vector<VX3_Link *> tmp_v_links;
     VcudaMalloc((void **)&d_links, num_d_links * sizeof(VX3_Link));
-    VX3_Link *tmp_link_cache =
-        (VX3_Link *)malloc(num_d_links * sizeof(VX3_Link));
+    VX3_Link *tmp_link_cache = (VX3_Link *)malloc(num_d_links * sizeof(VX3_Link));
     for (int i = 0; i < num_d_links; i++) {
         VX3_Link tmp_link(In->Vx.linksList[i], this);
         memcpy(tmp_link_cache + i, &tmp_link, sizeof(VX3_Link));
-        tmp_v_links.push_back(
-            d_links + i); // not copied yet, but still ok to get the address
+        tmp_v_links.push_back(d_links + i); // not copied yet, but still ok to get the address
         h_links.push_back(In->Vx.linksList[i]);
     }
-    VcudaMemcpy(d_links, tmp_link_cache, num_d_links * sizeof(VX3_Link),
-                VcudaMemcpyHostToDevice);
+    VcudaMemcpy(d_links, tmp_link_cache, num_d_links * sizeof(VX3_Link), VcudaMemcpyHostToDevice);
     hd_v_links = VX3_hdVector<VX3_Link *>(tmp_v_links);
     for (int i = 0; i < num_d_links; i++) {
         h_lookup_links[In->Vx.linksList[i]] = d_links + i;
@@ -81,8 +70,7 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
     for (int i = 0; i < num_d_voxels; i++) {
         // set values for GPU memory space
         VX3_Voxel tmp_voxel(In->Vx.voxelsList[i], this);
-        VcudaMemcpy(d_voxels + i, &tmp_voxel, sizeof(VX3_Voxel),
-                    VcudaMemcpyHostToDevice);
+        VcudaMemcpy(d_voxels + i, &tmp_voxel, sizeof(VX3_Voxel), VcudaMemcpyHostToDevice);
     }
 
     // Not all data is in Vx, here are others:
@@ -137,13 +125,11 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
         d_linkMats[i].syncVectors();
     }
 }
-__device__ bool VX3_VoxelyzeKernel::StopConditionMet(
-    void) // have we met the stop condition yet?
+__device__ bool VX3_VoxelyzeKernel::StopConditionMet(void) // have we met the stop condition yet?
 {
     if (StopConditionType != SC_MAX_SIM_TIME) {
-        printf(COLORCODE_BOLD_RED
-               "StopConditionType: %d. Type of stop condition no supported for "
-               "now.\n" COLORCODE_RESET,
+        printf(COLORCODE_BOLD_RED "StopConditionType: %d. Type of stop condition no supported for "
+                                  "now.\n" COLORCODE_RESET,
                StopConditionType);
         return true;
     }
@@ -172,12 +158,10 @@ __device__ double VX3_VoxelyzeKernel::recommendedTimeStep() {
             MaxFreq2 = thisMaxFreq2;
         // rotational will always be less than or equal
     }
-    if (MaxFreq2 <= 0.0f) { // didn't find anything (i.e no links) check for
-                            // individual voxelss
+    if (MaxFreq2 <= 0.0f) {                      // didn't find anything (i.e no links) check for
+                                                 // individual voxelss
         for (int i = 0; i < num_d_voxels; i++) { // for each link
-            double thisMaxFreq2 = d_voxels[i].mat->youngsModulus() *
-                                  d_voxels[i].mat->nomSize /
-                                  d_voxels[i].mat->mass();
+            double thisMaxFreq2 = d_voxels[i].mat->youngsModulus() * d_voxels[i].mat->nomSize / d_voxels[i].mat->mass();
             if (thisMaxFreq2 > MaxFreq2)
                 MaxFreq2 = thisMaxFreq2;
         }
@@ -185,10 +169,8 @@ __device__ double VX3_VoxelyzeKernel::recommendedTimeStep() {
     if (MaxFreq2 <= 0.0f)
         return 0.0f;
     else
-        return 1.0f /
-               (6.283185f *
-                sqrt(MaxFreq2)); // the optimal timestep is to advance one
-                                 // radian of the highest natural frequency
+        return 1.0f / (6.283185f * sqrt(MaxFreq2)); // the optimal timestep is to advance one
+                                                    // radian of the highest natural frequency
 }
 
 __device__ void VX3_VoxelyzeKernel::updateTemperature() {
@@ -198,14 +180,11 @@ __device__ void VX3_VoxelyzeKernel::updateTemperature() {
         if (TempPeriod > 0) {
             int blockSize = 512;
             int minGridSize;
-            cudaOccupancyMaxPotentialBlockSize(
-                &minGridSize, &blockSize, gpu_update_temperature, 0,
-                num_d_voxels); // Dynamically calculate blockSize
+            cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_temperature, 0,
+                                               num_d_voxels); // Dynamically calculate blockSize
             int gridSize_voxels = (num_d_voxels + blockSize - 1) / blockSize;
-            int blockSize_voxels =
-                num_d_voxels < blockSize ? num_d_voxels : blockSize;
-            gpu_update_temperature<<<gridSize_voxels, blockSize_voxels>>>(
-                d_voxels, num_d_voxels, TempAmplitude, TempPeriod, currentTime);
+            int blockSize_voxels = num_d_voxels < blockSize ? num_d_voxels : blockSize;
+            gpu_update_temperature<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, TempAmplitude, TempPeriod, currentTime);
             CUDA_CHECK_AFTER_CALL();
             cudaDeviceSynchronize();
         }
@@ -235,17 +214,14 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     int blockSize;
     int minGridSize;
     if (d_v_links.size()) {
-        cudaOccupancyMaxPotentialBlockSize(
-            &minGridSize, &blockSize, gpu_update_force, 0,
-            d_v_links.size()); // Dynamically calculate blockSize
+        cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_force, 0,
+                                           d_v_links.size()); // Dynamically calculate blockSize
         int gridSize_links = (d_v_links.size() + blockSize - 1) / blockSize;
-        int blockSize_links =
-            d_v_links.size() < blockSize ? d_v_links.size() : blockSize;
+        int blockSize_links = d_v_links.size() < blockSize ? d_v_links.size() : blockSize;
         // if (d_v_links.size() > 1024) {
         //     printf("debug");
         // }
-        gpu_update_force<<<gridSize_links, blockSize_links>>>(&d_v_links[0],
-                                                              d_v_links.size());
+        gpu_update_force<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
         CUDA_CHECK_AFTER_CALL();
         cudaDeviceSynchronize();
 
@@ -264,13 +240,11 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     if (enableAttach)
         updateAttach();
 
-    cudaOccupancyMaxPotentialBlockSize(
-        &minGridSize, &blockSize, gpu_update_voxel, 0,
-        num_d_voxels); // Dynamically calculate blockSize
+    cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_voxel, 0,
+                                       num_d_voxels); // Dynamically calculate blockSize
     int gridSize_voxels = (num_d_voxels + blockSize - 1) / blockSize;
     int blockSize_voxels = num_d_voxels < blockSize ? num_d_voxels : blockSize;
-    gpu_update_voxel<<<gridSize_voxels, blockSize_voxels>>>(
-        d_voxels, num_d_voxels, dt, currentTime, this);
+    gpu_update_voxel<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, dt, currentTime, this);
     CUDA_CHECK_AFTER_CALL();
     cudaDeviceSynchronize();
 
@@ -288,12 +262,10 @@ __device__ void VX3_VoxelyzeKernel::updateAttach() {
     // link between these two voxels, updateSurface().
     int blockSize = 16;
     dim3 dimBlock(blockSize, blockSize);
-    dim3 dimGrid((num_d_surface_voxels + dimBlock.x - 1) / dimBlock.x,
-                 (num_d_surface_voxels + dimBlock.y - 1) / dimBlock.y);
-    gpu_update_attach<<<dimGrid, dimBlock>>>(
-        d_surface_voxels, num_d_surface_voxels, watchDistance,
-        this); // invoke two dimensional gpu threads 'CUDA C++ Programming
-               // Guide', Nov 2019, P52.
+    dim3 dimGrid((num_d_surface_voxels + dimBlock.x - 1) / dimBlock.x, (num_d_surface_voxels + dimBlock.y - 1) / dimBlock.y);
+    gpu_update_attach<<<dimGrid, dimBlock>>>(d_surface_voxels, num_d_surface_voxels, watchDistance,
+                                             this); // invoke two dimensional gpu threads 'CUDA C++ Programming
+                                                    // Guide', Nov 2019, P52.
     CUDA_CHECK_AFTER_CALL();
 }
 
@@ -322,30 +294,30 @@ __device__ void VX3_VoxelyzeKernel::regenerateSurfaceVoxels() {
         }
     }
     num_d_surface_voxels = tmp.size();
-    d_surface_voxels =
-        (VX3_Voxel **)malloc(num_d_surface_voxels * sizeof(VX3_Voxel));
+    d_surface_voxels = (VX3_Voxel **)malloc(num_d_surface_voxels * sizeof(VX3_Voxel));
     for (int i = 0; i < num_d_surface_voxels; i++) {
         d_surface_voxels[i] = tmp[i];
     }
 }
 
-__device__ VX3_MaterialLink *
-VX3_VoxelyzeKernel::combinedMaterial(VX3_MaterialVoxel *mat1,
-                                     VX3_MaterialVoxel *mat2) {
+__device__ VX3_MaterialLink *VX3_VoxelyzeKernel::combinedMaterial(VX3_MaterialVoxel *mat1, VX3_MaterialVoxel *mat2) {
     for (int i = 0; i < d_v_linkMats.size(); i++) {
         VX3_MaterialLink *thisMat = d_v_linkMats[i];
-        if ((thisMat->vox1Mat == mat1 && thisMat->vox2Mat == mat2) ||
-            (thisMat->vox1Mat == mat2 && thisMat->vox2Mat == mat1))
+        if ((thisMat->vox1Mat == mat1 && thisMat->vox2Mat == mat2) || (thisMat->vox1Mat == mat2 && thisMat->vox2Mat == mat1))
             return thisMat; // already exist
     }
 
-    VX3_MaterialLink *newMat =
-        new VX3_MaterialLink(mat1, mat2); // where to free this?
+    VX3_MaterialLink *newMat = new VX3_MaterialLink(mat1, mat2); // where to free this?
     d_v_linkMats.push_back(newMat);
     mat1->d_dependentMaterials.push_back(newMat);
     mat2->d_dependentMaterials.push_back(newMat);
 
     return newMat;
+}
+
+__device__ void VX3_VoxelyzeKernel::computeFitness() {
+    VX3_Vec3D<> offset = currentCenterOfMass - initialCenterOfMass;
+    fitness_score = VX3_MathTree::eval(offset.x, offset.y, offset.z, currentTime, fitness_function);
 }
 
 /* Sub GPU Threads */
@@ -359,8 +331,7 @@ __global__ void gpu_update_force(VX3_Link **links, int num) {
         }
     }
 }
-__global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt,
-                                 double currentTime, VX3_VoxelyzeKernel *k) {
+__global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt, double currentTime, VX3_VoxelyzeKernel *k) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         VX3_Voxel *t = &voxels[gindex];
@@ -370,9 +341,7 @@ __global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt,
     }
 }
 
-__global__ void gpu_update_temperature(VX3_Voxel *voxels, int num,
-                                       double TempAmplitude, double TempPeriod,
-                                       double currentTime) {
+__global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         // vfloat tmp = pEnv->GetTempAmplitude() *
@@ -382,16 +351,12 @@ __global__ void gpu_update_temperature(VX3_Voxel *voxels, int num,
         if (t->mat->fixed)
             return; // fixed voxels, no need to update temperature
         double currentTemperature =
-            TempAmplitude *
-            sin(2 * 3.1415926f *
-                (currentTime / TempPeriod +
-                 t->phaseOffset)); // update the global temperature
+            TempAmplitude * sin(2 * 3.1415926f * (currentTime / TempPeriod + t->phaseOffset)); // update the global temperature
         t->setTemperature(currentTemperature);
         // t->setTemperature(0.0f);
     }
 }
-__device__ bool is_neighbor(VX3_Voxel *voxel1, VX3_Voxel *voxel2,
-                            VX3_Link *incoming_link, int depth) {
+__device__ bool is_neighbor(VX3_Voxel *voxel1, VX3_Voxel *voxel2, VX3_Link *incoming_link, int depth) {
     // printf("Checking (%d,%d,%d) and (%d,%d,%d) in depth %d.\n",
     //             voxel1->ix, voxel1->iy, voxel1->iz,
     //             voxel2->ix, voxel2->iy, voxel2->iz, depth);
@@ -407,13 +372,11 @@ __device__ bool is_neighbor(VX3_Voxel *voxel1, VX3_Voxel *voxel2,
         if (voxel1->links[i]) {
             if (voxel1->links[i] != incoming_link) {
                 if (voxel1->links[i]->pVNeg == voxel1) {
-                    if (is_neighbor(voxel1->links[i]->pVPos, voxel2,
-                                    voxel1->links[i], depth - 1)) {
+                    if (is_neighbor(voxel1->links[i]->pVPos, voxel2, voxel1->links[i], depth - 1)) {
                         return true;
                     }
                 } else {
-                    if (is_neighbor(voxel1->links[i]->pVNeg, voxel2,
-                                    voxel1->links[i], depth - 1)) {
+                    if (is_neighbor(voxel1->links[i]->pVNeg, voxel2, voxel1->links[i], depth - 1)) {
                         return true;
                     }
                 }
@@ -423,17 +386,14 @@ __device__ bool is_neighbor(VX3_Voxel *voxel1, VX3_Voxel *voxel2,
     // printf("not found.\n");
     return false;
 }
-__global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num,
-                                  double watchDistance, VX3_VoxelyzeKernel *k) {
+__global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double watchDistance, VX3_VoxelyzeKernel *k) {
     int first = threadIdx.x + blockIdx.x * blockDim.x;
     int second = threadIdx.y + blockIdx.y * blockDim.y;
     if (first < num && second < first) {
         VX3_Voxel *voxel1 = surface_voxels[first];
         VX3_Voxel *voxel2 = surface_voxels[second];
         VX3_Vec3D<double> diff = voxel1->pos - voxel2->pos;
-        watchDistance = 0.5 *
-                        (voxel1->baseSize(X_AXIS) + voxel2->baseSize(X_AXIS)) *
-                        watchDistance;
+        watchDistance = 0.5 * (voxel1->baseSize(X_AXIS) + voxel2->baseSize(X_AXIS)) * watchDistance;
 
         if (diff.x > watchDistance || diff.x < -watchDistance)
             return;
@@ -525,17 +485,14 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num,
 
         // TODO: need to solve this. Create only when there's a right place to
         // attach
-        if (voxel1->links[link_dir_1] == NULL &&
-            voxel2->links[link_dir_2] == NULL) {
+        if (voxel1->links[link_dir_1] == NULL && voxel2->links[link_dir_2] == NULL) {
             VX3_Link *pL;
             if (reverseOrder) {
-                pL = new VX3_Link(
-                    voxel1, link_dir_1, voxel2, link_dir_2, link_axis,
-                    k); // make the new link (change to both materials, etc.
+                pL = new VX3_Link(voxel1, link_dir_1, voxel2, link_dir_2, link_axis,
+                                  k); // make the new link (change to both materials, etc.
             } else {
-                pL = new VX3_Link(
-                    voxel2, link_dir_2, voxel1, link_dir_1, link_axis,
-                    k); // make the new link (change to both materials, etc.
+                pL = new VX3_Link(voxel2, link_dir_2, voxel1, link_dir_1, link_axis,
+                                  k); // make the new link (change to both materials, etc.
             }
             if (!pL) {
                 printf("ERROR: Out of memory. Link not created.\n");

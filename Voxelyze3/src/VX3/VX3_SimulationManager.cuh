@@ -13,9 +13,8 @@ namespace pt = boost::property_tree;
 #include "VX3_VoxelyzeKernel.cuh"
 
 class VX3_SimulationManager {
-public:
-    VX3_SimulationManager(std::vector<std::vector<fs::path>> in_sub_batches,
-                          fs::path in_base, fs::path in_input_dir,
+  public:
+    VX3_SimulationManager(std::vector<std::vector<fs::path>> in_sub_batches, fs::path in_base, fs::path in_input_dir,
                           int in_num_of_devices);
     ~VX3_SimulationManager();
 
@@ -27,14 +26,12 @@ public:
     void sortResults();
     void printResults();
     void enlargeGPUHeapSize();
-    void ParseForceField(VX3_MathTreeToken *field_ptr, size_t max_length,
-                         std::string field_name, pt::ptree &tree);
+    void ParseMathTree(VX3_MathTreeToken *field_ptr, size_t max_length, std::string node_address, pt::ptree &tree);
 
     /* DATA */
-    int num_of_devices; // Total number of GPUs on one single node. One
-                        // DeepGreen node has 8 GPUs.
-    std::vector<VX3_VoxelyzeKernel *>
-        d_voxelyze_3s; // Multiple device memory passing to different device.
+    int num_of_devices;                              // Total number of GPUs on one single node. One
+                                                     // DeepGreen node has 8 GPUs.
+    std::vector<VX3_VoxelyzeKernel *> d_voxelyze_3s; // Multiple device memory passing to different device.
 
     std::vector<std::vector<fs::path>> sub_batches;
     fs::path input_dir;
