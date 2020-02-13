@@ -25,6 +25,7 @@ Experiments/*/vx3_node_*
 Experiments/**/gen*.vxd
 submit*.sh
 generation01/
+generated_data_*
 
 # Prerequisites
 *.d
