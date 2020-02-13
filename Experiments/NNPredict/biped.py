@@ -34,7 +34,8 @@ z,y,x = morphology.shape
 # generate random control for each voxel
 #
 num_generation = 1000
-population_per_generation = 1000
+population_per_generation = 100
+mutation_ratio = 0.02
 best_robot = None
 
 prefix = "generated_data_biped_v1/"
@@ -46,7 +47,7 @@ for generation_id in range(num_generation):
         if (best_robot is None):#initialize
             control = np.random.random(size=morphology.shape)  * 2 - 1
         else:#mutate
-            control = best_robot + np.random.random(size=morphology.shape)  * 0.02 - 1
+            control = best_robot + (np.random.random(size=morphology.shape)  * 2 - 1) * mutation_ratio
         control[morphology==0]=0
         robots.append(control)
         control_flatten = control.reshape(Z_Voxels,-1)
