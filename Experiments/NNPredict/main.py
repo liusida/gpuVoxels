@@ -29,13 +29,13 @@ z,y,x = morphology.shape
 #%%
 # generate random control for each voxel
 #
-num_generation = 100
-population_per_generation = 100
+num_generation = 1000
+population_per_generation = 1000
 best_robot = None
 
 prefix = "generated_data_v2/"
 for generation_id in range(num_generation):
-    print(f"Starting generation {generation_id}..." , end="")
+    print(f"Starting generation {generation_id}..." , end="", flush=True)
     robots = []
     robots_flatten = []
     for robot_id in range(population_per_generation):
@@ -96,6 +96,8 @@ for generation_id in range(num_generation):
     # print(running_cmd)
     process = subprocess.Popen(running_cmd.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
+    if (error):
+        print(error, flush=True)
 
     report = etree.parse(f"{path_gene}output.xml")
     #%%
@@ -104,5 +106,5 @@ for generation_id in range(num_generation):
     distance = report.findall(".//distance")[0].text
     best_fit_robot_id = int(filename[len("robot_"):len("robot_")+5])
     best_robot = robots[best_fit_robot_id]
-    print(f"done. best fit distance: {distance}.")
+    print(f"done. best fit distance: {distance}.", flush=True)
     # %%
