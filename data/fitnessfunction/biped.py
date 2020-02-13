@@ -121,3 +121,5 @@ for generation_id in range(num_generation):
     if (fitness_score > -0.1): # allow the robot to move downward a little bit. No fall! (If the robot fall, the score will be around -0.3.)
         print("increasing trainning time to " + str(0.1+additional_training_time))
         additional_training_time += 0.1
+
+print("Job Finished.")
