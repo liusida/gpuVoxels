@@ -12,7 +12,7 @@
 # Run for five minutes
 #SBATCH --time=10:00:00
 # Name of this job
-#SBATCH --job-name=NNPredict
+#SBATCH --job-name=Puppy
 # Output of this job, stderr and stdout are joined by default
 # %x=job-name %j=jobid
 #SBATCH --output=%x_%j.out
