@@ -6,10 +6,10 @@ import shutil
 import os
 import subprocess
 
-root = etree.parse("assets/Biped.vxc")
-morphology = []
+root = etree.parse("assets/gen230.vxc")
 try:
-    data = root.findall(".//Data")[0]
+    Data = root.findall(".//Data")[0]
+    PhaseOffset = root.findall(".//PhaseOffset")[0]
     X_Voxels = int(root.findall(".//X_Voxels")[0].text)
     Y_Voxels = int(root.findall(".//Y_Voxels")[0].text)
     Z_Voxels = int(root.findall(".//Z_Voxels")[0].text)
@@ -18,7 +18,8 @@ except:
     print("No valid Data.")
     exit()
 
-for l in data.iter("Layer"):
+morphology = []
+for l in Data.iter("Layer"):
     layer = []
     for c in l.text:
         layer.append(int(c))
@@ -27,20 +28,32 @@ for l in data.iter("Layer"):
 morphology = np.array(morphology)
 morphology = np.array(morphology).reshape(Z_Voxels, Y_Voxels, X_Voxels)
 morphology_flatten = morphology.reshape(Z_Voxels, -1)
+
+control = []
+for l in PhaseOffset.iter("Layer"):
+    layer = []
+    for c in l.text.split(","):
+        layer.append(float(c))
+    control.append(layer)
+control = np.array(control)
+control = np.array(control).reshape(Z_Voxels, Y_Voxels, X_Voxels)
+
 # print(morphology)
 z, y, x = morphology.shape
 
 # generate random control for each voxel
 #
+generation_id_start = 240
 num_generation = 1000
-population_per_generation = 1000
+population_per_generation = 400
 mutation_ratio = 0.02
-best_robot = None
+best_robot = control
 fitness_score = 0
+base_training_time = 2
 additional_training_time = 0
 
 prefix = "generated_data_biped_v1/"
-for generation_id in range(num_generation):
+for generation_id in range(generation_id_start, generation_id_start+num_generation):
     print(f"Starting generation {generation_id}...", end="", flush=True)
     robots = []
     robots_flatten = []
@@ -76,7 +89,7 @@ for generation_id in range(num_generation):
         StopConditionValue.set(
             'replace', 'VXA.Simulator.StopCondition.StopConditionValue')
         StopConditionValue.text = str(
-            0.1 + additional_training_time)  # scaffolding!!!
+            base_training_time + additional_training_time)  # scaffolding!!!
         # Main Structure and PhaseOffset
         structure = child(root, "Structure")
         structure.set('replace', 'VXA.VXC.Structure')
