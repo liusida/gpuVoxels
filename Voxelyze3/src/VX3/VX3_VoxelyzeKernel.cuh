@@ -91,6 +91,7 @@ class VX3_VoxelyzeKernel {
     VX3_dVector<VX3_Collision *> d_v_collisions;
 
     bool enableAttach;
+    bool EnableCollision = true;
     int RecordStepSize = 0;
     int RecordLink = 0;
     int RecordVoxel = 0;
@@ -103,6 +104,9 @@ class VX3_VoxelyzeKernel {
 
     VX3_MathTreeToken fitness_function[1024];
     double fitness_score = 0;
+
+    VX3_MathTreeToken AttachCondition[1024];
+    VX3_MathTreeToken StopConditionFormula[1024];
 };
 
 #endif // VX3_VOXELYZE_KERNEL_H
