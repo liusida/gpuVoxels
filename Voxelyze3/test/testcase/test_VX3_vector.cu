@@ -89,45 +89,45 @@ TEST(VX3_dVector_Test, Basic_Usage_Mid_Size) {
     cudaFree(d_output);
 }
 
-//Larger version with larger default memory
-__global__ void kernel_create_and_copy_to_output_larger(int num, double* output){
-    VX3_dVector_Larger<double> vec;
-    for (int i=0; i<num; i++) {
-        if (!vec.push_back(1/((double)i))) break;
-    }
-    printf("vec.size() %d\n", vec.size());
-    for (int i=0; i<vec.size(); i++) {
-        output[i] = vec[i];
-    }
-}
-TEST(VX3_dVector_Test, Basic_Usage_Larger_version) {
-    double *d_output;
-    int test_num = 10;
-    cudaMalloc((void **)&d_output, test_num * sizeof(double));
-    kernel_create_and_copy_to_output_larger<<<1,1>>>(test_num, d_output);
-    double *h_output;
-    cudaHostAlloc((void **)&h_output, test_num * sizeof(double), cudaHostAllocWriteCombined);
-    cudaMemcpy(h_output, d_output, test_num*sizeof(double), cudaMemcpyDeviceToHost);
-    for (int i=0;i<test_num;i++) {
-        EXPECT_EQ(h_output[i], 1/((double)i));
-    }
-    cudaFree(h_output);
-    cudaFree(d_output);
-}
-TEST(VX3_dVector_Test, Basic_Usage_Mid_Size_Larger_version) {
-    double *d_output;
-    int test_num = 100000;
-    cudaMalloc((void **)&d_output, test_num * sizeof(double));
-    kernel_create_and_copy_to_output_larger<<<1,1>>>(test_num, d_output);
-    double *h_output;
-    cudaHostAlloc((void **)&h_output, test_num * sizeof(double), cudaHostAllocWriteCombined);
-    cudaMemcpy(h_output, d_output, test_num*sizeof(double), cudaMemcpyDeviceToHost);
-    for (int i=0;i<test_num;i++) {
-        EXPECT_EQ(h_output[i], 1/((double)i));
-    }
-    cudaFree(h_output);
-    cudaFree(d_output);
-}
+// //Larger version with larger default memory
+// __global__ void kernel_create_and_copy_to_output_larger(int num, double* output){
+//     VX3_dVector_Larger<double> vec;
+//     for (int i=0; i<num; i++) {
+//         if (!vec.push_back(1/((double)i))) break;
+//     }
+//     printf("vec.size() %d\n", vec.size());
+//     for (int i=0; i<vec.size(); i++) {
+//         output[i] = vec[i];
+//     }
+// }
+// TEST(VX3_dVector_Test, Basic_Usage_Larger_version) {
+//     double *d_output;
+//     int test_num = 10;
+//     cudaMalloc((void **)&d_output, test_num * sizeof(double));
+//     kernel_create_and_copy_to_output_larger<<<1,1>>>(test_num, d_output);
+//     double *h_output;
+//     cudaHostAlloc((void **)&h_output, test_num * sizeof(double), cudaHostAllocWriteCombined);
+//     cudaMemcpy(h_output, d_output, test_num*sizeof(double), cudaMemcpyDeviceToHost);
+//     for (int i=0;i<test_num;i++) {
+//         EXPECT_EQ(h_output[i], 1/((double)i));
+//     }
+//     cudaFree(h_output);
+//     cudaFree(d_output);
+// }
+// TEST(VX3_dVector_Test, Basic_Usage_Mid_Size_Larger_version) {
+//     double *d_output;
+//     int test_num = 100000;
+//     cudaMalloc((void **)&d_output, test_num * sizeof(double));
+//     kernel_create_and_copy_to_output_larger<<<1,1>>>(test_num, d_output);
+//     double *h_output;
+//     cudaHostAlloc((void **)&h_output, test_num * sizeof(double), cudaHostAllocWriteCombined);
+//     cudaMemcpy(h_output, d_output, test_num*sizeof(double), cudaMemcpyDeviceToHost);
+//     for (int i=0;i<test_num;i++) {
+//         EXPECT_EQ(h_output[i], 1/((double)i));
+//     }
+//     cudaFree(h_output);
+//     cudaFree(d_output);
+// }
 
 
 //test clear 
