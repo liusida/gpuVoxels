@@ -1,4 +1,7 @@
-<VXD><AttachDetach replace="VXA.Simulator.AttachDetach"><EnableCollision>1</EnableCollision><EnableAttach>1</EnableAttach><watchDistance>1</watchDistance><SafetyGuard>1000</SafetyGuard><AttachCondition><mtCONST>1</mtCONST></AttachCondition></AttachDetach><StopCondition replace="VXA.Simulator.StopCondition"><StopConditionFormula><mtSUB>
+<VXD><AttachDetach replace="VXA.Simulator.AttachDetach"><EnableCollision>1</EnableCollision><EnableAttach>1</EnableAttach><watchDistance>1</watchDistance><SafetyGuard>1000</SafetyGuard><AttachCondition><mtSUB>
+        <mtVAR>t</mtVAR>
+        <mtCONST>3</mtCONST>
+    </mtSUB></AttachCondition></AttachDetach><StopCondition replace="VXA.Simulator.StopCondition"><StopConditionFormula><mtSUB>
         <mtVAR>t</mtVAR>
         <mtCONST>10</mtCONST>
     </mtSUB></StopConditionFormula></StopCondition><RecordHistory replace="VXA.Simulator.RecordHistory"><RecordStepSize>100</RecordStepSize><RecordVoxel>1</RecordVoxel><RecordLink>0</RecordLink></RecordHistory><GravAcc replace="VXA.Environment.Gravity.GravAcc">-1</GravAcc><ForceField replace="VXA.Simulator.ForceField"><x_forcefield><mtADD>

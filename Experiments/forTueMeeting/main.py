@@ -29,6 +29,7 @@ def write_VXD(body, phaseoffset, exp_id, exp_name):
     # Attach Condition (attach only happens when this value > 0)
     AttachCondition = child(AttachDetach, 'AttachCondition')
     formula_attach = []
+    formula_attach.append("<mtCONST>1</mtCONST>")
     # attach = (x-50)^2 + (y-50)^2 - r^2
     formula_attach.append("""
     <mtSUB>
@@ -63,7 +64,6 @@ def write_VXD(body, phaseoffset, exp_id, exp_name):
         <mtCONST>3</mtCONST>
     </mtSUB>
     """)
-    formula_attach.append("<mtCONST>1</mtCONST>")
     
 
     AttachCondition.append(etree.fromstring(formula_attach[exp_id]))
