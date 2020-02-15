@@ -16,6 +16,7 @@ enum VX3_MathTreeOperator {
     mtSIN,
     mtCOS,
     mtTAN,
+    mtATAN,
     mtLOG,       // log_e
     mtINT,       // round to nearest integer. e.g. 0.9 --> 1.0
     mtNORMALCDF, // normal CDF function
@@ -79,6 +80,10 @@ struct VX3_MathTree {
                 break;
             case mtTAN:
                 values[values_cursor] = tan(values[process_cursor]);
+                process_cursor++;
+                break;
+            case mtATAN:
+                values[values_cursor] = atan(values[process_cursor]);
                 process_cursor++;
                 break;
             case mtLOG:
