@@ -1,4 +1,30 @@
-<VXD><RawPrint replace="VXA.RawPrint"></RawPrint><AttachDetach replace="VXA.Simulator.AttachDetach"><EnableCollision>1</EnableCollision><EnableAttach>1</EnableAttach><watchDistance>1</watchDistance><SafetyGuard>2000</SafetyGuard><AttachCondition><Condition_0><mtCONST>1</mtCONST></Condition_0></AttachCondition></AttachDetach><StopCondition replace="VXA.Simulator.StopCondition"><StopConditionFormula><mtSUB>
+<VXD><RawPrint replace="VXA.RawPrint">{{{setting}}}&lt;cylinder&gt;&lt;x&gt;1.5&lt;/x&gt;&lt;y&gt;1.5&lt;/y&gt;&lt;r&gt;0.1&lt;/r&gt;&lt;/cylinder&gt;</RawPrint><AttachDetach replace="VXA.Simulator.AttachDetach"><EnableCollision>1</EnableCollision><EnableAttach>1</EnableAttach><watchDistance>1</watchDistance><SafetyGuard>2000</SafetyGuard><AttachCondition><Condition_0>
+                        <mtSUB>
+                            <mtCONST>0.01</mtCONST>
+                            <mtADD>
+                                <mtMUL>
+                                    <mtSUB>
+                                        <mtVAR>x</mtVAR>
+                                        <mtCONST>1.5</mtCONST>
+                                    </mtSUB>
+                                    <mtSUB>
+                                        <mtVAR>x</mtVAR>
+                                        <mtCONST>1.5</mtCONST>
+                                    </mtSUB>
+                                </mtMUL>
+                                <mtMUL>
+                                    <mtSUB>
+                                        <mtVAR>y</mtVAR>
+                                        <mtCONST>1.5</mtCONST>
+                                    </mtSUB>
+                                    <mtSUB>
+                                        <mtVAR>y</mtVAR>
+                                        <mtCONST>1.5</mtCONST>
+                                    </mtSUB>
+                                </mtMUL>
+                            </mtADD>
+                        </mtSUB>
+                        </Condition_0></AttachCondition></AttachDetach><StopCondition replace="VXA.Simulator.StopCondition"><StopConditionFormula><mtSUB>
         <mtVAR>t</mtVAR>
         <mtCONST>10</mtCONST>
     </mtSUB></StopConditionFormula></StopCondition><RecordHistory replace="VXA.Simulator.RecordHistory"><RecordStepSize>100</RecordStepSize><RecordVoxel>1</RecordVoxel><RecordLink>0</RecordLink></RecordHistory><GravAcc replace="VXA.Environment.Gravity.GravAcc">-9.8</GravAcc><ForceField replace="VXA.Simulator.ForceField"><x_forcefield><mtADD>
