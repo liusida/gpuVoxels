@@ -3,7 +3,7 @@ from lxml import etree
 import shutil, os
 import subprocess
 
-np.random.seed(1)
+np.random.seed(2)
 voxSize = 0.01
 r = np.random.random([1,300,300])
 r1 = np.random.random([1,300,300])
@@ -19,54 +19,102 @@ def write_VXD(body, phaseoffset, exp_id, exp_name):
     # generate VXD
     child = etree.SubElement
     root = etree.Element("VXD")
+    RawPrint = child(root, "RawPrint")
+    RawPrint.set('replace', 'VXA.RawPrint')
+    RawPrint.text = ""
     # Enable Attachment
     AttachDetach = child(root, "AttachDetach")
     AttachDetach.set('replace', 'VXA.Simulator.AttachDetach')
     child(AttachDetach, 'EnableCollision').text = '1'
     child(AttachDetach, 'EnableAttach').text = '1'
     child(AttachDetach, 'watchDistance').text = '1'
-    child(AttachDetach, 'SafetyGuard').text = '1000'
+    child(AttachDetach, 'SafetyGuard').text = '2000'
     # Attach Condition (attach only happens when this value > 0)
     AttachCondition = child(AttachDetach, 'AttachCondition')
-    formula_attach = []
-    formula_attach.append("<mtCONST>1</mtCONST>")
-    # attach = (x-50)^2 + (y-50)^2 - r^2
-    formula_attach.append("""
-    <mtSUB>
-        <mtADD>
-            <mtMUL>
-                <mtSUB>
-                    <mtVAR>x</mtVAR>
-                    <mtCONST>{}</mtCONST>
-                </mtSUB>
-                <mtSUB>
-                    <mtVAR>x</mtVAR>
-                    <mtCONST>{}</mtCONST>
-                </mtSUB>
-            </mtMUL>
-            <mtMUL>
-                <mtSUB>
-                    <mtVAR>y</mtVAR>
-                    <mtCONST>{}</mtCONST>
-                </mtSUB>
-                <mtSUB>
-                    <mtVAR>y</mtVAR>
-                    <mtCONST>{}</mtCONST>
-                </mtSUB>
-            </mtMUL>
-        </mtADD>
-        <mtCONST>{}</mtCONST>
-    </mtSUB>
-    """.format(x/2*voxSize, x/2*voxSize, y/2*voxSize, y/2*voxSize, 25*voxSize*voxSize))
-    formula_attach.append("""
-    <mtSUB>
-        <mtVAR>t</mtVAR>
-        <mtCONST>3</mtCONST>
-    </mtSUB>
-    """)
-    
+    if exp_name=="attach_all":
+        formula_attach = "<Condition_0><mtCONST>1</mtCONST></Condition_0>"
+        AttachCondition.append(etree.fromstring(formula_attach))
+    elif exp_name=="attach_area_circle":
+        # attach = r^2 - (x-50)^2 + (y-50)^2
+        r = 10
+        formula_attach = """
+                        <Condition_0>
+                        <mtSUB>
+                            <mtCONST>{}</mtCONST>
+                            <mtADD>
+                                <mtMUL>
+                                    <mtSUB>
+                                        <mtVAR>x</mtVAR>
+                                        <mtCONST>{}</mtCONST>
+                                    </mtSUB>
+                                    <mtSUB>
+                                        <mtVAR>x</mtVAR>
+                                        <mtCONST>{}</mtCONST>
+                                    </mtSUB>
+                                </mtMUL>
+                                <mtMUL>
+                                    <mtSUB>
+                                        <mtVAR>y</mtVAR>
+                                        <mtCONST>{}</mtCONST>
+                                    </mtSUB>
+                                    <mtSUB>
+                                        <mtVAR>y</mtVAR>
+                                        <mtCONST>{}</mtCONST>
+                                    </mtSUB>
+                                </mtMUL>
+                            </mtADD>
+                        </mtSUB>
+                        </Condition_0>
+        """.format(r*r*voxSize*voxSize, x/2*voxSize, x/2*voxSize, y/2*voxSize, y/2*voxSize)
+        AttachCondition.append(etree.fromstring(formula_attach))
+        RawPrint.text += "{{{setting}}}"+f"<cylinder><x>{x/2*voxSize}</x><y>{y/2*voxSize}</y><r>{r*voxSize}</r></cylinder>"
+    elif exp_name=="attach_area_rect":
+        a = 50 ; b = 5
+        formula_attach = """
+                        <Condition_0>
+                        <mtSUB>
+                            <mtCONST>{}</mtCONST>
+                            <mtABS>
+                                <mtSUB>
+                                    <mtVAR>x</mtVAR>
+                                        <mtCONST>{}</mtCONST>
+                                </mtSUB>
+                            </mtABS>
+                        </mtSUB>
+                        </Condition_0>
+                        """.format(a*voxSize, x/2*voxSize)
+        AttachCondition.append(etree.fromstring(formula_attach))
+        formula_attach = """
+                        <Condition_1>
+                        <mtSUB>
+                            <mtCONST>{}</mtCONST>
+                            <mtABS>
+                                <mtSUB>
+                                    <mtVAR>y</mtVAR>
+                                        <mtCONST>{}</mtCONST>
+                                </mtSUB>
+                            </mtABS>
+                        </mtSUB>
+                        </Condition_1>
+                        """.format(b*voxSize, y/2*voxSize)
+        AttachCondition.append(etree.fromstring(formula_attach))
+        RawPrint.text += "{{{setting}}}"+f"<rectangle><x>{x/2*voxSize}</x><y>{y/2*voxSize}</y><a>{a*voxSize}</a><b>{b*voxSize}</b></rectangle>"
 
-    AttachCondition.append(etree.fromstring(formula_attach[exp_id]))
+    elif exp_name=="attach_time":
+        t = 3
+        formula_attach = """
+                        <Condition_0>
+                        <mtSUB>
+                            <mtVAR>t</mtVAR>
+                            <mtCONST>{}</mtCONST>
+                        </mtSUB>
+                        </Condition_0>
+                        """.format(t)
+        AttachCondition.append(etree.fromstring(formula_attach))
+        RawPrint.text += "{{{setting}}}"+f"<flash><t>{t}</t></flash>"
+    else:
+        print("ERROR: exp_name unexpected.")
+
     # Stop Condition 10 sec
     StopCondition = child(root, "StopCondition")
     StopCondition.set('replace', 'VXA.Simulator.StopCondition')
@@ -93,7 +141,7 @@ def write_VXD(body, phaseoffset, exp_id, exp_name):
     # ForceField
     ForceField = child(root, "ForceField")
     ForceField.set('replace', "VXA.Simulator.ForceField")
-    # x_f = y + (-100)*arctan(x-50);
+    # x_f = -100*y + (-100)*arctan(x-50);
     x_forcefield = child(ForceField, "x_forcefield")
     formula_x = """
     <mtADD>
@@ -116,7 +164,7 @@ def write_VXD(body, phaseoffset, exp_id, exp_name):
     </mtADD>
     """.format(y/2*voxSize, x/2*voxSize)
     x_forcefield.append(etree.fromstring(formula_x))
-    # y_f = -x + (-100)*arctan(y-50);
+    # y_f = -100*x + (-100)*arctan(y-50);
     y_forcefield = child(ForceField, "y_forcefield")
     formula_y = """
     <mtADD>
@@ -162,7 +210,7 @@ def write_VXD(body, phaseoffset, exp_id, exp_name):
 
 
 # Start Experiments
-exp_names = ["attach_all", "attach_area", "attach_time"]
+exp_names = ["attach_all", "attach_area_circle", "attach_area_rect", "attach_time"]
 for exp_id, exp_name in enumerate(exp_names):
     try:
         os.mkdir(exp_name)

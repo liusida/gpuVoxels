@@ -267,13 +267,21 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         VX3_VoxelyzeKernel h_d_tmp(&MainSim);
         // More VXA settings which is new in VX3
         strcpy(h_d_tmp.vxa_filename, file.filename().c_str());
+        
+        std::string RawPrint = pt_merged.get<std::string>("VXA.RawPrint", "");
+        std::cout << RawPrint << "\n";
+
         ParseMathTree(h_d_tmp.StopConditionFormula, sizeof(h_d_tmp.StopConditionFormula), "VXA.Simulator.StopCondition.StopConditionFormula", pt_merged);
         h_d_tmp.EnableCollision = pt_merged.get<bool>("VXA.Simulator.AttachDetach.EnableCollision", true);
         h_d_tmp.enableAttach = pt_merged.get<bool>("VXA.Simulator.AttachDetach.EnableAttach", false);
         h_d_tmp.watchDistance = pt_merged.get<double>("VXA.Simulator.AttachDetach.watchDistance", 1.0);
         h_d_tmp.boundingRadius = pt_merged.get<double>("VXA.Simulator.AttachDetach.boundingRadius", 0.75);
         h_d_tmp.SafetyGuard = pt_merged.get<int>("VXA.Simulator.AttachDetach.SafetyGuard", 500);
-        ParseMathTree(h_d_tmp.AttachCondition, sizeof(h_d_tmp.AttachCondition), "VXA.Simulator.AttachDetach.AttachCondition", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[0], sizeof(h_d_tmp.AttachCondition[0]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_0", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[1], sizeof(h_d_tmp.AttachCondition[1]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_1", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[2], sizeof(h_d_tmp.AttachCondition[2]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_2", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[3], sizeof(h_d_tmp.AttachCondition[3]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_3", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[4], sizeof(h_d_tmp.AttachCondition[4]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_4", pt_merged);
         h_d_tmp.RecordStepSize = pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordStepSize", 0);
         h_d_tmp.RecordLink = pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordLink", 0);
         h_d_tmp.RecordVoxel = pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordVoxel", 1);

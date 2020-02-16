@@ -105,7 +105,7 @@ class VX3_VoxelyzeKernel {
     VX3_MathTreeToken fitness_function[1024];
     double fitness_score = 0;
 
-    VX3_MathTreeToken AttachCondition[1024];
+    VX3_MathTreeToken AttachCondition[5][1024];
     VX3_MathTreeToken StopConditionFormula[1024];
 };
 

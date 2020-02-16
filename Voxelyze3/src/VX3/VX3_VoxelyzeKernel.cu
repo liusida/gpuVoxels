@@ -345,7 +345,14 @@ __global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt, double c
         if (t->mat->fixed)
             return; // fixed voxels, no need to update position
         t->timeStep(dt, currentTime, k);
-        t->enableAttach = (VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, currentTime, k->AttachCondition) > 0);
+        t->enableAttach = false;
+        if (VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, currentTime, k->AttachCondition[0]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, currentTime, k->AttachCondition[1]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, currentTime, k->AttachCondition[2]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, currentTime, k->AttachCondition[3]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, currentTime, k->AttachCondition[4]) > 0) {
+            t->enableAttach = true;
+        };
     }
 }
 
