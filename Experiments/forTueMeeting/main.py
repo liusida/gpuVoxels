@@ -136,7 +136,7 @@ def write_VXD(body, phaseoffset, exp_id, exp_name):
     # Gravity
     GravAcc = child(root, "GravAcc")
     GravAcc.set('replace', 'VXA.Environment.Gravity.GravAcc')
-    GravAcc.text = '-1' # instead of -9.8
+    GravAcc.text = '-9.8' # instead of -9.8
 
     # ForceField
     ForceField = child(root, "ForceField")
