@@ -27,6 +27,8 @@ submit*.sh
 generation01/
 generated_data_*
 .clang-format
+bot/
+
 
 # Prerequisites
 *.d
