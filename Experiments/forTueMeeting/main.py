@@ -141,7 +141,7 @@ def write_VXD(body, phaseoffset, exp_id, exp_name):
     # ForceField
     ForceField = child(root, "ForceField")
     ForceField.set('replace', "VXA.Simulator.ForceField")
-    # x_f = -100*y + (-100)*arctan(x-50);
+    # x_f = 100*y + (-100)*atan(x-50);
     x_forcefield = child(ForceField, "x_forcefield")
     formula_x = """
     <mtADD>
@@ -164,7 +164,7 @@ def write_VXD(body, phaseoffset, exp_id, exp_name):
     </mtADD>
     """.format(y/2*voxSize, x/2*voxSize)
     x_forcefield.append(etree.fromstring(formula_x))
-    # y_f = -100*x + (-100)*arctan(y-50);
+    # y_f = -100*x + (-100)*atan(y-50);
     y_forcefield = child(ForceField, "y_forcefield")
     formula_y = """
     <mtADD>
