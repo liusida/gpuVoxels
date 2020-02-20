@@ -1034,7 +1034,7 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
     CColor colorMap[10];
     colorMap[0] = CColor(0.9f, 0.2f, 0.29f, 0.5f);
     colorMap[1] = CColor(0.6f, 0.6f, 0.5f, 0.5f);
-    colorMap[2] = CColor(0.85f, 0.75f, 0.24f, 0.5f);
+    colorMap[2] = CColor(0.85f, 0.75f, 0.24f, 0.8f);
     colorMap[3] = CColor(0.41f, 0.73f, 0.49f, 0.5f);
     colorMap[4] = CColor(0.30f, 0.70f, 0.37f, 0.5f);
     colorMap[5] = CColor(0.17f, 0.23f, 0.20f, 0.5f);
