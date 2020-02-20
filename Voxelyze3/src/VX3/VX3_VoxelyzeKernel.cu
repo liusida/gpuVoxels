@@ -332,6 +332,8 @@ __global__ void gpu_update_force(VX3_Link **links, int num) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         VX3_Link *t = links[gindex];
+        if (t->pVPos->mat->fixed && t->pVNeg->mat->fixed)
+            return;
         t->updateForces();
         if (t->axialStrain() > 100) {
             printf("ERROR: Diverged.");
@@ -407,6 +409,9 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double wa
     if (first < num && second < first) {
         VX3_Voxel *voxel1 = surface_voxels[first];
         VX3_Voxel *voxel2 = surface_voxels[second];
+        // if both of the voxels are fixed, no need to compute.
+        if (voxel1->mat->fixed && voxel2->mat->fixed)
+            return;
 
         VX3_Vec3D<double> diff = voxel1->pos - voxel2->pos;
         watchDistance = 0.5 * (voxel1->baseSize(X_AXIS) + voxel2->baseSize(X_AXIS)) * watchDistance;
@@ -436,6 +441,7 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double wa
             voxel1->contactForce += collision.contactForce(voxel1);
             voxel2->contactForce += collision.contactForce(voxel2);
         }
+
         // determined by formula
         if (!voxel1->enableAttach || !voxel2->enableAttach)
             return;
