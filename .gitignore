@@ -28,7 +28,9 @@ generation01/
 generated_data_*
 .clang-format
 bot/
-
+v*_data/
+exp_*.vxd
+personal/
 
 # Prerequisites
 *.d
