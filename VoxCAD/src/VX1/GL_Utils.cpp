@@ -47,7 +47,7 @@ void CGL_Utils::DrawCube(bool Faces, bool Edges, float LineWidth, const CColor& 
 
 	if (Edges){
 		//store the last color and always draw edges black!
-		glColor4f(0.0, 0.0, 0.0, 1.0);
+		glColor4f(0.0, 0.0, 0.0, 0.2);
 		static GLboolean IsLighting;
 		glGetBooleanv(GL_LIGHTING, &IsLighting);
 		if (IsLighting) glDisable(GL_LIGHTING);
