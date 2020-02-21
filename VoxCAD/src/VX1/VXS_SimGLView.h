@@ -133,6 +133,7 @@ public:
 	double rectangleX, rectangleY, rectangleA, rectangleB;
 	bool drawFlash = false;
 	double flashT;
+	double rescale = 1.0;
 
 	QString Message;
 

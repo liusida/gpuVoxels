@@ -33,6 +33,9 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         //     printf(" [%d]%p ", j, d_v3->d_surface_voxels[j]);
         // }
         //
+        printf("{{{setting}}}<rescale>0.001</rescale>\n");
+        double vs = 1 / 0.001;
+
         d_v3->updateCurrentCenterOfMass();
         d_v3->initialCenterOfMass = d_v3->currentCenterOfMass;
         int real_stepsize = int(d_v3->RecordStepSize / (10000 * d_v3->recommendedTimeStep() * d_v3->DtFrac));
@@ -54,16 +57,15 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                     if (d_v3->RecordVoxel) {
                         // Voxels
                         printf("<<<Step%d Time:%f>>>", j, d_v3->currentTime);
-                        double vs = 1 / d_v3->voxSize;
                         for (int i = 0; i < d_v3->num_d_voxels; i++) {
                             auto &v = d_v3->d_voxels[i];
                             if (v.isSurface()) {
-                                printf("%.2f,%.2f,%.2f,", v.pos.x*vs, v.pos.y*vs, v.pos.z*vs);
+                                printf("%.1f,%.1f,%.1f,", v.pos.x*vs, v.pos.y*vs, v.pos.z*vs);
                                 printf("%.1f,%.2f,%.2f,%.2f,", v.orient.AngleDegrees(), v.orient.x, v.orient.y, v.orient.z);
                                 VX3_Vec3D<double> ppp, nnn;
                                 nnn = v.cornerOffset(NNN);
                                 ppp = v.cornerOffset(PPP);
-                                printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,", nnn.x*vs, nnn.y*vs, nnn.z*vs, ppp.x*vs, ppp.y*vs, ppp.z*vs);
+                                printf("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", nnn.x*vs, nnn.y*vs, nnn.z*vs, ppp.x*vs, ppp.y*vs, ppp.z*vs);
                                 printf("%d,", v.mat->matid); // for coloring
                                 printf(";");
                             }
