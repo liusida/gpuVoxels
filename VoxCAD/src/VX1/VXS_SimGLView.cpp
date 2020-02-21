@@ -1154,20 +1154,20 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
                             continue;
                         }
                         glPushMatrix();
-                        p1 = pos[0].toDouble();
-                        p2 = pos[1].toDouble();
-                        p3 = pos[2].toDouble();
+                        p1 = pos[0].toDouble()*0.01;
+                        p2 = pos[1].toDouble()*0.01;
+                        p3 = pos[2].toDouble()*0.01;
                         angle = pos[3].toDouble();
                         r1 = pos[4].toDouble();
                         r2 = pos[5].toDouble();
                         r3 = pos[6].toDouble();
                         Vec3D<double> nnn, ppp;
-                        nnn.x = pos[7].toDouble();
-                        nnn.y = pos[8].toDouble();
-                        nnn.z = pos[9].toDouble();
-                        ppp.x = pos[10].toDouble();
-                        ppp.y = pos[11].toDouble();
-                        ppp.z = pos[12].toDouble();
+                        nnn.x = pos[7].toDouble()*0.01;
+                        nnn.y = pos[8].toDouble()*0.01;
+                        nnn.z = pos[9].toDouble()*0.01;
+                        ppp.x = pos[10].toDouble()*0.01;
+                        ppp.y = pos[11].toDouble()*0.01;
+                        ppp.z = pos[12].toDouble()*0.01;
                         matid = pos[13].toInt();
                         if (matid < 0 || matid >= 10) {
                             matid = 0;
@@ -1175,7 +1175,9 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
 
                         glTranslated(p1, p2, p3);
                         glRotated(angle, r1, r2, r3);
-                        CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, true, 1.0, colorMap[matid]);
+                        if (nnn.Dist2(ppp)<1) {
+                            CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, false, true, 1.0, colorMap[matid]);
+                        }
                         glPopMatrix();
                         // Update camera view center, but gentlely.
                         if (i == int(voxel.size() / 2))
