@@ -1177,7 +1177,7 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
                         glTranslated(p1, p2, p3);
                         glRotated(angle, r1, r2, r3);
                         if (nnn.Dist2(ppp)<1) {
-                            CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, false, 1.0, colorMap[matid]);
+                            CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, true, 1.0, colorMap[matid]);
                         }
                         glPopMatrix();
                         // Update camera view center, but gentlely.

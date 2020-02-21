@@ -33,7 +33,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         //     printf(" [%d]%p ", j, d_v3->d_surface_voxels[j]);
         // }
         //
-        printf("{{{setting}}}<rescale>0.001</rescale>\n");
+        printf("\n{{{setting}}}<rescale>0.001</rescale>\n");
         double vs = 1 / 0.001;
 
         d_v3->updateCurrentCenterOfMass();
