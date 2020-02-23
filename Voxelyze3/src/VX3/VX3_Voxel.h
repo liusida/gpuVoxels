@@ -140,7 +140,9 @@ public:
 	double phaseOffset;
 	bool isDetached; //true if the voxel is on main body, false if it fell on the ground.
 
-	VX3_Vec3D<double> contactForce;	
+	VX3_Vec3D<double> contactForce;
+
+	bool enableAttach = true;
 };
 
 #endif // VX3_VOXEL_H

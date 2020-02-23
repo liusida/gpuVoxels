@@ -6,6 +6,8 @@ import numpy as np
 import shutil, os
 import subprocess
 
+np.random.seed(1)
+
 root = etree.parse("assets/robot.data")
 morphology = []
 try:
@@ -29,11 +31,11 @@ z,y,x = morphology.shape
 #%%
 # generate random control for each voxel
 #
-num_generation = 1000
-population_per_generation = 1000
+num_generation = 100
+population_per_generation = 100
 best_robot = None
 
-prefix = "generated_data_v3/"
+prefix = "v2_data/"
 for generation_id in range(num_generation):
     print(f"Starting generation {generation_id}..." , end="", flush=True)
     robots = []

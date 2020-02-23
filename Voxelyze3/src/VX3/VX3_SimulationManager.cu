@@ -33,6 +33,9 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         //     printf(" [%d]%p ", j, d_v3->d_surface_voxels[j]);
         // }
         //
+        printf("\n{{{setting}}}<rescale>0.001</rescale>\n");
+        double vs = 1 / 0.001;
+
         d_v3->updateCurrentCenterOfMass();
         d_v3->initialCenterOfMass = d_v3->currentCenterOfMass;
         int real_stepsize = int(d_v3->RecordStepSize / (10000 * d_v3->recommendedTimeStep() * d_v3->DtFrac));
@@ -53,16 +56,16 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                 if (j % real_stepsize == 0) {
                     if (d_v3->RecordVoxel) {
                         // Voxels
-                        printf("<<<%d>>>", j);
+                        printf("<<<Step%d Time:%f>>>", j, d_v3->currentTime);
                         for (int i = 0; i < d_v3->num_d_voxels; i++) {
                             auto &v = d_v3->d_voxels[i];
                             if (v.isSurface()) {
-                                printf("%.4f,%.4f,%.4f,", v.pos.x, v.pos.y, v.pos.z);
-                                printf("%.1f,%.4f,%.4f,%.4f,", v.orient.AngleDegrees(), v.orient.x, v.orient.y, v.orient.z);
+                                printf("%.1f,%.1f,%.1f,", v.pos.x*vs, v.pos.y*vs, v.pos.z*vs);
+                                printf("%.1f,%.2f,%.2f,%.2f,", v.orient.AngleDegrees(), v.orient.x, v.orient.y, v.orient.z);
                                 VX3_Vec3D<double> ppp, nnn;
                                 nnn = v.cornerOffset(NNN);
                                 ppp = v.cornerOffset(PPP);
-                                printf("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,", nnn.x, nnn.y, nnn.z, ppp.x, ppp.y, ppp.z);
+                                printf("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", nnn.x*vs, nnn.y*vs, nnn.z*vs, ppp.x*vs, ppp.y*vs, ppp.z*vs);
                                 printf("%d,", v.mat->matid); // for coloring
                                 printf(";");
                             }
@@ -137,7 +140,7 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
     tokens.push(make_pair((std::string) "mtEND", (std::string) ""));
     auto root = tree.get_child_optional(node_address);
     if (!root) {
-        // printf("ERROR: No field %s in VXA.\n", node_address.c_str());
+        // printf("ERROR: No ParseMathTree %s in VXA.\n", node_address.c_str());
         return;
     }
     frontier.push(tree.get_child(node_address));
@@ -206,6 +209,8 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
             p->op = mtCOS;
         } else if (tok.first == "mtTAN") {
             p->op = mtTAN;
+        } else if (tok.first == "mtATAN") {
+            p->op = mtATAN;
         } else if (tok.first == "mtLOG") {
             p->op = mtLOG;
         } else if (tok.first == "mtINT") {
@@ -265,11 +270,21 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         VX3_VoxelyzeKernel h_d_tmp(&MainSim);
         // More VXA settings which is new in VX3
         strcpy(h_d_tmp.vxa_filename, file.filename().c_str());
+        
+        std::string RawPrint = pt_merged.get<std::string>("VXA.RawPrint", "");
+        std::cout << RawPrint << "\n";
+
+        ParseMathTree(h_d_tmp.StopConditionFormula, sizeof(h_d_tmp.StopConditionFormula), "VXA.Simulator.StopCondition.StopConditionFormula", pt_merged);
+        h_d_tmp.EnableCollision = pt_merged.get<bool>("VXA.Simulator.AttachDetach.EnableCollision", true);
         h_d_tmp.enableAttach = pt_merged.get<bool>("VXA.Simulator.AttachDetach.EnableAttach", false);
         h_d_tmp.watchDistance = pt_merged.get<double>("VXA.Simulator.AttachDetach.watchDistance", 1.0);
         h_d_tmp.boundingRadius = pt_merged.get<double>("VXA.Simulator.AttachDetach.boundingRadius", 0.75);
         h_d_tmp.SafetyGuard = pt_merged.get<int>("VXA.Simulator.AttachDetach.SafetyGuard", 500);
-
+        ParseMathTree(h_d_tmp.AttachCondition[0], sizeof(h_d_tmp.AttachCondition[0]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_0", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[1], sizeof(h_d_tmp.AttachCondition[1]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_1", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[2], sizeof(h_d_tmp.AttachCondition[2]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_2", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[3], sizeof(h_d_tmp.AttachCondition[3]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_3", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[4], sizeof(h_d_tmp.AttachCondition[4]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_4", pt_merged);
         h_d_tmp.RecordStepSize = pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordStepSize", 0);
         h_d_tmp.RecordLink = pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordLink", 0);
         h_d_tmp.RecordVoxel = pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordVoxel", 1);

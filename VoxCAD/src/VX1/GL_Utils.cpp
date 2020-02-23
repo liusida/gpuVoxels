@@ -29,7 +29,7 @@ int CGL_Utils::CurContextID = 0;
 #define MAXNUMWINDOWS 10 //maximum number of windows we'll open (for keeping track of contexts...)
 
 // --------------------------------------------------------------------------
-void CGL_Utils::DrawCube(bool Faces, bool Edges, float LineWidth, const CColor& Color)
+void CGL_Utils::DrawCube(bool Faces, bool Edges, float LineWidth, const CColor& Color, bool Topless)
 // --------------------------------------------------------------------------
 { // draw unit cube
 	if (Color.isValid())
@@ -42,12 +42,12 @@ void CGL_Utils::DrawCube(bool Faces, bool Edges, float LineWidth, const CColor& 
 		glLineWidth(LineWidth);
 
 	if (Faces && CurColor[3] != 0.0){ //If we want to draw the faces (and not fully transparent...)
-		DrawCubeFace();
+		DrawCubeFace(Topless);
 	}
 
 	if (Edges){
 		//store the last color and always draw edges black!
-		glColor4f(0.0, 0.0, 0.0, 1.0);
+		glColor4f(0.0, 0.0, 0.0, 0.2);
 		static GLboolean IsLighting;
 		glGetBooleanv(GL_LIGHTING, &IsLighting);
 		if (IsLighting) glDisable(GL_LIGHTING);
@@ -60,7 +60,7 @@ void CGL_Utils::DrawCube(bool Faces, bool Edges, float LineWidth, const CColor& 
 }
 
 // --------------------------------------------------------------------------
-void CGL_Utils::DrawCubeFace()
+void CGL_Utils::DrawCubeFace(bool Topless)
 // --------------------------------------------------------------------------
 {
 	static GLuint BoxFaceList[MAXNUMWINDOWS] = {0};
@@ -96,18 +96,19 @@ void CGL_Utils::DrawCubeFace()
 		glVertex3d( 0.5,-0.5,-0.5);
 		glVertex3d( 0.5,-0.5, 0.5);
 		glVertex3d(-0.5,-0.5, 0.5);
+		if (!Topless) {
+			glNormal3f(0,0,1); //+Z face
+			glVertex3d(-0.5,-0.5,0.5);
+			glVertex3d(0.5, -0.5,0.5);
+			glVertex3d(0.5, 0.5, 0.5);
+			glVertex3d(-0.5,0.5, 0.5);
 
-		glNormal3f(0,0,1); //+Z face
-		glVertex3d(-0.5,-0.5,0.5);
-		glVertex3d(0.5, -0.5,0.5);
-		glVertex3d(0.5, 0.5, 0.5);
-		glVertex3d(-0.5,0.5, 0.5);
-
-		glNormal3f(0,0,-1); //-Z face
-		glVertex3d(-0.5,-0.5,-0.5);
-		glVertex3d(-0.5, 0.5,-0.5);
-		glVertex3d( 0.5, 0.5,-0.5);
-		glVertex3d( 0.5,-0.5,-0.5);
+			glNormal3f(0,0,-1); //-Z face
+			glVertex3d(-0.5,-0.5,-0.5);
+			glVertex3d(-0.5, 0.5,-0.5);
+			glVertex3d( 0.5, 0.5,-0.5);
+			glVertex3d( 0.5,-0.5,-0.5);
+		}
 		glEnd();
 		
 		glEndList();
@@ -161,18 +162,18 @@ void CGL_Utils::DrawCubeEdge()
 }
 
 // --------------------------------------------------------------------------
-void CGL_Utils::DrawCube(const Vec3D<>& Center, vfloat Dim, const Vec3D<>& Squeeze, bool Faces, bool edges, float LineWidth, const CColor& Color)
+void CGL_Utils::DrawCube(const Vec3D<>& Center, vfloat Dim, const Vec3D<>& Squeeze, bool Faces, bool edges, float LineWidth, const CColor& Color, bool Topless)
 // --------------------------------------------------------------------------
 { //draw arbitrary scaled and translated cube
 	glPushMatrix();
 	glTranslated(Center.x, Center.y, Center.z);
 	glScaled(Dim*Squeeze.x, Dim*Squeeze.y, Dim*Squeeze.z);
-	DrawCube(Faces, edges, LineWidth, Color);
+	DrawCube(Faces, edges, LineWidth, Color, Topless);
 	glPopMatrix();
 }
 
 // --------------------------------------------------------------------------
-void CGL_Utils::DrawCube(const Vec3D<>& V1, const Vec3D<>& V2, bool Faces, bool edges, float LineWidth, const CColor& Color)
+void CGL_Utils::DrawCube(const Vec3D<>& V1, const Vec3D<>& V2, bool Faces, bool edges, float LineWidth, const CColor& Color, bool Topless)
 // --------------------------------------------------------------------------
 { //Draws a rectangular prism
 	//Make sure Vertices are correct orientation
@@ -183,7 +184,7 @@ void CGL_Utils::DrawCube(const Vec3D<>& V1, const Vec3D<>& V2, bool Faces, bool 
 	glPushMatrix();
 	glTranslated(CenVec.x, CenVec.y, CenVec.z);
 	glScaled(V2.x - V1.x, V2.y - V1.y, V2.z - V1.z);
-	DrawCube(Faces, edges, LineWidth, Color);
+	DrawCube(Faces, edges, LineWidth, Color, Topless);
 	glPopMatrix();
 }
 
@@ -260,7 +261,6 @@ void CGL_Utils::DrawSphereFace()
 void CGL_Utils::DrawCylinder(float taper, bool Faces, bool Edges, float LineWidth, const CColor& Color)
 // --------------------------------------------------------------------------
 { // draw solid cylinder pointing in +Z direction
-
 	
 	if (Color.isValid())
 		glColor4d(Color.r, Color.g, Color.b, Color.a);
@@ -350,17 +350,19 @@ void CGL_Utils::DrawCylFace(float taper)
 		glEnd();
 
 		//Endcaps
-		glNormal3d(0,0,1); //normal is opposite so we can draw in same order...
-		glBegin(GL_TRIANGLE_FAN);
-		glVertex3d(0,0,-0.5);
-		for (vfloat a=0; a<pi*2.01; a+=pi/18) {glVertex3d(0.5*cos(a),0.5*sin(a),-0.5);}
-		glEnd();
+		// Sida comment out
+		// glNormal3d(0,0,1); //normal is opposite so we can draw in same order...
+		// glBegin(GL_TRIANGLE_FAN);
+		// glVertex3d(0,0,-0.5);
+		// for (vfloat a=0; a<pi*2.01; a+=pi/18) {glVertex3d(0.5*cos(a),0.5*sin(a),-0.5);}
+		// glEnd();
 
-		glNormal3d(0,0,1);
-		glBegin(GL_TRIANGLE_FAN);
-		glVertex3d(0,0,0.5);
-		for (vfloat a=0; a<pi*2.01; a+=pi/18) {glVertex3d(taper*0.5*cos(a),taper*0.5*sin(a),0.5);}
-		glEnd();
+		// glNormal3d(0,0,1);
+		// glBegin(GL_TRIANGLE_FAN);
+		// glVertex3d(0,0,0.5);
+		// for (vfloat a=0; a<pi*2.01; a+=pi/18) {glVertex3d(taper*0.5*cos(a),taper*0.5*sin(a),0.5);}
+		// glEnd();
+		// Sida
 
 //		glEndList();
 //	}

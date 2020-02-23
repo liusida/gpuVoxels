@@ -17,6 +17,10 @@ details.
 #include "GL_Utils.h"
 #include <QDebug>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+namespace pt = boost::property_tree;
+
 #ifdef VX2
 // Voxelyze/include
 #include "VX_Link.h"
@@ -44,8 +48,7 @@ CVXS_SimGLView::CVXS_SimGLView(CVX_Sim *pSimIn) {
 
 CVXS_SimGLView::~CVXS_SimGLView(void) {}
 
-CVXS_SimGLView &
-CVXS_SimGLView::operator=(const CVXS_SimGLView &rGlView) // overload "="
+CVXS_SimGLView &CVXS_SimGLView::operator=(const CVXS_SimGLView &rGlView) // overload "="
 {
     pSim = rGlView.pSim;
     NeedStatsUpdate = rGlView.NeedStatsUpdate;
@@ -145,28 +148,22 @@ void CVXS_SimGLView::DrawForce(void) {
         {
             switch (i) {
             case BD_PX:
-                PointToDrawFrom =
-                    Center + Angle.RotateVec3D(Vec3D<>(0.1 * vSize, 0, 0));
+                PointToDrawFrom = Center + Angle.RotateVec3D(Vec3D<>(0.1 * vSize, 0, 0));
                 break;
             case BD_NX:
-                PointToDrawFrom =
-                    Center + Angle.RotateVec3D(Vec3D<>(-0.1 * vSize, 0, 0));
+                PointToDrawFrom = Center + Angle.RotateVec3D(Vec3D<>(-0.1 * vSize, 0, 0));
                 break;
             case BD_PY:
-                PointToDrawFrom =
-                    Center + Angle.RotateVec3D(Vec3D<>(0, 0.1 * vSize, 0));
+                PointToDrawFrom = Center + Angle.RotateVec3D(Vec3D<>(0, 0.1 * vSize, 0));
                 break;
             case BD_NY:
-                PointToDrawFrom =
-                    Center + Angle.RotateVec3D(Vec3D<>(0, -0.1 * vSize, 0));
+                PointToDrawFrom = Center + Angle.RotateVec3D(Vec3D<>(0, -0.1 * vSize, 0));
                 break;
             case BD_PZ:
-                PointToDrawFrom =
-                    Center + Angle.RotateVec3D(Vec3D<>(0, 0, 0.1 * vSize));
+                PointToDrawFrom = Center + Angle.RotateVec3D(Vec3D<>(0, 0, 0.1 * vSize));
                 break;
             case BD_NZ:
-                PointToDrawFrom =
-                    Center + Angle.RotateVec3D(Vec3D<>(0, 0, -0.1 * vSize));
+                PointToDrawFrom = Center + Angle.RotateVec3D(Vec3D<>(0, 0, -0.1 * vSize));
                 break;
             };
 
@@ -178,17 +175,14 @@ void CVXS_SimGLView::DrawForce(void) {
                 Vec3D<> PointToDrawTo;
 
                 // Total Force
-                PointToDrawTo =
-                    PointToDrawFrom +
-                    ForceScale * pLink->force(pV == pLink->voxel(true));
+                PointToDrawTo = PointToDrawFrom + ForceScale * pLink->force(pV == pLink->voxel(true));
                 //				if (pVox->IAmInternalVox2(i))
                 // PointToDrawTo =
                 // PointToDrawFrom+ForceScale*pBond->GetForce2();
                 // else
                 // PointToDrawTo =
                 // PointToDrawFrom+ForceScale*pBond->GetForce1();
-                CGL_Utils::DrawLineArrowD(PointToDrawFrom, PointToDrawTo, 2.0,
-                                          CColor(1, 0, 0)); // Red
+                CGL_Utils::DrawLineArrowD(PointToDrawFrom, PointToDrawTo, 2.0, CColor(1, 0, 0)); // Red
 
                 ////Axial Force
                 // if (pVox->IAmInternalVox2(i)) PointToDrawTo =
@@ -227,7 +221,12 @@ void CVXS_SimGLView::DrawFloor(void) {
     double z = 0.0;
 
 #ifdef VX2
-    z = -pSim->Vx.voxelSize() / 2;
+    if (CurViewVox == RVV_HISTORY) { // TODO: if showing history, should use history's voxel size. Since we didn't pass this in history
+                                     // file, hard coded for now.
+        z = -0.01 / 2;
+    } else {
+        z = -pSim->Vx.voxelSize() / 2;
+    }
 #endif
 
     // TODO: build an openGL list
@@ -242,13 +241,9 @@ void CVXS_SimGLView::DrawFloor(void) {
     glNormal3d(0.0, 0.0, 1.0);
     for (int i = -20; i <= 30; i++) {
         for (int j = -40; j <= 60; j++) {
-            glColor4d(0.6,
-                      0.7 + 0.2 *
-                                ((int)(1000 * sin((float)(i + 110) * (j + 106) *
-                                                  (j + 302))) %
-                                 10) /
-                                10.0,
-                      0.6, 1.0);
+            // Draw Hexagons with different colors
+            double colorFloor = 0.8 + 0.1 * ((int)(1000 * sin((float)(i + 110) * (j + 106) * (j + 302))) % 10) / 10.0;
+            glColor4d(colorFloor, colorFloor, colorFloor + 0.1, 1.0);
             glBegin(GL_TRIANGLE_FAN);
             glVertex3d(i * sX, j * sY, z);
             glVertex3d(i * sX + 0.5 * Size, j * sY, z);
@@ -260,13 +255,8 @@ void CVXS_SimGLView::DrawFloor(void) {
             glVertex3d(i * sX + 0.5 * Size, j * sY, z);
             glEnd();
 
-            glColor4d(0.6,
-                      0.7 + 0.2 *
-                                ((int)(1000 * sin((float)(i + 100) * (j + 103) *
-                                                  (j + 369))) %
-                                 10) /
-                                10.0,
-                      0.6, 1.0);
+            colorFloor = 0.8 + 0.1 * ((int)(1000 * sin((float)(i + 100) * (j + 103) * (j + 369))) % 10) / 10.0;
+            glColor4d(colorFloor, colorFloor, colorFloor + 0.1, 1.0);
 
             glBegin(GL_TRIANGLE_FAN);
             glVertex3d(i * sX + .75 * Size, j * sY + 0.433 * Size, z);
@@ -282,8 +272,7 @@ void CVXS_SimGLView::DrawFloor(void) {
     }
 }
 
-void CVXS_SimGLView::DrawGeometry(int Selected, bool ViewSection,
-                                  int SectionLayer, vfloat ScaleVox) {
+void CVXS_SimGLView::DrawGeometry(int Selected, bool ViewSection, int SectionLayer, vfloat ScaleVox) {
 #ifdef VX2
     CVoxelyze *pVx = &pSim->Vx;
     const std::vector<CVX_Voxel *> *voxels = pVx->voxelList();
@@ -297,16 +286,12 @@ void CVXS_SimGLView::DrawGeometry(int Selected, bool ViewSection,
         // glColor4d(ThisColor.r, ThisColor.g, ThisColor.b, ThisColor.a);
 
         glPushMatrix();
-        glTranslated(pVox->position().x, pVox->position().y,
-                     pVox->position().z);
-        glRotated(pVox->orientation().AngleDegrees(), pVox->orientation().x,
-                  pVox->orientation().y, pVox->orientation().z);
+        glTranslated(pVox->position().x, pVox->position().y, pVox->position().z);
+        glRotated(pVox->orientation().AngleDegrees(), pVox->orientation().x, pVox->orientation().y, pVox->orientation().z);
         CColor ThisColor = GetCurVoxColor(pVox, indexCounter == Selected);
         glLoadName(indexCounter++); // to enable picking
-        CGL_Utils::DrawCube(
-            (Vec3D<>)pVox->cornerOffset(CVX_Voxel::NNN) * ScaleVox,
-            (Vec3D<>)pVox->cornerOffset(CVX_Voxel::PPP) * ScaleVox, true, true,
-            1.0, ThisColor);
+        CGL_Utils::DrawCube((Vec3D<>)pVox->cornerOffset(CVX_Voxel::NNN) * ScaleVox, (Vec3D<>)pVox->cornerOffset(CVX_Voxel::PPP) * ScaleVox,
+                            true, true, 1.0, ThisColor);
         //		CGL_Utils::DrawCube(pVox->cornerNegative()*ScaleVox,
         // pVox->cornerPositive()*ScaleVox, true, true, 1.0,
         // CColor(pVox->material()->red()/255.0,
@@ -332,14 +317,10 @@ void CVXS_SimGLView::DrawGeometry(int Selected, bool ViewSection,
         ThisColor = GetCurVoxColor(i, Selected);
         glColor4d(ThisColor.r, ThisColor.g, ThisColor.b, ThisColor.a);
 
-        Vec3D<> CenterOff = ScaleVox *
-                            (pSim->VoxArray[i].GetCornerPos() +
-                             pSim->VoxArray[i].GetCornerNeg()) /
-                            2;
+        Vec3D<> CenterOff = ScaleVox * (pSim->VoxArray[i].GetCornerPos() + pSim->VoxArray[i].GetCornerNeg()) / 2;
 
         glPushMatrix();
-        glTranslated(Center.x + CenterOff.x, Center.y + CenterOff.y,
-                     Center.z + CenterOff.z);
+        glTranslated(Center.x + CenterOff.x, Center.y + CenterOff.y, Center.z + CenterOff.z);
 
         glLoadName(pSim->StoXIndexMap[i]); // to enable picking
 
@@ -350,11 +331,9 @@ void CVXS_SimGLView::DrawGeometry(int Selected, bool ViewSection,
         glRotated(AngleAmt * 180 / 3.1415926, Axis.x, Axis.y, Axis.z);
 
         Vec3D<> CurrentSizeDisplay = pSim->VoxArray[i].GetSizeCurrent();
-        glScaled(CurrentSizeDisplay.x, CurrentSizeDisplay.y,
-                 CurrentSizeDisplay.z);
+        glScaled(CurrentSizeDisplay.x, CurrentSizeDisplay.y, CurrentSizeDisplay.z);
 
-        pSim->LocalVXC.Voxel.DrawVoxel(
-            &Center, ScaleVox); // draw unit size since we scaled just now
+        pSim->LocalVXC.Voxel.DrawVoxel(&Center, ScaleVox); // draw unit size since we scaled just now
 
         glPopMatrix();
     }
@@ -372,15 +351,12 @@ CColor CVXS_SimGLView::GetCurVoxColor(CVX_Voxel *pVox, bool Selected) {
     case RVC_TYPE: {
         float R, G, B, A;
         CVX_Material *pMat = pVox->material();
-        return CColor(pMat->red() / 255.0, pMat->green() / 255.0,
-                      pMat->blue() / 255.0, pMat->alpha() / 255.0);
+        return CColor(pMat->red() / 255.0, pMat->green() / 255.0, pMat->blue() / 255.0, pMat->alpha() / 255.0);
     }
     case RVC_KINETIC_EN:
         if (pSim->SS.MaxVoxKinE == 0)
             return GetJet(0);
-        return GetJet(
-            pVox->kineticEnergy() /
-            pSim->SS.MaxVoxKinE); // kineticEnergy() / pSim->SS.MaxVoxKinE);
+        return GetJet(pVox->kineticEnergy() / pSim->SS.MaxVoxKinE); // kineticEnergy() / pSim->SS.MaxVoxKinE);
     case RVC_DISP:
         if (pSim->SS.MaxVoxDisp == 0)
             return GetJet(0);
@@ -459,14 +435,12 @@ CColor CVXS_SimGLView::GetCurVoxColor(int SIndex, int Selected) {
     case RVC_KINETIC_EN:
         if (pSim->SS.MaxVoxKinE == 0)
             return GetJet(0);
-        return GetJet(pSim->VoxArray[SIndex].GetCurKineticE() /
-                      pSim->SS.MaxVoxKinE);
+        return GetJet(pSim->VoxArray[SIndex].GetCurKineticE() / pSim->SS.MaxVoxKinE);
         break;
     case RVC_DISP:
         if (pSim->SS.MaxVoxDisp == 0)
             return GetJet(0);
-        return GetJet(pSim->VoxArray[SIndex].GetCurAbsDisp() /
-                      pSim->SS.MaxVoxDisp);
+        return GetJet(pSim->VoxArray[SIndex].GetCurAbsDisp() / pSim->SS.MaxVoxDisp);
         break;
     case RVC_STATE:
         if (pSim->VoxArray[SIndex].GetBroken())
@@ -479,20 +453,17 @@ CColor CVXS_SimGLView::GetCurVoxColor(int SIndex, int Selected) {
     case RVC_STRAIN_EN:
         if (pSim->SS.MaxBondStrainE == 0)
             return GetJet(0);
-        return GetJet(pSim->VoxArray[SIndex].GetMaxBondStrainE() /
-                      pSim->SS.MaxBondStrainE);
+        return GetJet(pSim->VoxArray[SIndex].GetMaxBondStrainE() / pSim->SS.MaxBondStrainE);
         break;
     case RVC_STRAIN:
         if (pSim->SS.MaxBondStrain == 0)
             return GetJet(0);
-        return GetJet(pSim->VoxArray[SIndex].GetMaxBondStrain() /
-                      pSim->SS.MaxBondStrain);
+        return GetJet(pSim->VoxArray[SIndex].GetMaxBondStrain() / pSim->SS.MaxBondStrain);
         break;
     case RVC_STRESS:
         if (pSim->SS.MaxBondStress == 0)
             return GetJet(0);
-        return GetJet(pSim->VoxArray[SIndex].GetMaxBondStress() /
-                      pSim->SS.MaxBondStress);
+        return GetJet(pSim->VoxArray[SIndex].GetMaxBondStress() / pSim->SS.MaxBondStress);
         break;
     case RVC_PRESSURE: {
         vfloat MaxP = pSim->SS.MaxPressure, MinP = pSim->SS.MinPressure;
@@ -563,8 +534,7 @@ CColor CVXS_SimGLView::GetInternalBondColor(CVX_Link *pLink) {
         return GetJet(pLink->axialStress() / pSim->SS.MaxBondStress);
         break;
     case RVC_PRESSURE:
-        return GetJet(
-            0); // for now. Pressure of a bond doesn't really make sense
+        return GetJet(0); // for now. Pressure of a bond doesn't really make sense
         break;
     default:
         return CColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -615,8 +585,7 @@ CColor CVXS_SimGLView::GetInternalBondColor(CVXS_BondInternal *pBond) {
         return GetJet(pBond->GetEngStress() / pSim->SS.MaxBondStress);
         break;
     case RVC_PRESSURE:
-        return GetJet(
-            0); // for now. Pressure of a bond doesn't really make sense
+        return GetJet(0); // for now. Pressure of a bond doesn't really make sense
         break;
     default:
         return CColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -649,27 +618,22 @@ void CVXS_SimGLView::DrawVoxMesh(int Selected) {
         defMeshVx2->updateMesh(CVX_MeshRender::MATERIAL);
         break;
     case RVC_KINETIC_EN:
-        defMeshVx2->updateMesh(CVX_MeshRender::STATE_INFO,
-                               CVoxelyze::KINETIC_ENERGY);
+        defMeshVx2->updateMesh(CVX_MeshRender::STATE_INFO, CVoxelyze::KINETIC_ENERGY);
         break;
     case RVC_DISP:
-        defMeshVx2->updateMesh(CVX_MeshRender::STATE_INFO,
-                               CVoxelyze::DISPLACEMENT);
+        defMeshVx2->updateMesh(CVX_MeshRender::STATE_INFO, CVoxelyze::DISPLACEMENT);
         break;
     case RVC_STATE:
         defMeshVx2->updateMesh(CVX_MeshRender::FAILURE);
         break;
     case RVC_STRAIN_EN:
-        defMeshVx2->updateMesh(CVX_MeshRender::STATE_INFO,
-                               CVoxelyze::STRAIN_ENERGY);
+        defMeshVx2->updateMesh(CVX_MeshRender::STATE_INFO, CVoxelyze::STRAIN_ENERGY);
         break;
     case RVC_STRAIN:
-        defMeshVx2->updateMesh(CVX_MeshRender::STATE_INFO,
-                               CVoxelyze::ENG_STRAIN);
+        defMeshVx2->updateMesh(CVX_MeshRender::STATE_INFO, CVoxelyze::ENG_STRAIN);
         break;
     case RVC_STRESS:
-        defMeshVx2->updateMesh(CVX_MeshRender::STATE_INFO,
-                               CVoxelyze::ENG_STRESS);
+        defMeshVx2->updateMesh(CVX_MeshRender::STATE_INFO, CVoxelyze::ENG_STRESS);
         break;
     case RVC_PRESSURE:
         defMeshVx2->updateMesh(CVX_MeshRender::STATE_INFO, CVoxelyze::PRESSURE);
@@ -693,8 +657,7 @@ void CVXS_SimGLView::DrawBonds(void) {
 #ifdef VX2
     CVoxelyze *pVx = &pSim->Vx;
     const std::vector<CVX_Link *> *links = pVx->linkList();
-    for (std::vector<CVX_Link *>::const_iterator it = links->begin();
-         it != links->end(); it++) {
+    for (std::vector<CVX_Link *>::const_iterator it = links->begin(); it != links->end(); it++) {
         CVX_Link *pLink = *it;
 
         Vec3D<float> P1 = (Vec3D<float>)pLink->voxel(false)->position();
@@ -710,16 +673,13 @@ void CVXS_SimGLView::DrawBonds(void) {
         glColor4f(ThisColor.r, ThisColor.g, ThisColor.b, ThisColor.a);
 
         if (CurViewVox == RVV_SMOOTH) {
-            Quat3D<float> A1 =
-                (Quat3D<float>)pLink->voxel(false)->orientation();
+            Quat3D<float> A1 = (Quat3D<float>)pLink->voxel(false)->orientation();
             Quat3D<float> A2 = (Quat3D<float>)pLink->voxel(true)->orientation();
             A1.AngleAxis(AngleAmt, Axis); // get angle/axis for A1
 
-            Vec3D<float> Pos2L = A1.RotateVec3DInv(
-                P2 - P1); // Get PosDif in local coordinate system
-            Quat3D<float> Angle2L = A2 * A1.Conjugate(); // rotate A2 by A1
-            pLink->toAxisX(
-                &Pos2L); // swing bonds in the +Y and +Z directions to +X
+            Vec3D<float> Pos2L = A1.RotateVec3DInv(P2 - P1); // Get PosDif in local coordinate system
+            Quat3D<float> Angle2L = A2 * A1.Conjugate();     // rotate A2 by A1
+            pLink->toAxisX(&Pos2L);                          // swing bonds in the +Y and +Z directions to +X
             pLink->toAxisX(&Angle2L);
 
             vfloat L = Pos2L.x; // pV1->GetNominalSize();
@@ -738,9 +698,7 @@ void CVXS_SimGLView::DrawBonds(void) {
 
             for (int i = 0; i <= NumSegs; i++) {
                 vfloat iL = ((float)i) / NumSegs * L;
-                Vec3D<float> ThisPoint =
-                    Vec3D<>(iL, ay * iL * iL * iL + by * iL * iL,
-                            az * iL * iL * iL + bz * iL * iL);
+                Vec3D<float> ThisPoint = Vec3D<>(iL, ay * iL * iL * iL + by * iL * iL, az * iL * iL * iL + bz * iL * iL);
                 pLink->toAxisOriginal(&ThisPoint);
                 glVertex3d(ThisPoint.x, ThisPoint.y, ThisPoint.z);
             }
@@ -762,8 +720,7 @@ void CVXS_SimGLView::DrawBonds(void) {
 
     glBegin(GL_LINES);
     glLoadName(-1); // to disable picking
-    for (std::vector<CVX_Collision *>::const_iterator it = cols.begin();
-         it != cols.end(); it++) {
+    for (std::vector<CVX_Collision *>::const_iterator it = cols.begin(); it != cols.end(); it++) {
         //{
         // const CVX_Voxel* pV1 = (*it);
         // const std::list<CVX_Voxel*>* colVoxels = pV1->pColWatchList;
@@ -773,9 +730,8 @@ void CVXS_SimGLView::DrawBonds(void) {
 
         //	CVX_Voxel* pV2 = (*jt);
 
-        CColor ThisColor(
-            0, 0,
-            255); // = GetCollisionBondColor(&pSim->BondArrayCollision[i]);
+        CColor ThisColor(0, 0,
+                         255); // = GetCollisionBondColor(&pSim->BondArrayCollision[i]);
         Vec3D<> P1 = (*it)->voxel1()->pos;
         Vec3D<> P2 = (*it)->voxel2()->pos;
 
@@ -819,11 +775,9 @@ void CVXS_SimGLView::DrawBonds(void) {
             Quat3D<> A2 = pV2->GetCurAngle();
             A1.AngleAxis(AngleAmt, Axis); // get angle/axis for A1
 
-            Vec3D<> Pos2L = A1.RotateVec3DInv(
-                P2 - P1); // Get PosDif in local coordinate system
-            Quat3D<> Angle2L = A2 * A1.Conjugate(); // rotate A2 by A1
-            pBond->ToXDirBond(
-                &Pos2L); // swing bonds in the +Y and +Z directions to +X
+            Vec3D<> Pos2L = A1.RotateVec3DInv(P2 - P1); // Get PosDif in local coordinate system
+            Quat3D<> Angle2L = A2 * A1.Conjugate();     // rotate A2 by A1
+            pBond->ToXDirBond(&Pos2L);                  // swing bonds in the +Y and +Z directions to +X
             pBond->ToXDirBond(&Angle2L);
 
             vfloat L = Pos2L.x; // pV1->GetNominalSize();
@@ -842,9 +796,7 @@ void CVXS_SimGLView::DrawBonds(void) {
 
             for (int i = 0; i <= NumSegs; i++) {
                 vfloat iL = ((float)i) / NumSegs * L;
-                Vec3D<> ThisPoint =
-                    Vec3D<>(iL, ay * iL * iL * iL + by * iL * iL,
-                            az * iL * iL * iL + bz * iL * iL);
+                Vec3D<> ThisPoint = Vec3D<>(iL, ay * iL * iL * iL + by * iL * iL, az * iL * iL * iL + bz * iL * iL);
                 pBond->ToOrigDirBond(&ThisPoint);
                 glVertex3d(ThisPoint.x, ThisPoint.y, ThisPoint.z);
             }
@@ -953,44 +905,34 @@ void CVXS_SimGLView::DrawAngles(void) {
 
     glBegin(GL_LINES);
 
-    for (int i = 0; i < pSim->NumVox();
-         i++) { // go through all the voxels... (GOOD FOR ONLY SMALL
-                // DISPLACEMENTS, I THINK... think through transformations
-                // here!)
-        glColor3f(1, 0, 0); //+X direction
-        glVertex3d(pSim->VoxArray[i].GetCurPos().x,
-                   pSim->VoxArray[i].GetCurPos().y,
-                   pSim->VoxArray[i].GetCurPos().z);
+    for (int i = 0; i < pSim->NumVox(); i++) { // go through all the voxels... (GOOD FOR ONLY SMALL
+                                               // DISPLACEMENTS, I THINK... think through transformations
+                                               // here!)
+        glColor3f(1, 0, 0);                    //+X direction
+        glVertex3d(pSim->VoxArray[i].GetCurPos().x, pSim->VoxArray[i].GetCurPos().y, pSim->VoxArray[i].GetCurPos().z);
         Vec3D<> Axis1(pSim->LocalVXC.GetLatticeDim() / 4, 0, 0);
         Vec3D<> RotAxis1 = pSim->VoxArray[i].GetCurAngle().RotateVec3D(Axis1);
         //	Vec3D<> RotAxis1 =
         //(pSim->VoxArray[i].GetCurAngle()*Quat3D<>(Axis1)*pSim->VoxArray[i].GetCurAngle().Conjugate()).ToVec();
-        glVertex3d(pSim->VoxArray[i].GetCurPos().x + RotAxis1.x,
-                   pSim->VoxArray[i].GetCurPos().y + RotAxis1.y,
+        glVertex3d(pSim->VoxArray[i].GetCurPos().x + RotAxis1.x, pSim->VoxArray[i].GetCurPos().y + RotAxis1.y,
                    pSim->VoxArray[i].GetCurPos().z + RotAxis1.z);
 
         glColor3f(0, 1, 0); //+Y direction
-        glVertex3d(pSim->VoxArray[i].GetCurPos().x,
-                   pSim->VoxArray[i].GetCurPos().y,
-                   pSim->VoxArray[i].GetCurPos().z);
+        glVertex3d(pSim->VoxArray[i].GetCurPos().x, pSim->VoxArray[i].GetCurPos().y, pSim->VoxArray[i].GetCurPos().z);
         Axis1 = Vec3D<>(0, pSim->LocalVXC.GetLatticeDim() / 4, 0);
         RotAxis1 = pSim->VoxArray[i].GetCurAngle().RotateVec3D(Axis1);
         //		RotAxis1 =
         //(pSim->VoxArray[i].GetCurAngle()*Quat3D<>(Axis1)*pSim->VoxArray[i].GetCurAngle().Conjugate()).ToVec();
-        glVertex3d(pSim->VoxArray[i].GetCurPos().x + RotAxis1.x,
-                   pSim->VoxArray[i].GetCurPos().y + RotAxis1.y,
+        glVertex3d(pSim->VoxArray[i].GetCurPos().x + RotAxis1.x, pSim->VoxArray[i].GetCurPos().y + RotAxis1.y,
                    pSim->VoxArray[i].GetCurPos().z + RotAxis1.z);
 
         glColor3f(0, 0, 1); //+Z direction
-        glVertex3d(pSim->VoxArray[i].GetCurPos().x,
-                   pSim->VoxArray[i].GetCurPos().y,
-                   pSim->VoxArray[i].GetCurPos().z);
+        glVertex3d(pSim->VoxArray[i].GetCurPos().x, pSim->VoxArray[i].GetCurPos().y, pSim->VoxArray[i].GetCurPos().z);
         Axis1 = Vec3D<>(0, 0, pSim->LocalVXC.GetLatticeDim() / 4);
         RotAxis1 = pSim->VoxArray[i].GetCurAngle().RotateVec3D(Axis1);
         //		RotAxis1 =
         //(pSim->VoxArray[i].GetCurAngle()*Quat3D<>(Axis1)*pSim->VoxArray[i].GetCurAngle().Conjugate()).ToVec();
-        glVertex3d(pSim->VoxArray[i].GetCurPos().x + RotAxis1.x,
-                   pSim->VoxArray[i].GetCurPos().y + RotAxis1.y,
+        glVertex3d(pSim->VoxArray[i].GetCurPos().x + RotAxis1.x, pSim->VoxArray[i].GetCurPos().y + RotAxis1.y,
                    pSim->VoxArray[i].GetCurPos().z + RotAxis1.z);
     }
     glEnd();
@@ -1012,15 +954,12 @@ void CVXS_SimGLView::DrawStaticFric(void) {
 
     int iT = pVl->size();
     Vec3D<> P1;
-    for (int i = 0; i < iT; i++) { // go through all the voxels...
-        if (((*pVl)[i])
-                ->isFloorStaticFriction()) { // draw point if static friction...
-            P1 = (*pVl)[i]->position();      // pSim->VoxArray[i].GetCurPos();
+    for (int i = 0; i < iT; i++) {                  // go through all the voxels...
+        if (((*pVl)[i])->isFloorStaticFriction()) { // draw point if static friction...
+            P1 = (*pVl)[i]->position();             // pSim->VoxArray[i].GetCurPos();
             glVertex3f((float)P1.x, (float)P1.y, (float)P1.z);
-            glVertex3f((float)P1.x, (float)(P1.y - dist / 2),
-                       (float)(P1.z + dist));
-            glVertex3f((float)P1.x, (float)(P1.y + dist / 2),
-                       (float)(P1.z + dist));
+            glVertex3f((float)P1.x, (float)(P1.y - dist / 2), (float)(P1.z + dist));
+            glVertex3f((float)P1.x, (float)(P1.y + dist / 2), (float)(P1.z + dist));
         }
     }
     glEnd();
@@ -1031,15 +970,12 @@ void CVXS_SimGLView::DrawStaticFric(void) {
     vfloat dist = pSim->VoxArray[0].GetNominalSize() / 3; // needs work!!
     int iT = pSim->NumVox();
     Vec3D<> P1;
-    for (int i = 0; i < iT; i++) { // go through all the voxels...
-        if (pSim->VoxArray[i]
-                .GetCurStaticFric()) { // draw point if static friction...
+    for (int i = 0; i < iT; i++) {                  // go through all the voxels...
+        if (pSim->VoxArray[i].GetCurStaticFric()) { // draw point if static friction...
             P1 = pSim->VoxArray[i].GetCurPos();
             glVertex3f((float)P1.x, (float)P1.y, (float)P1.z);
-            glVertex3f((float)P1.x, (float)(P1.y - dist / 2),
-                       (float)(P1.z + dist));
-            glVertex3f((float)P1.x, (float)(P1.y + dist / 2),
-                       (float)(P1.z + dist));
+            glVertex3f((float)P1.x, (float)(P1.y - dist / 2), (float)(P1.z + dist));
+            glVertex3f((float)P1.x, (float)(P1.y + dist / 2), (float)(P1.z + dist));
         }
     }
     glEnd();
@@ -1076,13 +1012,29 @@ int CVXS_SimGLView::StatRqdToDraw() // returns the stats bitfield that we need
 }
 
 // Read a .history file and draw in an loop.
-void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection,
-                                 int SectionLayer, vfloat ScaleVox) {
+void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLayer, vfloat ScaleVox) {
+    if (drawCylinder) {
+        Vec3D<> v1(cylinderX, cylinderY, 0.01);
+        Vec3D<> v2(cylinderX, cylinderY, -0.005); // floor is actually at -voxelSize/2
+        CColor c(1.0, 0, 0, 0.5);
+        CGL_Utils::DrawCylinder(v1, v2, cylinderR, Vec3D<>(1.0, 1.0, 1.0), true, false, 1.0, c);
+    }
+    if (drawRectangle) {
+        CColor c(1.0, 0, 0, 0.5);
+        Vec3D<> v1(rectangleX-rectangleA, rectangleY-rectangleB,0);
+        Vec3D<> v2(rectangleX+rectangleA, rectangleY-rectangleB,0.01);
+        Vec3D<> v3(rectangleX+rectangleA, rectangleY+rectangleB,0);
+        Vec3D<> v4(rectangleX-rectangleA, rectangleY+rectangleB,0.01);
+        CGL_Utils::DrawRectangle(v1,v2,true,0,c);
+        CGL_Utils::DrawRectangle(v2,v3,true,0,c);
+        CGL_Utils::DrawRectangle(v3,v4,true,0,c);
+        CGL_Utils::DrawRectangle(v4,v1,true,0,c);
+    }
     QStringList pos;
     CColor colorMap[10];
     colorMap[0] = CColor(0.9f, 0.2f, 0.29f, 0.5f);
     colorMap[1] = CColor(0.6f, 0.6f, 0.5f, 0.5f);
-    colorMap[2] = CColor(0.85f, 0.75f, 0.24f, 0.5f);
+    colorMap[2] = CColor(0.85f, 0.75f, 0.24f, 0.8f);
     colorMap[3] = CColor(0.41f, 0.73f, 0.49f, 0.5f);
     colorMap[4] = CColor(0.30f, 0.70f, 0.37f, 0.5f);
     colorMap[5] = CColor(0.17f, 0.23f, 0.20f, 0.5f);
@@ -1090,6 +1042,11 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection,
     colorMap[7] = CColor(0.82f, 0.61f, 0.49f, 0.5f);
     colorMap[8] = CColor(0.85f, 0.76f, 0.39f, 0.5f);
     colorMap[9] = CColor(0.97f, 0.55f, 0.19f, 1.0f);
+    if (drawFlash) {
+        if (historyTime>flashT && historyTime<flashT+0.02) {
+            colorMap[2] = CColor(1.0,0,0,0.5);
+        }
+    }
     // If it doesn't start play, check the Default.vxc file
     if (pSim->StreamHistory) {
         while (1) {
@@ -1105,6 +1062,39 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection,
                 line = pSim->StreamHistory->readLine();
             }
             if (!line.isNull()) {
+                QString token_setting = "{{{setting}}}";
+                if (line.indexOf(token_setting) != -1) {
+                    QString str_setting = line.mid(token_setting.length(), line.length() - 1);
+                    // qInfo() << str_setting;
+                    std::istringstream is(str_setting.toStdString());
+
+                    pt::ptree tree;
+                    pt::read_xml(is, tree);
+                    auto cylinder = tree.get_child_optional("cylinder");
+                    if (cylinder) {
+                        drawCylinder = true;
+                        cylinderX = tree.get("cylinder.x", 0.0);
+                        cylinderY = tree.get("cylinder.y", 0.0);
+                        cylinderR = tree.get("cylinder.r", 1.0);
+                        continue;
+                    }
+                    auto rectangle = tree.get_child_optional("rectangle");
+                    if (rectangle) {
+                        drawRectangle = true;
+                        rectangleX = tree.get("rectangle.x", 0.0);
+                        rectangleY = tree.get("rectangle.y", 0.0);
+                        rectangleA = tree.get("rectangle.a", 0.0);
+                        rectangleB = tree.get("rectangle.b", 0.0);
+                        continue;
+                    }
+                    auto flash = tree.get_child_optional("flash");
+                    if (flash) {
+                        drawFlash = true;
+                        flashT = tree.get("flash.t", 0.0);
+                        continue;
+                    }
+                    rescale = tree.get("rescale", 1.0);
+                }
                 int j = 0;
                 QStringList voxel_link = line.split("|");
                 if (voxel_link.size() > 1) {
@@ -1112,21 +1102,19 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection,
                         glBegin(GL_LINE_STRIP);
                         float PrevLineWidth;
                         float x1, y1, z1, x2, y2, z2;
-                        glColor4f(colorMap[9].r, colorMap[9].g, colorMap[9].b,
-                                  colorMap[9].a);
+                        glColor4f(colorMap[9].r, colorMap[9].g, colorMap[9].b, colorMap[9].a);
                         glGetFloatv(GL_LINE_WIDTH, &PrevLineWidth);
                         glLineWidth(3.0);
                         glDisable(GL_LIGHTING);
-                        QString mline = voxel_link[1].mid(
-                            j + 3, voxel_link[1].length() - j - 10);
+
+                        QString mline = voxel_link[1].mid(j + 3, voxel_link[1].length() - j - 10);
                         QStringList link = mline.split(";");
                         for (int i = 0; i < link.size(); i++) {
                             pos = link[i].split(",");
                             if (pos.size() <= 1)
                                 continue;
                             if (pos.size() < 6) {
-                                qWarning() << "ERROR: a link has pos size is "
-                                           << pos.size() << "<6." << link[i];
+                                qWarning() << "ERROR: a link has pos size is " << pos.size() << "<6." << link[i];
                                 continue;
                             }
                             x1 = pos[0].toDouble();
@@ -1147,10 +1135,13 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection,
                     }
                 }
                 if ((j = voxel_link[0].indexOf(">>>")) != -1) {
+                    Message = voxel_link[0].mid(3, j - 3);
+                    int k = voxel_link[0].indexOf("Time:");
+                    historyTime = voxel_link[0].mid(k+5, j-k-5).toDouble();
 
-                    QString mline = voxel_link[0].mid(
-                        j + 3, voxel_link[0].length() - j - 10);
+                    QString mline = voxel_link[0].mid(j + 3, voxel_link[0].length() - j - 10);
                     QStringList voxel = mline.split(";");
+                    Message += "\n\nVoxels: " + QString::number(voxel.size()) + "\n";
                     Vec3D<> v1, v2;
                     double p1, p2, p3;
                     double angle, r1, r2, r3;
@@ -1160,25 +1151,24 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection,
                         if (pos.size() <= 1)
                             continue;
                         if (pos.size() < 14) {
-                            qWarning() << "ERROR: a voxel has pos size is "
-                                       << pos.size() << "<14." << voxel[i];
+                            qWarning() << "ERROR: a voxel has pos size is " << pos.size() << "<14." << voxel[i];
                             continue;
                         }
                         glPushMatrix();
-                        p1 = pos[0].toDouble();
-                        p2 = pos[1].toDouble();
-                        p3 = pos[2].toDouble();
+                        p1 = pos[0].toDouble()*rescale;
+                        p2 = pos[1].toDouble()*rescale;
+                        p3 = pos[2].toDouble()*rescale;
                         angle = pos[3].toDouble();
                         r1 = pos[4].toDouble();
                         r2 = pos[5].toDouble();
                         r3 = pos[6].toDouble();
                         Vec3D<double> nnn, ppp;
-                        nnn.x = pos[7].toDouble();
-                        nnn.y = pos[8].toDouble();
-                        nnn.z = pos[9].toDouble();
-                        ppp.x = pos[10].toDouble();
-                        ppp.y = pos[11].toDouble();
-                        ppp.z = pos[12].toDouble();
+                        nnn.x = pos[7].toDouble()*rescale;
+                        nnn.y = pos[8].toDouble()*rescale;
+                        nnn.z = pos[9].toDouble()*rescale;
+                        ppp.x = pos[10].toDouble()*rescale;
+                        ppp.y = pos[11].toDouble()*rescale;
+                        ppp.z = pos[12].toDouble()*rescale;
                         matid = pos[13].toInt();
                         if (matid < 0 || matid >= 10) {
                             matid = 0;
@@ -1186,12 +1176,13 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection,
 
                         glTranslated(p1, p2, p3);
                         glRotated(angle, r1, r2, r3);
-                        CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox,
-                                            true, true, 1.0, colorMap[matid]);
+                        if (nnn.Dist2(ppp)<1) {
+                            CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, true, 1.0, colorMap[matid]);
+                        }
                         glPopMatrix();
-                        //Update camera view center, but gentlely.
-                        if (i == int(voxel.size()/2))
-                            HistoryCM= HistoryCM*0.95 + Vec3D<>(p1,p2,p3)* 0.05;
+                        // Update camera view center, but gentlely.
+                        if (i == int(voxel.size() / 2))
+                            HistoryCM = HistoryCM * 0.95 + Vec3D<>(p1, p2, p3) * 0.05;
                     }
                     currentHistoryLine = line;
                     return;

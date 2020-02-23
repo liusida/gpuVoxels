@@ -126,6 +126,17 @@ public:
 	bool HistoryPaused;
 
 	Vec3D<> HistoryCM;
+	double historyTime = 0;
+	bool drawCylinder = false;
+	double cylinderX, cylinderY, cylinderR;
+	bool drawRectangle = false;
+	double rectangleX, rectangleY, rectangleA, rectangleB;
+	bool drawFlash = false;
+	double flashT;
+	double rescale = 1.0;
+
+	QString Message;
+
 };
 
 #endif //VX_SIMGLUTILS_H

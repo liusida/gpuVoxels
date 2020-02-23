@@ -127,15 +127,22 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
 }
 __device__ bool VX3_VoxelyzeKernel::StopConditionMet(void) // have we met the stop condition yet?
 {
-    if (StopConditionType != SC_MAX_SIM_TIME) {
-        printf(COLORCODE_BOLD_RED "StopConditionType: %d. Type of stop condition no supported for "
-                                  "now.\n" COLORCODE_RESET,
-               StopConditionType);
+    if (VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, currentTime, StopConditionFormula) > 0) {
+        double a =
+            VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, currentTime, StopConditionFormula);
+        printf("stop score: %f.\n\n", a);
         return true;
     }
     if (forceExit)
         return true;
-    return currentTime > StopConditionValue ? true : false;
+    return false;
+    // if (StopConditionType != SC_MAX_SIM_TIME) {
+    //     printf(COLORCODE_BOLD_RED "StopConditionType: %d. Type of stop condition no supported for "
+    //                               "now.\n" COLORCODE_RESET,
+    //            StopConditionType);
+    //     return true;
+    // }
+    // return currentTime > StopConditionValue ? true : false;
 }
 
 __device__ double VX3_VoxelyzeKernel::recommendedTimeStep() {
@@ -218,8 +225,8 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
                                            d_v_links.size()); // Dynamically calculate blockSize
         int gridSize_links = (d_v_links.size() + blockSize - 1) / blockSize;
         int blockSize_links = d_v_links.size() < blockSize ? d_v_links.size() : blockSize;
-        // if (d_v_links.size() > 1024) {
-        //     printf("debug");
+        // if (CurStepCount % 1000 == 0 || currentTime>1.0) {
+        //     printf("&d_v_links[0] %p; d_v_links.size() %d. \n", &d_v_links[0], d_v_links.size());
         // }
         gpu_update_force<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
         CUDA_CHECK_AFTER_CALL();
@@ -325,6 +332,8 @@ __global__ void gpu_update_force(VX3_Link **links, int num) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         VX3_Link *t = links[gindex];
+        if (t->pVPos->mat->fixed && t->pVNeg->mat->fixed)
+            return;
         t->updateForces();
         if (t->axialStrain() > 100) {
             printf("ERROR: Diverged.");
@@ -338,6 +347,14 @@ __global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt, double c
         if (t->mat->fixed)
             return; // fixed voxels, no need to update position
         t->timeStep(dt, currentTime, k);
+        t->enableAttach = false;
+        if (VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, currentTime, k->AttachCondition[0]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, currentTime, k->AttachCondition[1]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, currentTime, k->AttachCondition[2]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, currentTime, k->AttachCondition[3]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, currentTime, k->AttachCondition[4]) > 0) {
+            t->enableAttach = true;
+        };
     }
 }
 
@@ -392,6 +409,10 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double wa
     if (first < num && second < first) {
         VX3_Voxel *voxel1 = surface_voxels[first];
         VX3_Voxel *voxel2 = surface_voxels[second];
+        // if both of the voxels are fixed, no need to compute.
+        if (voxel1->mat->fixed && voxel2->mat->fixed)
+            return;
+
         VX3_Vec3D<double> diff = voxel1->pos - voxel2->pos;
         watchDistance = 0.5 * (voxel1->baseSize(X_AXIS) + voxel2->baseSize(X_AXIS)) * watchDistance;
 
@@ -414,12 +435,17 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double wa
         // VX3_Voxel::force()
         // if (voxel1->mat !=
         //     voxel2->mat) { // disable same material collision for now
-        if (false) {
+        if (k->EnableCollision) {
             VX3_Collision collision(voxel1, voxel2);
             collision.updateContactForce();
             voxel1->contactForce += collision.contactForce(voxel1);
             voxel2->contactForce += collision.contactForce(voxel2);
         }
+
+        // determined by formula
+        if (!voxel1->enableAttach || !voxel2->enableAttach)
+            return;
+
         // fixed voxels, no need to look further for attachment
         if (voxel1->mat->fixed || voxel2->mat->fixed)
             return;
@@ -510,6 +536,10 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double wa
             // printf("newLink: rest %f.\n", pL->currentRestLength);
             // printf("between (%d,%d,%d) and (%d,%d,%d).\n", voxel1->ix,
             //        voxel1->iy, voxel1->iz, voxel2->ix, voxel2->iy, voxel2->iz);
+
+            // if a link is created, set contact force = 0 , for stable reason. (if they are connected, they should not collide.)
+            voxel1->contactForce += VX3_Vec3D<>();
+            voxel2->contactForce += VX3_Vec3D<>();
         }
     }
 }
