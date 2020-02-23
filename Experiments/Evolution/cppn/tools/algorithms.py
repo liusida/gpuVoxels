@@ -29,13 +29,13 @@ class Optimizer(object):
             return s / 3600.0
 
     def save_checkpoint(self, directory, gen):
-        sub.call("mkdir {0}/pickledPops".format(directory), shell=True)
+        sub.call("mkdir {0}/pickledPops{1}".format(directory, self.pop.seed), shell=True)
 
         random_state = random.getstate()
         numpy_random_state = np.random.get_state()
         data = [self, random_state, numpy_random_state]
 
-        with open('{0}/pickledPops/Gen_{1}.pickle'.format(directory, gen), 'wb') as handle:
+        with open('{0}/pickledPops{1}/Gen_{2}.pickle'.format(directory, self.pop.seed, gen), 'wb') as handle:
             cPickle.dump(data, handle, protocol=cPickle.HIGHEST_PROTOCOL)
 
     def run(self, max_hours_runtime, max_gens, checkpoint_every, directory="."):
@@ -46,8 +46,6 @@ class Optimizer(object):
             sub.call("rm %s/AUTOSUSPENDED" % directory, shell=True)
 
         if not self.continued_from_checkpoint:  # generation zero
-
-            sub.call("touch {}/RUNNING".format(directory), shell=True)
             self.evaluate(self.pop)
             self.select(self.pop)  # only produces dominated_by stats, no selection happening (population not replaced)
 
@@ -61,7 +59,6 @@ class Optimizer(object):
                 self.autosuspended = True
                 print "Autosuspending at generation {0}".format(self.pop.gen+1)
                 self.save_checkpoint(directory, self.pop.gen)
-                sub.call("touch {0}/AUTOSUSPENDED && rm {0}/RUNNING".format(directory), shell=True)
                 break
 
             self.pop.gen += 1
@@ -99,5 +96,4 @@ class Optimizer(object):
         if not self.autosuspended:  # print end of run stats
             print "Finished {0} generations".format(self.pop.gen + 1)
             print "DONE!"
-            sub.call("touch {0}/RUN_FINISHED && rm {0}/RUNNING".format(directory), shell=True)
 
