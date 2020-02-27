@@ -49,13 +49,13 @@ start_time = time()
 #     return total_vox / float(total_neigh) * displacement
 
 
-# def energy_efficiency(displacement, ind):
-#     num_muscle_vox = 0
-#     for name, details in ind.genotype.to_phenotype_mapping.items():
-#         if name == "Data":
-#             muscle = details['state'] > 2
-#             num_muscle_vox = np.sum(num_muscle_vox)
-#     return displacement / float(num_muscle_vox)
+def energy_efficiency(displacement, ind):
+    num_muscle_vox = 0
+    for name, details in ind.genotype.to_phenotype_mapping.items():
+        if name == "Data":
+            muscle = details['state'] > 2
+            num_muscle_vox = np.sum(muscle)
+    return displacement / float(num_muscle_vox)
 
 
 class MyGenotype(Genotype):
@@ -64,37 +64,28 @@ class MyGenotype(Genotype):
 
     Each individual must have the following properties:
 
-    The genotype consists of a single Compositional Pattern Producing Network (CPPN),
-    with multiple inter-dependent outputs determining the material constituting each voxel
-    (e.g. two types of active voxels, actuated in counter phase, and two passive voxel types, fat and bone)
-    The material IDs in the phenotype mapping dependencies refer to a predefined palette of materials:
-    (0: empty, 1: passiveSoft, 2: passiveHard, 3: active+, 4:active-)
+    The genotype consists of a Compositional Pattern Producing Network (CPPN),
+
+    which dictates whether a voxel is present/absent and if present whether it is muscle or fat
 
     """
     def __init__(self):
 
         Genotype.__init__(self, orig_size_xyz=IND_SIZE)
 
-        # self.add_network(CPPN(output_node_names=["Data"]))
-        # self.to_phenotype_mapping.add_map(name="Data", tag="<Data>", func=half_and_half, output_type=int)
+        self.add_network(CPPN(output_node_names=["phase"]))
+        self.to_phenotype_mapping.add_map(name="phase", tag="<PhaseOffset>", output_type=float)
 
-        self.add_network(CPPN(output_node_names=["shape", "muscleOrTissue", "muscleType", "tissueType"]))
+        self.add_network(CPPN(output_node_names=["shape", "muscleOrTissue"]))
 
-        self.to_phenotype_mapping.add_map(name="Data", tag="<Data>", func=make_material_tree,
-                                          dependency_order=["shape", "muscleOrTissue", "muscleType", "tissueType"],
-                                          output_type=int)
+        self.to_phenotype_mapping.add_map(name="Data", tag="<Data>", func=make_material_tree, output_type=int,
+                                          dependency_order=["shape", "muscleOrTissue"])
 
         self.to_phenotype_mapping.add_output_dependency(name="shape", dependency_name=None, requirement=None,
                                                         material_if_true=None, material_if_false="0")
 
         self.to_phenotype_mapping.add_output_dependency(name="muscleOrTissue", dependency_name="shape",
-                                                        requirement=True, material_if_true=None, material_if_false=None)
-
-        self.to_phenotype_mapping.add_output_dependency(name="tissueType", dependency_name="muscleOrTissue",
-                                                        requirement=False, material_if_true="1", material_if_false="2")
-
-        self.to_phenotype_mapping.add_output_dependency(name="muscleType", dependency_name="muscleOrTissue",
-                                                        requirement=True, material_if_true="3", material_if_false="4")
+                                                        requirement=True, material_if_true="3", material_if_false="1")
 
 
 class MyPhenotype(Phenotype):
@@ -125,7 +116,7 @@ my_objective_dict = ObjectiveDict()
 
 # Adding an objective named "fitness", which we want to maximize.
 # This information is returned by Voxelyze in a fitness .xml file, with a tag named "distance"
-my_objective_dict.add_objective(name="fitness", maximize=True, tag="<distance>")  # , meta_func=energy_efficiency)
+my_objective_dict.add_objective(name="fitness", maximize=True, tag="<distance>", meta_func=energy_efficiency)
 
 # Add an objective to minimize the age of solutions: promotes diversity
 my_objective_dict.add_objective(name="age", maximize=False, tag=None)
@@ -139,7 +130,7 @@ if len(glob("pickledPops/Gen_*.pickle")) == 0:
     my_pop = Population(my_objective_dict, MyGenotype, MyPhenotype, pop_size=POPSIZE)
 
     # hack: see evaluation.py lines 63-77
-    my_pop.material_wide_phase_offset = True
+    my_pop.material_wide_phase_offset = False
 
     my_pop.seed = SEED
 

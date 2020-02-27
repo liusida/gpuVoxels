@@ -3,7 +3,7 @@
   <Simulator>
     <Integration>
       <Integrator>0</Integrator>
-      <DtFrac>0.98</DtFrac>
+      <DtFrac>0.9</DtFrac>
     </Integration>
     <Damping>
       <BondDampingZ>1</BondDampingZ>
@@ -26,7 +26,7 @@
     </Features>
     <StopCondition>
       <StopConditionType>2</StopConditionType>
-      <StopConditionValue>2</StopConditionValue>
+      <StopConditionValue>3</StopConditionValue>
     </StopCondition>
     <EquilibriumMode>
       <EquilibriumModeEnabled>0</EquilibriumModeEnabled>
@@ -86,7 +86,7 @@
         </Display>
         <Mechanical>
           <MatModel>0</MatModel>
-          <Elastic_Mod>1e+07</Elastic_Mod>
+          <Elastic_Mod>5e+07</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
           <Yield_Stress>0</Yield_Stress>
           <FailModel>0</FailModel>
@@ -170,7 +170,7 @@
           <Density>5e+05</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
           <CTE>0.01</CTE>
-          <MaterialTempPhase>1</MaterialTempPhase>
+          <MaterialTempPhase>0.5</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>
         </Mechanical>

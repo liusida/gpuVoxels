@@ -259,7 +259,7 @@ def muscle_fat(output_state, empty_less_than=-0.3, fat_greater_than=0.3, muscle_
     mat = muscle_id*np.ones(output_state.shape, dtype=int)
     mat[fat] = fat_id
     mat[empty] = 0
-    return mat
+    return make_one_shape_only(mat)*mat
 
 
 def contiguous_material(output_state, *args, **kwargs):
