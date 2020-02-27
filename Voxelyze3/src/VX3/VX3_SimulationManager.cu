@@ -16,9 +16,8 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                                          // it, we should sync hd_vector to d_vector first.
         d_v3->regenerateSurfaceVoxels(); // first time regenerate
                                          // d_surface_voxels.
-        printf(COLORCODE_GREEN "%d) Simulation %d runs: %s. with stop "
-                               "condition: %f. \n" COLORCODE_RESET,
-               device_index, thread_index, d_v3->vxa_filename, d_v3->StopConditionValue);
+        printf(COLORCODE_GREEN "%d) Simulation %d runs: %s.\n" COLORCODE_RESET,
+               device_index, thread_index, d_v3->vxa_filename);
         // printf("%d) Simulation %d: links %d, voxels %d.\n", device_index, i,
         // d_v3->num_d_links, d_v3->num_d_voxels); printf("%d) Simulation %d
         // enableAttach %d.\n", device_index, i, d_v3->enableAttach);
@@ -33,7 +32,16 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         //     printf(" [%d]%p ", j, d_v3->d_surface_voxels[j]);
         // }
         //
-        printf("\n{{{setting}}}<rescale>0.001</rescale>\n");
+        if (d_v3->RecordStepSize) { // output History file
+
+            printf("\n{{{setting}}}<rescale>0.001</rescale>\n");
+            for (int i = 0; i < d_v3->num_d_voxelMats; i++) {
+                auto &mat = d_v3->d_voxelMats[i];
+                printf("{{{setting}}}<matcolor><id>%d</id><r>%.2f</r><g>%.2f</g><b>%.2f</b><a>%.2f</a></matcolor>\n", mat.matid,
+                       mat.r / 255., mat.g / 255., mat.b / 255., mat.a / 255.);
+            }
+        }
+
         double vs = 1 / 0.001;
 
         d_v3->updateCurrentCenterOfMass();
@@ -60,12 +68,13 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                         for (int i = 0; i < d_v3->num_d_voxels; i++) {
                             auto &v = d_v3->d_voxels[i];
                             if (v.isSurface()) {
-                                printf("%.1f,%.1f,%.1f,", v.pos.x*vs, v.pos.y*vs, v.pos.z*vs);
+                                printf("%.1f,%.1f,%.1f,", v.pos.x * vs, v.pos.y * vs, v.pos.z * vs);
                                 printf("%.1f,%.2f,%.2f,%.2f,", v.orient.AngleDegrees(), v.orient.x, v.orient.y, v.orient.z);
                                 VX3_Vec3D<double> ppp, nnn;
                                 nnn = v.cornerOffset(NNN);
                                 ppp = v.cornerOffset(PPP);
-                                printf("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", nnn.x*vs, nnn.y*vs, nnn.z*vs, ppp.x*vs, ppp.y*vs, ppp.z*vs);
+                                printf("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", nnn.x * vs, nnn.y * vs, nnn.z * vs, ppp.x * vs, ppp.y * vs,
+                                       ppp.z * vs);
                                 printf("%d,", v.mat->matid); // for coloring
                                 printf(";");
                             }
@@ -270,21 +279,27 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         VX3_VoxelyzeKernel h_d_tmp(&MainSim);
         // More VXA settings which is new in VX3
         strcpy(h_d_tmp.vxa_filename, file.filename().c_str());
-        
+
         std::string RawPrint = pt_merged.get<std::string>("VXA.RawPrint", "");
         std::cout << RawPrint << "\n";
 
-        ParseMathTree(h_d_tmp.StopConditionFormula, sizeof(h_d_tmp.StopConditionFormula), "VXA.Simulator.StopCondition.StopConditionFormula", pt_merged);
+        ParseMathTree(h_d_tmp.StopConditionFormula, sizeof(h_d_tmp.StopConditionFormula),
+                      "VXA.Simulator.StopCondition.StopConditionFormula", pt_merged);
         h_d_tmp.EnableCollision = pt_merged.get<bool>("VXA.Simulator.AttachDetach.EnableCollision", true);
         h_d_tmp.enableAttach = pt_merged.get<bool>("VXA.Simulator.AttachDetach.EnableAttach", false);
         h_d_tmp.watchDistance = pt_merged.get<double>("VXA.Simulator.AttachDetach.watchDistance", 1.0);
         h_d_tmp.boundingRadius = pt_merged.get<double>("VXA.Simulator.AttachDetach.boundingRadius", 0.75);
         h_d_tmp.SafetyGuard = pt_merged.get<int>("VXA.Simulator.AttachDetach.SafetyGuard", 500);
-        ParseMathTree(h_d_tmp.AttachCondition[0], sizeof(h_d_tmp.AttachCondition[0]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_0", pt_merged);
-        ParseMathTree(h_d_tmp.AttachCondition[1], sizeof(h_d_tmp.AttachCondition[1]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_1", pt_merged);
-        ParseMathTree(h_d_tmp.AttachCondition[2], sizeof(h_d_tmp.AttachCondition[2]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_2", pt_merged);
-        ParseMathTree(h_d_tmp.AttachCondition[3], sizeof(h_d_tmp.AttachCondition[3]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_3", pt_merged);
-        ParseMathTree(h_d_tmp.AttachCondition[4], sizeof(h_d_tmp.AttachCondition[4]), "VXA.Simulator.AttachDetach.AttachCondition.Condition_4", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[0], sizeof(h_d_tmp.AttachCondition[0]),
+                      "VXA.Simulator.AttachDetach.AttachCondition.Condition_0", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[1], sizeof(h_d_tmp.AttachCondition[1]),
+                      "VXA.Simulator.AttachDetach.AttachCondition.Condition_1", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[2], sizeof(h_d_tmp.AttachCondition[2]),
+                      "VXA.Simulator.AttachDetach.AttachCondition.Condition_2", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[3], sizeof(h_d_tmp.AttachCondition[3]),
+                      "VXA.Simulator.AttachDetach.AttachCondition.Condition_3", pt_merged);
+        ParseMathTree(h_d_tmp.AttachCondition[4], sizeof(h_d_tmp.AttachCondition[4]),
+                      "VXA.Simulator.AttachDetach.AttachCondition.Condition_4", pt_merged);
         h_d_tmp.RecordStepSize = pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordStepSize", 0);
         h_d_tmp.RecordLink = pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordLink", 0);
         h_d_tmp.RecordVoxel = pt_merged.get<int>("VXA.Simulator.RecordHistory.RecordVoxel", 1);

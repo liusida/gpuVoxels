@@ -130,7 +130,7 @@ __device__ bool VX3_VoxelyzeKernel::StopConditionMet(void) // have we met the st
     if (VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, currentTime, StopConditionFormula) > 0) {
         double a =
             VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, currentTime, StopConditionFormula);
-        printf("stop score: %f.\n\n", a);
+        // printf("stop score: %f.\n\n", a);
         return true;
     }
     if (forceExit)
@@ -369,6 +369,10 @@ __global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAm
             return; // fixed voxels, no need to update temperature
         double currentTemperature =
             TempAmplitude * sin(2 * 3.1415926f * (currentTime / TempPeriod + t->phaseOffset)); // update the global temperature
+        // Important: Sida: This change in actuation will affect older experiment!
+        if (currentTemperature>0) {
+            currentTemperature=0;
+        }
         t->setTemperature(currentTemperature);
         // t->setTemperature(0.0f);
     }

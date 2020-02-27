@@ -107,6 +107,8 @@ class VX3_VoxelyzeKernel {
 
     VX3_MathTreeToken AttachCondition[5][1024];
     VX3_MathTreeToken StopConditionFormula[1024];
+
+    int collisionCount = 0;
 };
 
 #endif // VX3_VOXELYZE_KERNEL_H

@@ -31,6 +31,7 @@ bot/
 v*_data/
 exp_*.vxd
 personal/
+xenobot/
 
 # Prerequisites
 *.d

@@ -137,6 +137,8 @@ public:
 
 	QString Message;
 
+    std::map<int, CColor> matColors;
+
 };
 
 #endif //VX_SIMGLUTILS_H

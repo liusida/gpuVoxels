@@ -2,6 +2,7 @@
 #include "VX3_VoxelyzeKernel.cuh"
 
 VX3_Material::VX3_Material( CVX_Material* p, VX3_VoxelyzeKernel* k ):
+r(p->r), g(p->g), b(p->b), a(p->a),
 matid(p->matid), fixed(p->fixed), sticky(p->sticky),
 linear(p->linear), E(p->E), sigmaYield(p->sigmaYield), sigmaFail(p->sigmaFail),
 epsilonYield(p->epsilonYield), epsilonFail(p->epsilonFail), 

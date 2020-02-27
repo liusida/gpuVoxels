@@ -1021,30 +1021,31 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
     }
     if (drawRectangle) {
         CColor c(1.0, 0, 0, 0.5);
-        Vec3D<> v1(rectangleX-rectangleA, rectangleY-rectangleB,0);
-        Vec3D<> v2(rectangleX+rectangleA, rectangleY-rectangleB,0.01);
-        Vec3D<> v3(rectangleX+rectangleA, rectangleY+rectangleB,0);
-        Vec3D<> v4(rectangleX-rectangleA, rectangleY+rectangleB,0.01);
-        CGL_Utils::DrawRectangle(v1,v2,true,0,c);
-        CGL_Utils::DrawRectangle(v2,v3,true,0,c);
-        CGL_Utils::DrawRectangle(v3,v4,true,0,c);
-        CGL_Utils::DrawRectangle(v4,v1,true,0,c);
+        Vec3D<> v1(rectangleX - rectangleA, rectangleY - rectangleB, 0);
+        Vec3D<> v2(rectangleX + rectangleA, rectangleY - rectangleB, 0.01);
+        Vec3D<> v3(rectangleX + rectangleA, rectangleY + rectangleB, 0);
+        Vec3D<> v4(rectangleX - rectangleA, rectangleY + rectangleB, 0.01);
+        CGL_Utils::DrawRectangle(v1, v2, true, 0, c);
+        CGL_Utils::DrawRectangle(v2, v3, true, 0, c);
+        CGL_Utils::DrawRectangle(v3, v4, true, 0, c);
+        CGL_Utils::DrawRectangle(v4, v1, true, 0, c);
     }
     QStringList pos;
+    CColor defaultColor(0.2,0.2,0.2,0.2);
     CColor colorMap[10];
     colorMap[0] = CColor(0.9f, 0.2f, 0.29f, 0.5f);
     colorMap[1] = CColor(0.6f, 0.6f, 0.5f, 0.5f);
     colorMap[2] = CColor(0.85f, 0.75f, 0.24f, 0.8f);
     colorMap[3] = CColor(0.41f, 0.73f, 0.49f, 0.5f);
     colorMap[4] = CColor(0.30f, 0.70f, 0.37f, 0.5f);
-    colorMap[5] = CColor(0.17f, 0.23f, 0.20f, 0.5f);
+    colorMap[5] = CColor(0.75f, 0.75f, 0.50f, 0.8f);
     colorMap[6] = CColor(0.35f, 0.56f, 0.39f, 0.5f);
     colorMap[7] = CColor(0.82f, 0.61f, 0.49f, 0.5f);
     colorMap[8] = CColor(0.85f, 0.76f, 0.39f, 0.5f);
     colorMap[9] = CColor(0.97f, 0.55f, 0.19f, 1.0f);
     if (drawFlash) {
-        if (historyTime>flashT && historyTime<flashT+0.02) {
-            colorMap[2] = CColor(1.0,0,0,0.5);
+        if (historyTime > flashT && historyTime < flashT + 0.02) {
+            colorMap[2] = CColor(1.0, 0, 0, 0.5);
         }
     }
     // If it doesn't start play, check the Default.vxc file
@@ -1093,7 +1094,20 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
                         flashT = tree.get("flash.t", 0.0);
                         continue;
                     }
-                    rescale = tree.get("rescale", 1.0);
+                    auto matid = tree.get_child_optional("matcolor.id");
+                    if (matid) {
+                        auto id = tree.get<int>("matcolor.id", 0);
+                        auto r = tree.get<double>("matcolor.r", 0);
+                        auto g = tree.get<double>("matcolor.g", 0);
+                        auto b = tree.get<double>("matcolor.b", 0);
+                        auto a = tree.get<double>("matcolor.a", 0);
+                        matColors[id] = CColor(r, g, b, a);
+                        continue;
+                    }
+                    auto op_rescale = tree.get_child_optional("rescale");
+                    if (op_rescale) {
+                        rescale = tree.get("rescale", 1.0);
+                    }
                 }
                 int j = 0;
                 QStringList voxel_link = line.split("|");
@@ -1137,7 +1151,7 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
                 if ((j = voxel_link[0].indexOf(">>>")) != -1) {
                     Message = voxel_link[0].mid(3, j - 3);
                     int k = voxel_link[0].indexOf("Time:");
-                    historyTime = voxel_link[0].mid(k+5, j-k-5).toDouble();
+                    historyTime = voxel_link[0].mid(k + 5, j - k - 5).toDouble();
 
                     QString mline = voxel_link[0].mid(j + 3, voxel_link[0].length() - j - 10);
                     QStringList voxel = mline.split(";");
@@ -1155,20 +1169,20 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
                             continue;
                         }
                         glPushMatrix();
-                        p1 = pos[0].toDouble()*rescale;
-                        p2 = pos[1].toDouble()*rescale;
-                        p3 = pos[2].toDouble()*rescale;
+                        p1 = pos[0].toDouble() * rescale;
+                        p2 = pos[1].toDouble() * rescale;
+                        p3 = pos[2].toDouble() * rescale;
                         angle = pos[3].toDouble();
                         r1 = pos[4].toDouble();
                         r2 = pos[5].toDouble();
                         r3 = pos[6].toDouble();
                         Vec3D<double> nnn, ppp;
-                        nnn.x = pos[7].toDouble()*rescale;
-                        nnn.y = pos[8].toDouble()*rescale;
-                        nnn.z = pos[9].toDouble()*rescale;
-                        ppp.x = pos[10].toDouble()*rescale;
-                        ppp.y = pos[11].toDouble()*rescale;
-                        ppp.z = pos[12].toDouble()*rescale;
+                        nnn.x = pos[7].toDouble() * rescale;
+                        nnn.y = pos[8].toDouble() * rescale;
+                        nnn.z = pos[9].toDouble() * rescale;
+                        ppp.x = pos[10].toDouble() * rescale;
+                        ppp.y = pos[11].toDouble() * rescale;
+                        ppp.z = pos[12].toDouble() * rescale;
                         matid = pos[13].toInt();
                         if (matid < 0 || matid >= 10) {
                             matid = 0;
@@ -1176,8 +1190,13 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
 
                         glTranslated(p1, p2, p3);
                         glRotated(angle, r1, r2, r3);
-                        if (nnn.Dist2(ppp)<1) {
-                            CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, true, 1.0, colorMap[matid]);
+                        if (nnn.Dist2(ppp) < 1) {
+                            if (matColors.find(matid) != matColors.end()) {
+                                CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, true, 1.0, matColors[matid]);
+                            } else {
+                                printf("Color not found %d.\n", matid);
+                                CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, true, 1.0, defaultColor);
+                            }
                         }
                         glPopMatrix();
                         // Update camera view center, but gentlely.
