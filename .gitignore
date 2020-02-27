@@ -31,7 +31,7 @@ bot/
 v*_data/
 exp_*.vxd
 personal/
-xenobot/
+__pycache__/
 
 # Prerequisites
 *.d
