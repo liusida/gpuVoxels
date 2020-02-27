@@ -32,7 +32,7 @@ struct VX3_MathTreeToken {
 struct VX3_MathTree {
     static bool validate(VX3_MathTreeToken *buff) {
         try {
-            eval(1, 1, 1, 1, buff);
+            eval(1, 1, 1, 1, 1, buff);
         } catch (...) {
             return false;
         }
@@ -42,7 +42,7 @@ struct VX3_MathTree {
     https://docs.nvidia.com/cuda/cuda-math-api/group__CUDA__MATH__DOUBLE.html
     */
     __device__ __host__ static double eval(double x, double y, double z,
-                                           double t, VX3_MathTreeToken *buff) {
+                                           double hit, double t, VX3_MathTreeToken *buff) {
         double values[1024];
         int values_cursor = 0;
         int process_cursor = 0;
@@ -66,6 +66,8 @@ struct VX3_MathTree {
                     values[values_cursor] = y;
                 } else if (buff[i].value < 2.5f) {
                     values[values_cursor] = z;
+                } else if (buff[i].value < 3.5f) {
+                    values[values_cursor] = hit;
                 } else {
                     values[values_cursor] = t;
                 }

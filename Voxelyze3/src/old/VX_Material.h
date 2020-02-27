@@ -159,6 +159,7 @@ class CVX_Material {
 	void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& w); //!< Writes this material's data to the rapidjson writing object.
 	bool readJSON(rapidjson::Value& mat); //!< reads this material data from the rapidjson Value.
 
+	bool isTarget = false;
 };
 
 #endif //VX_MATERIAL_H

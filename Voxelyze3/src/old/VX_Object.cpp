@@ -1178,6 +1178,7 @@ CVXC_Material& CVXC_Material::operator=(const CVXC_Material& RefMat)
 	Alpha = RefMat.Alpha;
 
 	matid = RefMat.matid;
+	isTarget = RefMat.isTarget;
 	Fixed = RefMat.Fixed;
 	sticky = RefMat.sticky;
 
@@ -1403,6 +1404,7 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 					pXML->UpLevel();
 
 				}
+				if (!pXML->FindLoadElement("isTarget", &isTarget)) isTarget = false;
 				if (!pXML->FindLoadElement("Fixed", &Fixed)) Fixed = 0;
 				if (!pXML->FindLoadElement("Sticky", &sticky)) sticky = 0;
 				if (!pXML->FindLoadElement("Elastic_Mod", &Elastic_Mod)) Elastic_Mod = 0;

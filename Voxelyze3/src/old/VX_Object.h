@@ -484,6 +484,8 @@ public:
 	//for random dither material definition
 	int RandIndex1, RandIndex2;
 	vfloat PercIndex1; //ranges from 0 to 1;
+
+	bool isTarget = false;
 };
 
 //PRSM:

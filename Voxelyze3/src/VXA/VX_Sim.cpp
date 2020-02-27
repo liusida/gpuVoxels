@@ -294,6 +294,7 @@ bool CVX_Sim::IsFeatureEnabled(const int VXSFEAT)
 void CVX_Sim::CopyMat(CVXC_Material* pOld, CVX_Material* pNew) //copies parameters from pOld to pNew
 {
 	pNew->matid = pOld->matid;
+	pNew->isTarget = (bool)pOld->isTarget;
 	pNew->fixed = (bool)pOld->Fixed;
 	pNew->sticky = (bool)pOld->sticky;
 	pNew->setName(pOld->GetName().c_str());

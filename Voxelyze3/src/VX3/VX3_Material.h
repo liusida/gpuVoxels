@@ -146,7 +146,7 @@ public:
 	//heat conduction
 	// dependentMaterials only for combinedMaterial, not used.
 
-
+	bool isTarget = false;
 };
 
 

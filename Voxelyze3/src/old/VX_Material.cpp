@@ -30,6 +30,7 @@ CVX_Material& CVX_Material::operator=(const CVX_Material& vIn)
 	b = vIn.b;
 	a = vIn.a;
 	matid = vIn.matid;
+	isTarget = vIn.isTarget;
 	fixed = vIn.fixed;
 	sticky = vIn.sticky;
 	linear = vIn.linear;
