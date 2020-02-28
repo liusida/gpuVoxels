@@ -28,6 +28,27 @@ body_flatten = world.reshape([z,-1])
 
 root = etree.Element("VXD")
 
+# ForceField
+ForceField = child(root, "ForceField")
+ForceField.set('replace', "VXA.Simulator.ForceField")
+x_forcefield = child(ForceField, "x_forcefield")
+a = child(x_forcefield, "mtADD")
+m = child(a, "mtMUL")
+child(m, "mtCONST").text = "-190"
+child(m, "mtVAR").text = "x"
+m = child(a, "mtMUL")
+child(m, "mtCONST").text = "90"
+child(m, "mtVAR").text = "y"
+
+y_forcefield = child(ForceField, "y_forcefield")
+a = child(y_forcefield, "mtADD")
+m = child(a, "mtMUL")
+child(m, "mtCONST").text = "-90"
+child(m, "mtVAR").text = "x"
+m = child(a, "mtMUL")
+child(m, "mtCONST").text = "-190"
+child(m, "mtVAR").text = "y"
+
 # Main Structure and PhaseOffset
 structure = child(root, "Structure")
 structure.set('replace', 'VXA.VXC.Structure')
