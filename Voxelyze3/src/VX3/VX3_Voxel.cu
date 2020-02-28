@@ -186,9 +186,9 @@ __device__ void VX3_Voxel::timeStep(double dt, double currentTime, VX3_VoxelyzeK
 	VX3_Vec3D<double> curForce = force();
 
 	// Apply Force Field
-	curForce.x += k->force_field.x_forcefield(pos.x, pos.y, pos.z, k->collisionCount, currentTime);
-	curForce.y += k->force_field.y_forcefield(pos.x, pos.y, pos.z, k->collisionCount, currentTime);
-	curForce.z += k->force_field.z_forcefield(pos.x, pos.y, pos.z, k->collisionCount, currentTime);
+	curForce.x += k->force_field.x_forcefield(pos.x, pos.y, pos.z, k->collisionCount, currentTime, k->recentAngle);
+	curForce.y += k->force_field.y_forcefield(pos.x, pos.y, pos.z, k->collisionCount, currentTime, k->recentAngle);
+	curForce.z += k->force_field.z_forcefield(pos.x, pos.y, pos.z, k->collisionCount, currentTime, k->recentAngle);
 		
 	VX3_Vec3D<double> fricForce = curForce;
 

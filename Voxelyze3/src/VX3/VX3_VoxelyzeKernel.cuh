@@ -109,6 +109,15 @@ class VX3_VoxelyzeKernel {
     VX3_MathTreeToken StopConditionFormula[1024];
 
     int collisionCount = 0;
+
+    //Calculate Angle
+    //A---B----C
+    //A: currentCenterOfMass_history[0]
+    //B: currentCenterOfMass_history[1]
+    //C: currentCenterOfMass
+    VX3_Vec3D<double> currentCenterOfMass_history[2];
+    int angleSampleTimes = 0;
+    double recentAngle = 0;
 };
 
 #endif // VX3_VOXELYZE_KERNEL_H

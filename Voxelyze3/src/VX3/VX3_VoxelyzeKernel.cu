@@ -127,7 +127,7 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
 }
 __device__ bool VX3_VoxelyzeKernel::StopConditionMet(void) // have we met the stop condition yet?
 {
-    if (VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, collisionCount, currentTime,
+    if (VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, collisionCount, currentTime, recentAngle,
                            StopConditionFormula) > 0) {
         // double a =
         //     VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, collisionCount, currentTime,
@@ -257,6 +257,24 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     CUDA_CHECK_AFTER_CALL();
     cudaDeviceSynchronize();
 
+    int CycleStep = int(TempPeriod/dt); // Sample at the same time point in the cycle, to avoid the impact of actuation as much as possible.
+    if (CurStepCount%CycleStep==0) {
+        angleSampleTimes++;
+
+        currentCenterOfMass_history[0] = currentCenterOfMass_history[1];
+        currentCenterOfMass_history[1] = currentCenterOfMass;
+        updateCurrentCenterOfMass();
+        auto A = currentCenterOfMass_history[0];
+        auto B = currentCenterOfMass_history[1];
+        auto C = currentCenterOfMass;
+        if (B==C || A==B || angleSampleTimes<3) {
+            recentAngle = 0; // avoid divide by zero, and don't include first two steps where A and B are still 0.
+        } else {
+            recentAngle = acos( (B-A).Dot(C-B) / (B.Dist(A)*C.Dist(B)) );
+        }
+        printf("(%d) recentAngle = %f\n", angleSampleTimes, recentAngle);
+    }
+
     currentTime += dt;
     // time_measures[1] = clock();
     // printf("running time for each step: \n");
@@ -282,6 +300,9 @@ __device__ void VX3_VoxelyzeKernel::updateCurrentCenterOfMass() {
     double TotalMass = 0;
     VX3_Vec3D<> Sum(0, 0, 0);
     for (int i = 0; i < num_d_voxels; i++) {
+        if (d_voxels[i].mat->isTarget || d_voxels[i].mat->fixed) {
+            continue;
+        }
         double ThisMass = d_voxels[i].material()->mass();
         Sum += d_voxels[i].position() * ThisMass;
         TotalMass += ThisMass;
@@ -326,7 +347,7 @@ __device__ VX3_MaterialLink *VX3_VoxelyzeKernel::combinedMaterial(VX3_MaterialVo
 
 __device__ void VX3_VoxelyzeKernel::computeFitness() {
     VX3_Vec3D<> offset = currentCenterOfMass - initialCenterOfMass;
-    fitness_score = VX3_MathTree::eval(offset.x, offset.y, offset.z, collisionCount, currentTime, fitness_function);
+    fitness_score = VX3_MathTree::eval(offset.x, offset.y, offset.z, collisionCount, currentTime, recentAngle, fitness_function);
 }
 
 /* Sub GPU Threads */
@@ -350,11 +371,11 @@ __global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt, double c
             return; // fixed voxels, no need to update position
         t->timeStep(dt, currentTime, k);
         t->enableAttach = false;
-        if (VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->AttachCondition[0]) > 0 &&
-            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->AttachCondition[1]) > 0 &&
-            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->AttachCondition[2]) > 0 &&
-            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->AttachCondition[3]) > 0 &&
-            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->AttachCondition[4]) > 0) {
+        if (VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->AttachCondition[0]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->AttachCondition[1]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->AttachCondition[2]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->AttachCondition[3]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->AttachCondition[4]) > 0) {
             t->enableAttach = true;
         };
     }
@@ -371,6 +392,7 @@ __global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAm
             return; // fixed voxels, no need to update temperature
         double currentTemperature =
             TempAmplitude * sin(2 * 3.1415926f * (currentTime / TempPeriod + t->phaseOffset)); // update the global temperature
+        //TODO: if we decide not to use PhaseOffset any more, we can move this calculation outside.
         // Important: Sida: This change in actuation will affect older experiment!
         if (currentTemperature > 0) {
             currentTemperature = 0;

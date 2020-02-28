@@ -23,14 +23,14 @@ struct VX3_ForceField {
                VX3_MathTree::validate(token_y_forcefield) &&
                VX3_MathTree::validate(token_z_forcefield);
     }
-    __device__ __host__ double x_forcefield(double x, double y, double z, double hit, double t) {
-        return VX3_MathTree::eval(x, y, z, hit, t, token_x_forcefield);
+    __device__ __host__ double x_forcefield(double x, double y, double z, double hit, double t, double angle) {
+        return VX3_MathTree::eval(x, y, z, hit, t, angle, token_x_forcefield);
     }
-    __device__ __host__ double y_forcefield(double x, double y, double z, double hit, double t) {
-        return VX3_MathTree::eval(x, y, z, hit, t, token_y_forcefield);
+    __device__ __host__ double y_forcefield(double x, double y, double z, double hit, double t, double angle) {
+        return VX3_MathTree::eval(x, y, z, hit, t, angle, token_y_forcefield);
     }
-    __device__ __host__ double z_forcefield(double x, double y, double z, double hit, double t) {
-        return VX3_MathTree::eval(x, y, z, hit, t, token_z_forcefield);
+    __device__ __host__ double z_forcefield(double x, double y, double z, double hit, double t, double angle) {
+        return VX3_MathTree::eval(x, y, z, hit, t, angle, token_z_forcefield);
     }
 };
 

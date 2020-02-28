@@ -191,6 +191,8 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
                 p->value = 3;
             } else if (tok.second == "t") {
                 p->value = 4;
+            } else if (tok.second == "angle") {
+                p->value = 5;
             } else {
                 printf("ERROR: No such variable.\n");
                 break;
