@@ -272,7 +272,7 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
         } else {
             recentAngle = acos( (B-A).Dot(C-B) / (B.Dist(A)*C.Dist(B)) );
         }
-        printf("(%d) recentAngle = %f\n", angleSampleTimes, recentAngle);
+        // printf("(%d) recentAngle = %f\n", angleSampleTimes, recentAngle);
     }
 
     currentTime += dt;
