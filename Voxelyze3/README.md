@@ -2,6 +2,10 @@
 
 [A basic manual of DeepGreen](https://wiki.uvm.edu/w/DeepGreenDocs)
 
+## Binary Executables:
+
+On DeepGreen, they can be copied from `/users/s/l/sliu1/updates/all/*`, so you don't need to build the project.
+
 ## Usage:
 
 This happens in DeepGreen Server environment:
