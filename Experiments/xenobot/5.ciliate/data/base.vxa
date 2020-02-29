@@ -2,6 +2,7 @@
 <VXA Version="1.1">
   <Simulator>
     <EnableTargetCloseness>1</EnableTargetCloseness>
+    <EnableNormalThrust>1</EnableNormalThrust>
     <FitnessFunction>
       <mtVAR>targetCloseness</mtVAR>
     </FitnessFunction>

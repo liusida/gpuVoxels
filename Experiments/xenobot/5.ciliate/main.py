@@ -12,12 +12,15 @@ def safe_mkdir(dir_name):
     except Exception:
         pass
 
+def toBinary(number, bit):
+    return ((number & (1<<np.arange(bit))) > 0).astype(int)
+
 safe_mkdir("data")
-x = 100; y = 10; z = 10
+x = 800; y = 800; z = 10
 world = np.zeros([z,y,x], dtype=int)
-world[0,9,12] = 5
-world[0,9,14] = 5
-world[0,9,99] = 5
+# world[0,9,12] = 5
+# world[0,9,14] = 5
+# world[0,9,99] = 5
 
 body = np.load("assets/handes.npy")
 body = np.swapaxes(body, 0,2)
@@ -26,8 +29,13 @@ body = np.swapaxes(body, 0,2)
 # world[:,:,21:31] = body[::-1,:,:]
 # world[:,:,41:51] = body[::-1,:,:]
 # world[:,:,61:71] = body[::-1,:,:]
-world[0,0,0] = 3
-world[0,0,1] = 4
+
+for i in range(16): # test 16 types of 2x2 cube
+    for j in range(16):
+        body = toBinary(i*16+j, 8).reshape(2,2,2)
+        body[body==0] = 3
+        body[body==1] = 4
+        world[:2,3*j:3*j+2,3*i:3*i+2] = body
 
 safe_mkdir(f"data")
 shutil.copy("base.vxa", f"data/base.vxa")

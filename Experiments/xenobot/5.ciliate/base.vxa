@@ -2,6 +2,7 @@
 <VXA Version="1.1">
   <Simulator>
     <EnableTargetCloseness>1</EnableTargetCloseness>
+    <EnableNormalThrust>1</EnableNormalThrust>
     <FitnessFunction>
       <mtVAR>targetCloseness</mtVAR>
     </FitnessFunction>
@@ -167,7 +168,7 @@
           <Alpha>0.8</Alpha>
         </Display>
         <Mechanical>
-          <NormalThrust>0.1</NormalThrust>
+          <NormalThrust>5</NormalThrust>
           <MatModel>0</MatModel>
           <Elastic_Mod>5e+07</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
