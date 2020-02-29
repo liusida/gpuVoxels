@@ -1181,6 +1181,7 @@ CVXC_Material& CVXC_Material::operator=(const CVXC_Material& RefMat)
 	isTarget = RefMat.isTarget;
 	Fixed = RefMat.Fixed;
 	sticky = RefMat.sticky;
+	normalThrust = RefMat.normalThrust;
 
 	Elastic_Mod = RefMat.Elastic_Mod;
 	Plastic_Mod = RefMat.Plastic_Mod;
@@ -1407,6 +1408,7 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 				if (!pXML->FindLoadElement("isTarget", &isTarget)) isTarget = false;
 				if (!pXML->FindLoadElement("Fixed", &Fixed)) Fixed = 0;
 				if (!pXML->FindLoadElement("Sticky", &sticky)) sticky = 0;
+				if (!pXML->FindLoadElement("NormalThrust", &normalThrust)) normalThrust = 0;
 				if (!pXML->FindLoadElement("Elastic_Mod", &Elastic_Mod)) Elastic_Mod = 0;
 				if (!pXML->FindLoadElement("Plastic_Mod", &Plastic_Mod)) Plastic_Mod = 0;
 				if (!pXML->FindLoadElement("Yield_Stress", &Yield_Stress)) Yield_Stress = 0;

@@ -3,7 +3,7 @@
 
 VX3_Material::VX3_Material( CVX_Material* p, VX3_VoxelyzeKernel* k ):
 r(p->r), g(p->g), b(p->b), a(p->a), isTarget(p->isTarget),
-matid(p->matid), fixed(p->fixed), sticky(p->sticky),
+matid(p->matid), fixed(p->fixed), sticky(p->sticky), normalThrust(p->normalThrust),
 linear(p->linear), E(p->E), sigmaYield(p->sigmaYield), sigmaFail(p->sigmaFail),
 epsilonYield(p->epsilonYield), epsilonFail(p->epsilonFail), 
 hd_strainData(p->strainData), hd_stressData(p->stressData), //hd_vector init in host, used for passing data to kernel. With syncVector() function, we use d_vector in kernel.
@@ -44,6 +44,7 @@ __device__ VX3_Material& VX3_Material::operator=(const VX3_Material& vIn)
 	matid = vIn.matid;
 	fixed = vIn.fixed;
 	sticky = vIn.sticky;
+	normalThrust = vIn.normalThrust;
 	linear = vIn.linear;
 	E = vIn.E;
 	sigmaYield = vIn.sigmaYield;

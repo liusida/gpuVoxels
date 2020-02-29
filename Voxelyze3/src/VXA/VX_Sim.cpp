@@ -297,6 +297,7 @@ void CVX_Sim::CopyMat(CVXC_Material* pOld, CVX_Material* pNew) //copies paramete
 	pNew->isTarget = (bool)pOld->isTarget;
 	pNew->fixed = (bool)pOld->Fixed;
 	pNew->sticky = (bool)pOld->sticky;
+	pNew->normalThrust = pOld->normalThrust;
 	pNew->setName(pOld->GetName().c_str());
 	pNew->setColor(pOld->GetRedi(), pOld->GetGreeni(), pOld->GetBluei(), pOld->GetAlphai());
 	switch (pOld->GetMatModel()){

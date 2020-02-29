@@ -6,6 +6,7 @@ __global__ void gpu_update_force(VX3_Link **links, int num);
 __global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt, double currentTime, VX3_VoxelyzeKernel *k);
 __global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime);
 __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double watchDistance, VX3_VoxelyzeKernel *k);
+__global__ void gpu_update_normal_thrust(VX3_Voxel **surface_voxels, int num, VX3_VoxelyzeKernel *k);
 /* Host methods */
 
 VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
@@ -128,8 +129,8 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
 }
 __device__ bool VX3_VoxelyzeKernel::StopConditionMet(void) // have we met the stop condition yet?
 {
-    if (VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, collisionCount, currentTime, recentAngle, targetCloseness,
-                           StopConditionFormula) > 0) {
+    if (VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, collisionCount, currentTime, recentAngle,
+                           targetCloseness, StopConditionFormula) > 0) {
         // double a =
         //     VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, collisionCount, currentTime,
         //     StopConditionFormula);
@@ -247,6 +248,16 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
             return false;
     }
 
+    if (true) { // TODO: make a switch for this.
+        cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_normal_thrust, 0,
+                                           num_d_surface_voxels); // Dynamically calculate blockSize
+        int gridSize_voxels = (num_d_surface_voxels + blockSize - 1) / blockSize;
+        int blockSize_voxels = num_d_surface_voxels < blockSize ? num_d_surface_voxels : blockSize;
+        gpu_update_normal_thrust<<<gridSize_voxels, blockSize_voxels>>>(d_surface_voxels, num_d_surface_voxels, this);
+        CUDA_CHECK_AFTER_CALL();
+        cudaDeviceSynchronize();
+    }
+
     if (enableAttach)
         updateAttach();
 
@@ -258,8 +269,9 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     CUDA_CHECK_AFTER_CALL();
     cudaDeviceSynchronize();
 
-    int CycleStep = int(TempPeriod/dt); // Sample at the same time point in the cycle, to avoid the impact of actuation as much as possible.
-    if (CurStepCount%CycleStep==0) {
+    int CycleStep =
+        int(TempPeriod / dt); // Sample at the same time point in the cycle, to avoid the impact of actuation as much as possible.
+    if (CurStepCount % CycleStep == 0) {
         angleSampleTimes++;
 
         currentCenterOfMass_history[0] = currentCenterOfMass_history[1];
@@ -268,14 +280,14 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
         auto A = currentCenterOfMass_history[0];
         auto B = currentCenterOfMass_history[1];
         auto C = currentCenterOfMass;
-        if (B==C || A==B || angleSampleTimes<3) {
+        if (B == C || A == B || angleSampleTimes < 3) {
             recentAngle = 0; // avoid divide by zero, and don't include first two steps where A and B are still 0.
         } else {
-            recentAngle = acos( (B-A).Dot(C-B) / (B.Dist(A)*C.Dist(B)) );
+            recentAngle = acos((B - A).Dot(C - B) / (B.Dist(A) * C.Dist(B)));
         }
         // printf("(%d) recentAngle = %f\n", angleSampleTimes, recentAngle);
 
-        //Also calculate targetCloseness here.
+        // Also calculate targetCloseness here.
         computeTargetCloseness();
     }
 
@@ -351,7 +363,8 @@ __device__ VX3_MaterialLink *VX3_VoxelyzeKernel::combinedMaterial(VX3_MaterialVo
 
 __device__ void VX3_VoxelyzeKernel::computeFitness() {
     VX3_Vec3D<> offset = currentCenterOfMass - initialCenterOfMass;
-    fitness_score = VX3_MathTree::eval(offset.x, offset.y, offset.z, collisionCount, currentTime, recentAngle, targetCloseness, fitness_function);
+    fitness_score =
+        VX3_MathTree::eval(offset.x, offset.y, offset.z, collisionCount, currentTime, recentAngle, targetCloseness, fitness_function);
 }
 
 __device__ void VX3_VoxelyzeKernel::registerTargets() {
@@ -365,15 +378,14 @@ __device__ void VX3_VoxelyzeKernel::registerTargets() {
 
 __device__ void VX3_VoxelyzeKernel::computeTargetCloseness() {
     double ret = 0;
-    for (int i=0;i<d_targets.size();i++) {
-        for (int j=i+1;j<d_targets.size();j++) {
+    for (int i = 0; i < d_targets.size(); i++) {
+        for (int j = i + 1; j < d_targets.size(); j++) {
             ret += 1 / d_targets[i]->pos.Dist(d_targets[j]->pos);
         }
     }
     targetCloseness = ret;
     // printf("targetCloseness: %f\n", targetCloseness);
 }
-
 
 /* Sub GPU Threads */
 __global__ void gpu_update_force(VX3_Link **links, int num) {
@@ -396,11 +408,16 @@ __global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt, double c
             return; // fixed voxels, no need to update position
         t->timeStep(dt, currentTime, k);
         t->enableAttach = false;
-        if (VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->AttachCondition[0]) > 0 &&
-            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->AttachCondition[1]) > 0 &&
-            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->AttachCondition[2]) > 0 &&
-            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->AttachCondition[3]) > 0 &&
-            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->AttachCondition[4]) > 0) {
+        if (VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                               k->AttachCondition[0]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                               k->AttachCondition[1]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                               k->AttachCondition[2]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                               k->AttachCondition[3]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                               k->AttachCondition[4]) > 0) {
             t->enableAttach = true;
         };
     }
@@ -417,7 +434,7 @@ __global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAm
             return; // fixed voxels, no need to update temperature
         double currentTemperature =
             TempAmplitude * sin(2 * 3.1415926f * (currentTime / TempPeriod + t->phaseOffset)); // update the global temperature
-        //TODO: if we decide not to use PhaseOffset any more, we can move this calculation outside.
+        // TODO: if we decide not to use PhaseOffset any more, we can move this calculation outside.
         // Important: Sida: This change in actuation will affect older experiment!
         if (currentTemperature > 0) {
             currentTemperature = 0;
@@ -494,7 +511,7 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double wa
             voxel1->contactForce += collision.contactForce(voxel1);
             voxel2->contactForce += collision.contactForce(voxel2);
             if ((voxel1->mat->isTarget && !voxel2->mat->isTarget) || (voxel2->mat->isTarget && !voxel1->mat->isTarget)) {
-                atomicAdd(&k->collisionCount,1);
+                atomicAdd(&k->collisionCount, 1);
             }
         }
 
@@ -596,6 +613,43 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double wa
             // if a link is created, set contact force = 0 , for stable reason. (if they are connected, they should not collide.)
             voxel1->contactForce += VX3_Vec3D<>();
             voxel2->contactForce += VX3_Vec3D<>();
+        }
+    }
+}
+
+// TODO: only need to update after attachment changes.
+__global__ void gpu_update_normal_thrust(VX3_Voxel **surface_voxels, int num, VX3_VoxelyzeKernel *k) {
+    int index = threadIdx.x + blockIdx.x * blockDim.x;
+    if (index < num) {
+        if (surface_voxels[index]->mat->normalThrust == 0)
+            return;
+        surface_voxels[index]->normalThrustForce = VX3_Vec3D<>();
+        double f = surface_voxels[index]->tempe * surface_voxels[index]->mat->normalThrust;
+        for (int dir = 0; dir < 6; dir++) {
+            if (surface_voxels[index]->links[dir] == NULL) {
+                switch (dir) {
+                case X_POS:
+                    surface_voxels[index]->normalThrustForce.x += f;
+                    break;
+                case X_NEG:
+                    surface_voxels[index]->normalThrustForce.x -= f;
+                    break;
+                case Y_POS:
+                    surface_voxels[index]->normalThrustForce.y += f;
+                    break;
+                case Y_NEG:
+                    surface_voxels[index]->normalThrustForce.y -= f;
+                    break;
+                case Z_POS:
+                    surface_voxels[index]->normalThrustForce.z += f;
+                    break;
+                case Z_NEG:
+                    surface_voxels[index]->normalThrustForce.z -= f;
+                    break;
+                }
+                // printf("gpu_update_normal_thrust for %d, dir: %d\n",index,dir);
+                // TODO: if opposite side all available, don't need any.
+            }
         }
     }
 }
