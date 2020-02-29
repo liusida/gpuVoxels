@@ -248,7 +248,17 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
             return false;
     }
 
-    if (true) { // TODO: make a switch for this.
+    if (enableAttach)
+        updateAttach();
+
+
+    if (isSurfaceChanged) {
+        isSurfaceChanged = false;
+
+        regenerateSurfaceVoxels();
+    }
+
+    if (EnableNormalThrust) {
         cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_normal_thrust, 0,
                                            num_d_surface_voxels); // Dynamically calculate blockSize
         int gridSize_voxels = (num_d_surface_voxels + blockSize - 1) / blockSize;
@@ -257,9 +267,6 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
         CUDA_CHECK_AFTER_CALL();
         cudaDeviceSynchronize();
     }
-
-    if (enableAttach)
-        updateAttach();
 
     cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_voxel, 0,
                                        num_d_voxels); // Dynamically calculate blockSize
@@ -599,6 +606,9 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double wa
             }
             pL->isNewLink = k->SafetyGuard;
             k->d_v_links.push_back(pL); // add to the list
+            
+            k->isSurfaceChanged = true;
+
             // printf("createLink.... %p %p distance=> %f %f %f (%f), dir (%d and "
             //        "%d), watchDistance %f.\n",
             //        voxel1, voxel2, diff.x, diff.y, diff.z, diff.Length(),
@@ -624,32 +634,37 @@ __global__ void gpu_update_normal_thrust(VX3_Voxel **surface_voxels, int num, VX
         if (surface_voxels[index]->mat->normalThrust == 0)
             return;
         surface_voxels[index]->normalThrustForce = VX3_Vec3D<>();
-        double f = surface_voxels[index]->tempe * surface_voxels[index]->mat->normalThrust;
+        double f = surface_voxels[index]->mat->normalThrust;
+        VX3_Vec3D<> thrust;
         for (int dir = 0; dir < 6; dir++) {
             if (surface_voxels[index]->links[dir] == NULL) {
                 switch (dir) {
                 case X_POS:
-                    surface_voxels[index]->normalThrustForce.x += f;
+                    thrust.x += f;
                     break;
                 case X_NEG:
-                    surface_voxels[index]->normalThrustForce.x -= f;
+                    thrust.x -= f;
                     break;
                 case Y_POS:
-                    surface_voxels[index]->normalThrustForce.y += f;
+                    thrust.y += f;
                     break;
                 case Y_NEG:
-                    surface_voxels[index]->normalThrustForce.y -= f;
+                    thrust.y -= f;
                     break;
                 case Z_POS:
-                    surface_voxels[index]->normalThrustForce.z += f;
+                    thrust.z += f;
                     break;
                 case Z_NEG:
-                    surface_voxels[index]->normalThrustForce.z -= f;
+                    thrust.z -= f;
                     break;
                 }
                 // printf("gpu_update_normal_thrust for %d, dir: %d\n",index,dir);
                 // TODO: if opposite side all available, don't need any.
             }
         }
+        //rotate thrust
+        thrust = surface_voxels[index]->orient.RotateVec3D(thrust);
+        //update to voxel
+        surface_voxels[index]->normalThrustForce = thrust;
     }
 }

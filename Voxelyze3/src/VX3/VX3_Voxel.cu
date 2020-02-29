@@ -272,7 +272,7 @@ __device__ VX3_Vec3D<double> VX3_Voxel::force()
 	totalForce -= contactForce;
 	contactForce = VX3_Vec3D<double>(0,0,0);
 	
-	totalForce += normalThrustForce;
+	totalForce += normalThrustForce * tempe;
 	
 	return totalForce;
 }

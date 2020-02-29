@@ -122,8 +122,11 @@ class VX3_VoxelyzeKernel {
     double recentAngle = 0;
 
     int EnableTargetCloseness = 0;
+    int EnableNormalThrust = 0;
     double  targetCloseness = 0;
     VX3_dVector<VX3_Voxel*> d_targets;
+
+    bool isSurfaceChanged=false;
 };
 
 #endif // VX3_VOXELYZE_KERNEL_H

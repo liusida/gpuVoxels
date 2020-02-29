@@ -14,8 +14,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         VX3_VoxelyzeKernel *d_v3 = &d_voxelyze_3[thread_index];
         d_v3->syncVectors();             // Everytime we pass a class with VX3_vectors in
                                          // it, we should sync hd_vector to d_vector first.
-        d_v3->regenerateSurfaceVoxels(); // first time regenerate
-                                         // d_surface_voxels.
+        d_v3->isSurfaceChanged = true; // trigger surface regenerating and calculate normal thrust for the first time
         d_v3->registerTargets();
         printf(COLORCODE_GREEN "%d) Simulation %d runs: %s.\n" COLORCODE_RESET,
                device_index, thread_index, d_v3->vxa_filename);
@@ -320,6 +319,7 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
                       "VXA.Simulator.ForceField.z_forcefield", pt_merged);
 
         h_d_tmp.EnableTargetCloseness = pt_merged.get<int>("VXA.Simulator.EnableTargetCloseness", 0);
+        h_d_tmp.EnableNormalThrust = pt_merged.get<int>("VXA.Simulator.EnableNormalThrust", 0);
 
         VcudaMemcpy(d_voxelyze_3s[device_index] + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), cudaMemcpyHostToDevice);
         i++;
