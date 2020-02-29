@@ -37,7 +37,9 @@ class VX3_VoxelyzeKernel {
     __device__ void regenerateSurfaceVoxels();
     __device__ VX3_MaterialLink *combinedMaterial(VX3_MaterialVoxel *mat1, VX3_MaterialVoxel *mat2);
     __device__ void computeFitness();
-    
+    __device__ void registerTargets();
+    __device__ void computeTargetCloseness();
+
     /* data */
     bool forceExit = false;
     char vxa_filename[256];
@@ -118,6 +120,10 @@ class VX3_VoxelyzeKernel {
     VX3_Vec3D<double> currentCenterOfMass_history[2];
     int angleSampleTimes = 0;
     double recentAngle = 0;
+
+    int EnableTargetCloseness = 0;
+    double  targetCloseness = 0;
+    VX3_dVector<VX3_Voxel*> d_targets;
 };
 
 #endif // VX3_VOXELYZE_KERNEL_H

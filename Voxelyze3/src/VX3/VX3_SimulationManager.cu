@@ -16,6 +16,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                                          // it, we should sync hd_vector to d_vector first.
         d_v3->regenerateSurfaceVoxels(); // first time regenerate
                                          // d_surface_voxels.
+        d_v3->registerTargets();
         printf(COLORCODE_GREEN "%d) Simulation %d runs: %s.\n" COLORCODE_RESET,
                device_index, thread_index, d_v3->vxa_filename);
         // printf("%d) Simulation %d: links %d, voxels %d.\n", device_index, i,
@@ -193,6 +194,8 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
                 p->value = 4;
             } else if (tok.second == "angle") {
                 p->value = 5;
+            } else if (tok.second == "targetCloseness") {
+                p->value = 6;
             } else {
                 printf("ERROR: No such variable.\n");
                 break;
@@ -315,6 +318,8 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
                       "VXA.Simulator.ForceField.y_forcefield", pt_merged);
         ParseMathTree(h_d_tmp.force_field.token_z_forcefield, sizeof(h_d_tmp.force_field.token_z_forcefield),
                       "VXA.Simulator.ForceField.z_forcefield", pt_merged);
+
+        h_d_tmp.EnableTargetCloseness = pt_merged.get<int>("VXA.Simulator.EnableTargetCloseness", 0);
 
         VcudaMemcpy(d_voxelyze_3s[device_index] + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), cudaMemcpyHostToDevice);
         i++;
