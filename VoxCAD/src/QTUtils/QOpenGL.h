@@ -133,7 +133,7 @@ public:
 	int GetCurView(){return (int)CurView;};
 
 
-protected: //functions and variables only needed internally
+public: //functions and variables only needed internally
 	QSize minimumSizeHint() const { return QSize(200, 200); }; //overload the sizing instructions
 	QSize sizeHint() const { return QSize(1000, 1000); };
 

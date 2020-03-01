@@ -195,6 +195,7 @@ void VoxCad::SetupGLWindow(void)
 	connect(GLWindow, SIGNAL(CtrlWheelRoll(bool)), this, SLOT(CtrlMouseRoll(bool)));
 
 	MainSim.pGLWin = GLWindow;
+	MainSim.pSimView->pGLWin = GLWindow;
 }
 
 void VoxCad::SetupRef3DWindow(void)

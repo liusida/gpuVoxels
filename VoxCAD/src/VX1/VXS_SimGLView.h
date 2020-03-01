@@ -12,6 +12,7 @@ See <http://www.opensource.org/licenses/lgpl-3.0.html> for license details.
 #define VX_SIMGLUTILS_H
 
 #include "VX_Sim.h"
+#include "QOpenGL.h"
 
 #ifdef QT_GUI_LIB
 #include <qgl.h>
@@ -52,6 +53,8 @@ public:
 	CVXS_SimGLView(CVX_Sim* pSimIn); //!< Constructor, links to simulation
 	~CVXS_SimGLView(void); //!< Destructor
 	CVXS_SimGLView& operator=(const CVXS_SimGLView& rGlView); //!< Overload "=" 
+
+    CQOpenGL *pGLWin; // need this pointer to determine camera.zoom... :P
 
 	CVX_Sim* pSim;
 	CVX_MeshRender* defMeshVx2;

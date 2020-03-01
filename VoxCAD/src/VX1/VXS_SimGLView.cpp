@@ -1048,6 +1048,15 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
             colorMap[2] = CColor(1.0, 0, 0, 0.5);
         }
     }
+    bool ZoomNear = false;
+    bool ZoomVeryFar = false;
+    // printf("pGLWin->m_Cam.Zoom: %f\n", pGLWin->m_Cam.Zoom);
+    if (pGLWin->m_Cam.Zoom<50) {
+        ZoomNear = true;
+    }
+    if (pGLWin->m_Cam.Zoom>150) {
+        ZoomVeryFar = true;
+    }
     // If it doesn't start play, check the Default.vxc file
     if (pSim->StreamHistory) {
         while (1) {
@@ -1160,30 +1169,47 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
                     double p1, p2, p3;
                     double angle, r1, r2, r3;
                     int matid;
-                    for (int i = 0; i < voxel.size(); i++) {
-                        pos = voxel[i].split(",");
+                    int i=0;
+                    for (auto &v : voxel) {
+                    //for (int i = 0; i < voxel.size(); i++) {
+                        pos = v.split(",");
                         if (pos.size() <= 1)
                             continue;
                         if (pos.size() < 14) {
-                            qWarning() << "ERROR: a voxel has pos size is " << pos.size() << "<14." << voxel[i];
+                            qWarning() << "ERROR: a voxel has pos size is " << pos.size() << "<14." << v;
                             continue;
                         }
                         glPushMatrix();
-                        p1 = pos[0].toDouble() * rescale;
-                        p2 = pos[1].toDouble() * rescale;
-                        p3 = pos[2].toDouble() * rescale;
-                        angle = pos[3].toDouble();
-                        r1 = pos[4].toDouble();
-                        r2 = pos[5].toDouble();
-                        r3 = pos[6].toDouble();
+                        QStringList::const_iterator constIterator;
+                        constIterator = pos.constBegin();
+                        p1 = (*constIterator).toDouble() * rescale;
+                        constIterator++;
+                        p2 = (*constIterator).toDouble() * rescale;
+                        constIterator++;
+                        p3 = (*constIterator).toDouble() * rescale;
+                        constIterator++;
+                        angle = (*constIterator).toDouble();
+                        constIterator++;
+                        r1 = (*constIterator).toDouble();
+                        constIterator++;
+                        r2 = (*constIterator).toDouble();
+                        constIterator++;
+                        r3 = (*constIterator).toDouble();
+                        constIterator++;
                         Vec3D<double> nnn, ppp;
-                        nnn.x = pos[7].toDouble() * rescale;
-                        nnn.y = pos[8].toDouble() * rescale;
-                        nnn.z = pos[9].toDouble() * rescale;
-                        ppp.x = pos[10].toDouble() * rescale;
-                        ppp.y = pos[11].toDouble() * rescale;
-                        ppp.z = pos[12].toDouble() * rescale;
-                        matid = pos[13].toInt();
+                        nnn.x = (*constIterator).toDouble() * rescale;
+                        constIterator++;
+                        nnn.y = (*constIterator).toDouble() * rescale;
+                        constIterator++;
+                        nnn.z = (*constIterator).toDouble() * rescale;
+                        constIterator++;
+                        ppp.x = (*constIterator).toDouble() * rescale;
+                        constIterator++;
+                        ppp.y = (*constIterator).toDouble() * rescale;
+                        constIterator++;
+                        ppp.z = (*constIterator).toDouble() * rescale;
+                        constIterator++;
+                        matid = (*constIterator).toInt();
                         if (matid < 0 || matid >= 10) {
                             matid = 0;
                         }
@@ -1192,15 +1218,15 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
                         glRotated(angle, r1, r2, r3);
                         if (nnn.Dist2(ppp) < 1) {
                             if (matColors.find(matid) != matColors.end()) {
-                                CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, true, 1.0, matColors[matid]);
+                                CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, ZoomNear, 1.0, matColors[matid], ZoomVeryFar);
                             } else {
                                 printf("Color not found %d.\n", matid);
-                                CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, true, 1.0, defaultColor);
+                                CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, ZoomNear, 1.0, defaultColor, ZoomVeryFar);
                             }
                         }
                         glPopMatrix();
                         // Update camera view center, but gentlely.
-                        if (i == int(voxel.size() / 2))
+                        if (i++ == int(voxel.size() / 2))
                             HistoryCM = HistoryCM * 0.95 + Vec3D<>(p1, p2, p3) * 0.05;
                     }
                     currentHistoryLine = line;
