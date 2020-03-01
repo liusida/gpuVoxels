@@ -12,8 +12,8 @@
       <RecordLink>0</RecordLink>
     </RecordHistory>
     <AttachDetach>
-      <EnableCollision>1</EnableCollision>
-      <EnableAttach>1</EnableAttach>
+      <EnableCollision>0</EnableCollision>
+      <EnableAttach>0</EnableAttach>
       <watchDistance>1</watchDistance>
       <SafetyGuard>2000</SafetyGuard>
       <AttachCondition>
@@ -108,57 +108,8 @@
       <Z_Squeeze>1</Z_Squeeze>
     </Voxel>
     <Palette>
+
       <Material ID="1">
-        <MatType>0</MatType>
-        <Name>Fat</Name>
-        <Display>
-          <Red>0.8</Red>
-          <Green>0.8</Green>
-          <Blue>0.3</Blue>
-          <Alpha>0.8</Alpha>
-        </Display>
-        <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>1e+07</Elastic_Mod>
-          <Plastic_Mod>0</Plastic_Mod>
-          <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
-          <Fail_Strain>0</Fail_Strain>
-          <Density>5e+05</Density>
-          <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
-          <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
-        </Mechanical>
-      </Material>
-      <Material ID="2">
-        <MatType>0</MatType>
-        <Name>Bone</Name>
-        <Display>
-          <Red>0.2</Red>
-          <Green>0.2</Green>
-          <Blue>0.2</Blue>
-          <Alpha>1</Alpha>
-        </Display>
-        <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>5e+08</Elastic_Mod>
-          <Plastic_Mod>0</Plastic_Mod>
-          <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
-          <Fail_Strain>0</Fail_Strain>
-          <Density>5e+05</Density>
-          <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
-          <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
-        </Mechanical>
-      </Material>
-      <Material ID="3">
         <MatType>0</MatType>
         <Name>MuscleOne</Name>
         <Display>
@@ -183,7 +134,7 @@
           <uDynamic>0.5</uDynamic>
         </Mechanical>
       </Material>
-      <Material ID="4">
+      <Material ID="2">
         <MatType>0</MatType>
         <Name>MuscleTwo</Name>
         <Display>
@@ -208,19 +159,18 @@
           <uDynamic>0.5</uDynamic>
         </Mechanical>
       </Material>
-      <Material ID="5">
+      <Material ID="3">
         <MatType>0</MatType>
-        <Name>TargetPebble</Name>
+        <Name>MuscleOne</Name>
         <Display>
-          <Red>1</Red>
-          <Green>0</Green>
-          <Blue>0</Blue>
-          <Alpha>1</Alpha>
+          <Red>0.8</Red>
+          <Green>0.6</Green>
+          <Blue>0.0</Blue>
+          <Alpha>0.8</Alpha>
         </Display>
         <Mechanical>
-          <isTarget>1</isTarget>
           <MatModel>0</MatModel>
-          <Elastic_Mod>5e+06</Elastic_Mod>
+          <Elastic_Mod>3e+07</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
           <Yield_Stress>0</Yield_Stress>
           <FailModel>0</FailModel>
@@ -228,12 +178,139 @@
           <Fail_Strain>0</Fail_Strain>
           <Density>1e+06</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0</CTE>
+          <CTE>0.03</CTE>
           <MaterialTempPhase>0</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>
         </Mechanical>
       </Material>
+      <Material ID="4">
+        <MatType>0</MatType>
+        <Name>MuscleTwo</Name>
+        <Display>
+          <Red>0.7</Red>
+          <Green>0.5</Green>
+          <Blue>0.2</Blue>
+          <Alpha>0.8</Alpha>
+        </Display>
+        <Mechanical>
+          <MatModel>0</MatModel>
+          <Elastic_Mod>3e+07</Elastic_Mod>
+          <Plastic_Mod>0</Plastic_Mod>
+          <Yield_Stress>0</Yield_Stress>
+          <FailModel>0</FailModel>
+          <Fail_Stress>0</Fail_Stress>
+          <Fail_Strain>0</Fail_Strain>
+          <Density>1e+06</Density>
+          <Poissons_Ratio>0.35</Poissons_Ratio>
+          <CTE>0.03</CTE>
+          <MaterialTempPhase>0</MaterialTempPhase>
+          <uStatic>1</uStatic>
+          <uDynamic>0.5</uDynamic>
+        </Mechanical>
+      </Material>
+
+      <Material ID="5">
+        <MatType>0</MatType>
+        <Name>MuscleOne</Name>
+        <Display>
+          <Red>0.9</Red>
+          <Green>0.8</Green>
+          <Blue>0.2</Blue>
+          <Alpha>0.8</Alpha>
+        </Display>
+        <Mechanical>
+          <MatModel>0</MatModel>
+          <Elastic_Mod>3e+07</Elastic_Mod>
+          <Plastic_Mod>0</Plastic_Mod>
+          <Yield_Stress>0</Yield_Stress>
+          <FailModel>0</FailModel>
+          <Fail_Stress>0</Fail_Stress>
+          <Fail_Strain>0</Fail_Strain>
+          <Density>1e+06</Density>
+          <Poissons_Ratio>0.35</Poissons_Ratio>
+          <CTE>0.03</CTE>
+          <MaterialTempPhase>0</MaterialTempPhase>
+          <uStatic>1</uStatic>
+          <uDynamic>0.5</uDynamic>
+        </Mechanical>
+      </Material>
+      <Material ID="6">
+        <MatType>0</MatType>
+        <Name>MuscleTwo</Name>
+        <Display>
+          <Red>0.8</Red>
+          <Green>0.7</Green>
+          <Blue>0.4</Blue>
+          <Alpha>0.8</Alpha>
+        </Display>
+        <Mechanical>
+          <MatModel>0</MatModel>
+          <Elastic_Mod>3e+07</Elastic_Mod>
+          <Plastic_Mod>0</Plastic_Mod>
+          <Yield_Stress>0</Yield_Stress>
+          <FailModel>0</FailModel>
+          <Fail_Stress>0</Fail_Stress>
+          <Fail_Strain>0</Fail_Strain>
+          <Density>1e+06</Density>
+          <Poissons_Ratio>0.35</Poissons_Ratio>
+          <CTE>0.03</CTE>
+          <MaterialTempPhase>0</MaterialTempPhase>
+          <uStatic>1</uStatic>
+          <uDynamic>0.5</uDynamic>
+        </Mechanical>
+      </Material>
+      <Material ID="7">
+        <MatType>0</MatType>
+        <Name>MuscleOne</Name>
+        <Display>
+          <Red>0.7</Red>
+          <Green>0.6</Green>
+          <Blue>0.0</Blue>
+          <Alpha>0.8</Alpha>
+        </Display>
+        <Mechanical>
+          <MatModel>0</MatModel>
+          <Elastic_Mod>3e+07</Elastic_Mod>
+          <Plastic_Mod>0</Plastic_Mod>
+          <Yield_Stress>0</Yield_Stress>
+          <FailModel>0</FailModel>
+          <Fail_Stress>0</Fail_Stress>
+          <Fail_Strain>0</Fail_Strain>
+          <Density>1e+06</Density>
+          <Poissons_Ratio>0.35</Poissons_Ratio>
+          <CTE>0.03</CTE>
+          <MaterialTempPhase>0</MaterialTempPhase>
+          <uStatic>1</uStatic>
+          <uDynamic>0.5</uDynamic>
+        </Mechanical>
+      </Material>
+      <Material ID="8">
+        <MatType>0</MatType>
+        <Name>MuscleTwo</Name>
+        <Display>
+          <Red>0.6</Red>
+          <Green>0.5</Green>
+          <Blue>0.2</Blue>
+          <Alpha>0.8</Alpha>
+        </Display>
+        <Mechanical>
+          <MatModel>0</MatModel>
+          <Elastic_Mod>3e+07</Elastic_Mod>
+          <Plastic_Mod>0</Plastic_Mod>
+          <Yield_Stress>0</Yield_Stress>
+          <FailModel>0</FailModel>
+          <Fail_Stress>0</Fail_Stress>
+          <Fail_Strain>0</Fail_Strain>
+          <Density>1e+06</Density>
+          <Poissons_Ratio>0.35</Poissons_Ratio>
+          <CTE>0.03</CTE>
+          <MaterialTempPhase>0</MaterialTempPhase>
+          <uStatic>1</uStatic>
+          <uDynamic>0.5</uDynamic>
+        </Mechanical>
+      </Material>
+
     </Palette>
     <Structure Compression="ASCII_READABLE">
       <X_Voxels>6</X_Voxels>

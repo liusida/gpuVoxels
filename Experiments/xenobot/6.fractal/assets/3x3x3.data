@@ -1,0 +1,10 @@
+<Structure Compression="ASCII_READABLE" replace="VXA.VXC.Structure">
+    <X_Voxels>3</X_Voxels>
+    <Y_Voxels>3</Y_Voxels>
+    <Z_Voxels>3</Z_Voxels>
+    <Data>
+      <Layer><![CDATA[101000101]]></Layer>
+      <Layer><![CDATA[111111111]]></Layer>
+      <Layer><![CDATA[111111111]]></Layer>
+    </Data>
+</Structure>
