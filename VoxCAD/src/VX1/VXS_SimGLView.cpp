@@ -1066,7 +1066,7 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
                 // pSim->StreamHistory->seek(0);
             }
             QString line;
-            if (HistoryPaused) {
+            if (HistoryPaused && currentHistoryLine!="") {
                 line = currentHistoryLine;
             } else {
                 line = pSim->StreamHistory->readLine();

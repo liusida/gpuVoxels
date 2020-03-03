@@ -341,10 +341,6 @@ void Dlg_Physics::DeletePlotPoints(void)
 
 void Dlg_Physics::ClickedReset(void)
 {
-	if (pSim->StreamHistory) {
-		qInfo() << "history loop, reload the file.";
-		pSim->LoadHistoryFile(pSim->fileHistory->fileName());
-	}
 	pSim->ResetSim(); 
 	DeletePlotPoints();
 	UpdateUI();

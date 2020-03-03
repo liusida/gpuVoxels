@@ -641,9 +641,17 @@ void QVX_Sim::ResetSim() {
             LOCALSLEEP(1);
         }
     }
-
     ResetSimulation();
+	if (StreamHistory) {
+		qInfo() << "history loop, reload the file.";
+		LoadHistoryFile(fileHistory->fileName());
+	}
+    pSimView->HistoryPaused = Paused;
+
     ReqGLUpdate();
+
+    pSimView->currentHistoryLine = ""; // make current History line empty, so it will read until the first line that has content.
+
 }
 
 void QVX_Sim::LMouseDown(Vec3D<> P) {
