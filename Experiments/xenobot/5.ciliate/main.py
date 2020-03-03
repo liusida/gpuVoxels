@@ -29,9 +29,10 @@ body = np.swapaxes(body, 0,2)
 # world[:,:,21:31] = body[::-1,:,:]
 # world[:,:,41:51] = body[::-1,:,:]
 # world[:,:,61:71] = body[::-1,:,:]
-
-for i in range(16): # test 16 types of 2x2 cube
-    for j in range(16):
+num = 16
+num = 3
+for i in range(num): # test 16 types of 2x2 cube
+    for j in range(num):
         body = toBinary(i*16+j, 8).reshape(2,2,2)
         body[body==0] = 3
         body[body==1] = 4

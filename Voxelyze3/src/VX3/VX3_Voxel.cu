@@ -11,7 +11,7 @@ VX3_Voxel::VX3_Voxel(CVX_Voxel *p, VX3_VoxelyzeKernel* k):
 ix(p->ix), iy(p->iy), iz(p->iz),
 pos(p->pos), linMom(p->linMom), orient(p->orient), angMom(p->angMom),
 boolStates(p->boolStates), tempe(p->temp), pStrain(p->pStrain), poissonsStrainInvalid(p->poissonsStrainInvalid),
-previousDt(p->previousDt), phaseOffset(p->phaseOffset), isDetached(p->isDetached) {
+previousDt(p->previousDt), phaseOffset(p->phaseOffset), isDetached(p->isDetached), baseCiliaForce(p->baseCiliaForce) {
 	_voxel = p;
 
 	for (int i=0;i<k->num_d_voxelMats;i++) {
@@ -270,10 +270,11 @@ __device__ VX3_Vec3D<double> VX3_Voxel::force()
 	// }
 	// }
 	totalForce -= contactForce;
-	contactForce = VX3_Vec3D<double>(0,0,0);
+	contactForce.clear();
 	
-	totalForce += normalThrustForce * tempe;
-	
+	totalForce += CiliaForce * mat->Cilia;
+	CiliaForce.clear();
+
 	return totalForce;
 }
 

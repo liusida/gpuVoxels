@@ -100,6 +100,8 @@ bool CVX_Sim::Import(CVX_Environment* pEnvIn, CMesh* pSurfMeshIn, std::string* R
 			VoxList.push_back(Vx.setVoxel(VxcToVx2MatIndexMap[VxcMatIndex], x, y, z));
 			//PhaseOffset
 			VoxList.back()->phaseOffset = pEnv->pObj->Structure.GetPhaseOffset(VoxList.size()-1);
+			//BaseCiliaForce
+			VoxList.back()->baseCiliaForce = pEnv->pObj->Structure.GetBaseCiliaForce(VoxList.size()-1);
 		}
 	}
 
@@ -297,7 +299,7 @@ void CVX_Sim::CopyMat(CVXC_Material* pOld, CVX_Material* pNew) //copies paramete
 	pNew->isTarget = (bool)pOld->isTarget;
 	pNew->fixed = (bool)pOld->Fixed;
 	pNew->sticky = (bool)pOld->sticky;
-	pNew->normalThrust = pOld->normalThrust;
+	pNew->Cilia = pOld->Cilia;
 	pNew->setName(pOld->GetName().c_str());
 	pNew->setColor(pOld->GetRedi(), pOld->GetGreeni(), pOld->GetBluei(), pOld->GetAlphai());
 	switch (pOld->GetMatModel()){

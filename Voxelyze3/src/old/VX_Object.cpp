@@ -1181,7 +1181,7 @@ CVXC_Material& CVXC_Material::operator=(const CVXC_Material& RefMat)
 	isTarget = RefMat.isTarget;
 	Fixed = RefMat.Fixed;
 	sticky = RefMat.sticky;
-	normalThrust = RefMat.normalThrust;
+	Cilia = RefMat.Cilia;
 
 	Elastic_Mod = RefMat.Elastic_Mod;
 	Plastic_Mod = RefMat.Plastic_Mod;
@@ -1408,7 +1408,7 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 				if (!pXML->FindLoadElement("isTarget", &isTarget)) isTarget = false;
 				if (!pXML->FindLoadElement("Fixed", &Fixed)) Fixed = 0;
 				if (!pXML->FindLoadElement("Sticky", &sticky)) sticky = 0;
-				if (!pXML->FindLoadElement("NormalThrust", &normalThrust)) normalThrust = 0;
+				if (!pXML->FindLoadElement("Cilia", &Cilia)) Cilia = 0;
 				if (!pXML->FindLoadElement("Elastic_Mod", &Elastic_Mod)) Elastic_Mod = 0;
 				if (!pXML->FindLoadElement("Plastic_Mod", &Plastic_Mod)) Plastic_Mod = 0;
 				if (!pXML->FindLoadElement("Yield_Stress", &Yield_Stress)) Yield_Stress = 0;
@@ -1788,9 +1788,10 @@ bool CVXC_Structure::ReadXML(CXML_Rip* pXML, std::string Version, std::string* R
 			else { //if Compression == BASE64
 				DataIn = FromBase64(RawData); //otherwise uncompressed
 			}
-
+			
 			if (DataIn.length() != X_Voxels*Y_Voxels){
 				if (RetMessage) *RetMessage += "Voxel layer data not present or does not match expected size.";
+				DataIn.resize(X_Voxels*Y_Voxels);
 				return false;
 			}
 
@@ -1856,6 +1857,42 @@ bool CVXC_Structure::ReadXML(CXML_Rip* pXML, std::string Version, std::string* R
 		usingPhaseOffset = false;
 	}
 
+	//Read BaseCiliaForce
+	if (pXML->FindElement("BaseCiliaForce")){ 
+		// usingPhaseOffset = true;
+		bool paddingZeros = false;
+		int voxCounter = 0;
+		// std::cout << "found weights!" << std::endl;
+		InitBaseCiliaForceArray(X_Voxels*Y_Voxels*Z_Voxels);
+		for (int i=0; i<Z_Voxels; i++)
+		{
+			std::string DataIn;
+			std::string RawData;
+			// std::string thisValue;
+			pXML->FindLoadElement("Layer", &RawData, true, true);
+		
+			std::vector<std::string> dataArray;
+			dataArray = split(RawData,',',dataArray);
+			for (int k=0; k<X_Voxels*Y_Voxels; k++)
+			{
+				if (pData[X_Voxels*Y_Voxels*i+k] > 0)
+				{
+					if (dataArray.size()<=k*3) { // if BaseCiliaForce Layer is not longer enough, just padding 0's.
+						SetpBaseCiliaForce(voxCounter, 0, 0, 0 );
+						paddingZeros = true;
+					} else {
+						SetpBaseCiliaForce(voxCounter, atof(dataArray[3*k].c_str()), atof(dataArray[3*k+1].c_str()), atof(dataArray[3*k+2].c_str()) );
+					}
+					voxCounter++;
+				}
+			}
+		}
+		if (paddingZeros) {
+			printf("Info: BaseCiliaForce Layer is not longer enough, just padding 0's to the end.\n");
+		}
+		pXML->UpLevel(); //Layer
+		pXML->UpLevel(); //Weights
+	}
 	return true;
 }
 

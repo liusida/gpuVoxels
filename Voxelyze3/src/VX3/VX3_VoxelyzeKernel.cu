@@ -6,7 +6,7 @@ __global__ void gpu_update_force(VX3_Link **links, int num);
 __global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt, double currentTime, VX3_VoxelyzeKernel *k);
 __global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime);
 __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double watchDistance, VX3_VoxelyzeKernel *k);
-__global__ void gpu_update_normal_thrust(VX3_Voxel **surface_voxels, int num, VX3_VoxelyzeKernel *k);
+__global__ void gpu_update_cilia_force(VX3_Voxel **surface_voxels, int num, VX3_VoxelyzeKernel *k);
 /* Host methods */
 
 VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
@@ -248,22 +248,22 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
             return false;
     }
 
-    if (enableAttach)
-        updateAttach();
-
-
     if (isSurfaceChanged) {
         isSurfaceChanged = false;
 
         regenerateSurfaceVoxels();
     }
 
-    if (EnableNormalThrust) {
-        cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_normal_thrust, 0,
+    if (enableAttach || EnableCollision) { //either attachment and collision need measurement for pairwise distances
+        updateAttach();
+    }
+
+    if (EnableCilia) {
+        cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_cilia_force, 0,
                                            num_d_surface_voxels); // Dynamically calculate blockSize
         int gridSize_voxels = (num_d_surface_voxels + blockSize - 1) / blockSize;
         int blockSize_voxels = num_d_surface_voxels < blockSize ? num_d_surface_voxels : blockSize;
-        gpu_update_normal_thrust<<<gridSize_voxels, blockSize_voxels>>>(d_surface_voxels, num_d_surface_voxels, this);
+        gpu_update_cilia_force<<<gridSize_voxels, blockSize_voxels>>>(d_surface_voxels, num_d_surface_voxels, this);
         CUDA_CHECK_AFTER_CALL();
         cudaDeviceSynchronize();
     }
@@ -621,6 +621,7 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double wa
             //        voxel1->iy, voxel1->iz, voxel2->ix, voxel2->iy, voxel2->iz);
 
             // if a link is created, set contact force = 0 , for stable reason. (if they are connected, they should not collide.)
+            //TODO: later to verify whether it is a bug here: += ??
             voxel1->contactForce += VX3_Vec3D<>();
             voxel2->contactForce += VX3_Vec3D<>();
         }
@@ -628,43 +629,12 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double wa
 }
 
 // TODO: only need to update after attachment changes.
-__global__ void gpu_update_normal_thrust(VX3_Voxel **surface_voxels, int num, VX3_VoxelyzeKernel *k) {
+__global__ void gpu_update_cilia_force(VX3_Voxel **surface_voxels, int num, VX3_VoxelyzeKernel *k) {
     int index = threadIdx.x + blockIdx.x * blockDim.x;
     if (index < num) {
-        if (surface_voxels[index]->mat->normalThrust == 0)
+        if (surface_voxels[index]->mat->Cilia == 0)
             return;
-        surface_voxels[index]->normalThrustForce = VX3_Vec3D<>();
-        double f = surface_voxels[index]->mat->normalThrust;
-        VX3_Vec3D<> thrust;
-        for (int dir = 0; dir < 6; dir++) {
-            if (surface_voxels[index]->links[dir] == NULL) {
-                switch (dir) {
-                case X_POS:
-                    thrust.x += f;
-                    break;
-                case X_NEG:
-                    thrust.x -= f;
-                    break;
-                case Y_POS:
-                    thrust.y += f;
-                    break;
-                case Y_NEG:
-                    thrust.y -= f;
-                    break;
-                case Z_POS:
-                    thrust.z += f;
-                    break;
-                case Z_NEG:
-                    thrust.z -= f;
-                    break;
-                }
-                // printf("gpu_update_normal_thrust for %d, dir: %d\n",index,dir);
-                // TODO: if opposite side all available, don't need any.
-            }
-        }
-        //rotate thrust
-        thrust = surface_voxels[index]->orient.RotateVec3D(thrust);
-        //update to voxel
-        surface_voxels[index]->normalThrustForce = thrust;
+        //rotate base cilia force and update it into voxel.
+        surface_voxels[index]->CiliaForce = surface_voxels[index]->orient.RotateVec3D(surface_voxels[index]->baseCiliaForce);
     }
 }

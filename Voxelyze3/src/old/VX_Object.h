@@ -180,6 +180,11 @@ public:
 	inline void InitPhaseOffsetArray(int Size) {pPhaseOffsets = new double[Size];}
 	inline bool GetUsingPhaseOffset(void) {return usingPhaseOffset;}
 
+	//BaseCiliaForce
+	inline void SetpBaseCiliaForce(int Index, double x, double y, double z) {pBaseCiliaForce[Index] = Vec3D<>(x,y,z);}
+	inline Vec3D<> GetBaseCiliaForce(int Index) const {if (pBaseCiliaForce) return pBaseCiliaForce[Index]; return Vec3D<>();}
+	inline void InitBaseCiliaForceArray(int Size) {pBaseCiliaForce = new Vec3D<>[Size]; }
+
 protected:
 	//variable from file
 	std::string Compression;
@@ -202,6 +207,7 @@ protected:
 	//PhaseOffset
 	bool usingPhaseOffset; 
 	double* pPhaseOffsets;
+	Vec3D<>* pBaseCiliaForce;
 
 };
 
@@ -469,7 +475,7 @@ public:
 	int matid=0;
 	int Fixed=0;
 	int sticky=0;
-	double normalThrust=0;
+	double Cilia=0;
 	vfloat Density, Elastic_Mod, Yield_Stress, Plastic_Mod, Fail_Stress, Fail_Strain, Poissons_Ratio, CTE, CurMaterialTemp, MaterialTempPhase, uStatic, uDynamic;
 	std::vector<vfloat> DStress, DStrain; //arbitrary stress/strain values for material model (in tension only for now)
 

@@ -121,7 +121,7 @@ class CVX_Material {
 	//material model
 	bool fixed = false;
 	bool sticky = false;
-	double normalThrust = 0;
+	double Cilia = 0; //!< Scale factor of cilia force in VXD.
 	bool linear; //!< Set to true if this material is specified as linear.
 	float E; //!< Young's modulus (stiffness) in Pa.
 	float sigmaYield; //!< Yield stress in Pa.

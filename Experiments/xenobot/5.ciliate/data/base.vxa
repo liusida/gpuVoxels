@@ -87,7 +87,7 @@
       <TempAmplitude>7.72173</TempAmplitude>
       <TempBase>25</TempBase>
       <VaryTempEnabled>1</VaryTempEnabled>
-      <TempPeriod>0.2</TempPeriod>
+      <TempPeriod>0.1</TempPeriod>
     </Thermal>
   </Environment>
   <VXC Version="0.94">
