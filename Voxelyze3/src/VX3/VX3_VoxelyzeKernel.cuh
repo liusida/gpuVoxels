@@ -127,6 +127,19 @@ class VX3_VoxelyzeKernel {
     VX3_dVector<VX3_Voxel*> d_targets;
 
     bool isSurfaceChanged=false;
+
+    //Spatial Hash
+    //index all surface voxels into grid, so we only need to compare neighbor grids for detecting collision
+    //dx,dy,dz width height of one single grid. must larger than collision watch distance.
+    double dx = 0.1;
+    double dy = 0.1;
+    double dz = 0.1;
+    //number of grid on each side
+    int lookupGrid_n = 50;
+    //total number of grid
+    int num_lookupGrids;
+    VX3_dVector<VX3_Voxel*>* d_collisionLookupGrid;
+
 };
 
 #endif // VX3_VOXELYZE_KERNEL_H

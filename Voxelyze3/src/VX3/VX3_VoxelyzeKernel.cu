@@ -7,6 +7,11 @@ __global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt, double c
 __global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime);
 __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double watchDistance, VX3_VoxelyzeKernel *k);
 __global__ void gpu_update_cilia_force(VX3_Voxel **surface_voxels, int num, VX3_VoxelyzeKernel *k);
+__global__ void gpu_clear_lookupgrid(VX3_dVector<VX3_Voxel *> *d_collisionLookupGrid, int num);
+__global__ void gpu_insert_lookupgrid(VX3_Voxel **d_surface_voxels, int num, VX3_dVector<VX3_Voxel *> *d_collisionLookupGrid, double dx,
+                                      double dy, double dz, int lookupGrid_n);
+__global__ void gpu_collision_attachment_lookupgrid(VX3_dVector<VX3_Voxel *> *d_collisionLookupGrid, int num, double watchDistance,
+                                                    VX3_VoxelyzeKernel *k);
 /* Host methods */
 
 VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
@@ -109,6 +114,9 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
     d_v_linkMats.clear();
     d_v_collisions.clear();
     d_targets.clear();
+    // allocate memory for collision lookup table
+    num_lookupGrids = lookupGrid_n * lookupGrid_n * lookupGrid_n;
+    d_collisionLookupGrid = (VX3_dVector<VX3_Voxel *> *)malloc(num_lookupGrids * sizeof(VX3_dVector<VX3_Voxel *>));
 
     for (int i = 0; i < hd_v_linkMats.size(); i++) {
         d_v_linkMats.push_back(hd_v_linkMats[i]);
@@ -254,7 +262,7 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
         regenerateSurfaceVoxels();
     }
 
-    if (enableAttach || EnableCollision) { //either attachment and collision need measurement for pairwise distances
+    if (enableAttach || EnableCollision) { // either attachment and collision need measurement for pairwise distances
         updateAttach();
     }
 
@@ -310,13 +318,45 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
 __device__ void VX3_VoxelyzeKernel::updateAttach() {
     // for each surface voxel pair, check distance < watchDistance, make a new
     // link between these two voxels, updateSurface().
-    int blockSize = 16;
-    dim3 dimBlock(blockSize, blockSize);
-    dim3 dimGrid((num_d_surface_voxels + dimBlock.x - 1) / dimBlock.x, (num_d_surface_voxels + dimBlock.y - 1) / dimBlock.y);
-    gpu_update_attach<<<dimGrid, dimBlock>>>(d_surface_voxels, num_d_surface_voxels, watchDistance,
-                                             this); // invoke two dimensional gpu threads 'CUDA C++ Programming
-                                                    // Guide', Nov 2019, P52.
-    CUDA_CHECK_AFTER_CALL();
+    int blockSize;
+    int minGridSize;
+    if (false) { //TODO: true to test new Spatial Hashing, but there's difference between two method. need to check.
+        // clear all lookupGrids
+        cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_clear_lookupgrid, 0,
+                                           num_lookupGrids); // Dynamically calculate blockSize
+        int gridSize_voxels = (num_lookupGrids + blockSize - 1) / blockSize;
+        int blockSize_voxels = num_lookupGrids < blockSize ? num_lookupGrids : blockSize;
+        gpu_clear_lookupgrid<<<gridSize_voxels, blockSize_voxels>>>(d_collisionLookupGrid, num_lookupGrids);
+        CUDA_CHECK_AFTER_CALL();
+        cudaDeviceSynchronize();
+        // build lookupGrids: put surface voxels into grids
+        cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_insert_lookupgrid, 0,
+                                           num_d_surface_voxels); // Dynamically calculate blockSize
+        gridSize_voxels = (num_d_surface_voxels + blockSize - 1) / blockSize;
+        blockSize_voxels = num_d_surface_voxels < blockSize ? num_d_surface_voxels : blockSize;
+        gpu_insert_lookupgrid<<<gridSize_voxels, blockSize_voxels>>>(d_surface_voxels, num_d_surface_voxels, d_collisionLookupGrid, dx, dy,
+                                                                     dz, lookupGrid_n);
+        CUDA_CHECK_AFTER_CALL();
+        cudaDeviceSynchronize();
+        // detect collision: voxels in each grid with voxels within this grid and its neighbors
+        cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_collision_attachment_lookupgrid, 0,
+                                           num_lookupGrids); // Dynamically calculate blockSize
+        gridSize_voxels = (num_lookupGrids + blockSize - 1) / blockSize;
+        blockSize_voxels = num_lookupGrids < blockSize ? num_lookupGrids : blockSize;
+        gpu_collision_attachment_lookupgrid<<<gridSize_voxels, blockSize_voxels>>>(d_collisionLookupGrid, num_lookupGrids, watchDistance,
+                                                                                   this);
+        CUDA_CHECK_AFTER_CALL();
+        cudaDeviceSynchronize();
+    } else {
+        // Pairwise detection O(n ^ 2)
+        blockSize = 16;
+        dim3 dimBlock(blockSize, blockSize);
+        dim3 dimGrid((num_d_surface_voxels + dimBlock.x - 1) / dimBlock.x, (num_d_surface_voxels + dimBlock.y - 1) / dimBlock.y);
+        gpu_update_attach<<<dimGrid, dimBlock>>>(d_surface_voxels, num_d_surface_voxels, watchDistance,
+                                                 this); // invoke two dimensional gpu threads 'CUDA C++ Programming
+                                                        // Guide', Nov 2019, P52.
+        CUDA_CHECK_AFTER_CALL();
+    }
 }
 
 __device__ void VX3_VoxelyzeKernel::updateCurrentCenterOfMass() {
@@ -480,151 +520,159 @@ __device__ bool is_neighbor(VX3_Voxel *voxel1, VX3_Voxel *voxel2, VX3_Link *inco
     // printf("not found.\n");
     return false;
 }
+
+__device__ void handle_collision_attachment(VX3_Voxel *voxel1, VX3_Voxel *voxel2, double watchDistance, VX3_VoxelyzeKernel *k) {
+    // same voxel
+    if (voxel1 == voxel2)
+        return;
+    // if both of the voxels are fixed, no need to compute.
+    if (voxel1->mat->fixed && voxel2->mat->fixed)
+        return;
+
+    VX3_Vec3D<double> diff = voxel1->pos - voxel2->pos;
+    watchDistance = 0.5 * (voxel1->baseSize(X_AXIS) + voxel2->baseSize(X_AXIS)) * watchDistance;
+
+    if (diff.x > watchDistance || diff.x < -watchDistance)
+        return;
+    if (diff.y > watchDistance || diff.y < -watchDistance)
+        return;
+    if (diff.z > watchDistance || diff.z < -watchDistance)
+        return;
+
+    if (diff.Length() > watchDistance)
+        return;
+
+    // to exclude voxels already have link between them. check in depth of
+    // 1, direct neighbor ignore the collision
+    if (is_neighbor(voxel1, voxel2, NULL, 1)) {
+        return;
+    }
+    // calculate and store contact force, apply and clean in
+    // VX3_Voxel::force()
+    // if (voxel1->mat !=
+    //     voxel2->mat) { // disable same material collision for now
+    if (k->EnableCollision) {
+        VX3_Collision collision(voxel1, voxel2);
+        collision.updateContactForce();
+        voxel1->contactForce += collision.contactForce(voxel1);
+        voxel2->contactForce += collision.contactForce(voxel2);
+        if ((voxel1->mat->isTarget && !voxel2->mat->isTarget) || (voxel2->mat->isTarget && !voxel1->mat->isTarget)) {
+            atomicAdd(&k->collisionCount, 1);
+        }
+    }
+
+    // determined by formula
+    if (!voxel1->enableAttach || !voxel2->enableAttach)
+        return;
+
+    // fixed voxels, no need to look further for attachment
+    if (voxel1->mat->fixed || voxel2->mat->fixed)
+        return;
+    // different material, no need to attach
+    if (voxel1->mat != voxel2->mat)
+        return;
+    if (!voxel1->mat->sticky)
+        return;
+
+    // to exclude voxels already have link between them. check in depth 5.
+    // closely connected part ignore the link creation.
+    if (is_neighbor(voxel1, voxel2, NULL, 5)) {
+        return;
+    }
+
+    // determine relative position
+    linkDirection link_dir_1, link_dir_2;
+    linkAxis link_axis;
+    auto a = voxel1->orientation();
+    auto b = voxel2->orientation();
+    auto c = voxel1->position();
+    auto d = voxel2->position();
+    auto e = c - d;
+    auto ea = a.RotateVec3DInv(-e);
+    auto eb = b.RotateVec3DInv(e);
+
+    // first find which is the dominant axis, then determine which one is
+    // neg which one is pos.
+    VX3_Vec3D<double> f;
+    bool reverseOrder = false;
+    f = ea.Abs();
+    if (f.x >= f.y && f.x >= f.z) { // X_AXIS
+        link_axis = X_AXIS;
+        if (ea.x < 0) {
+            link_dir_1 = X_NEG;
+            link_dir_2 = X_POS;
+            reverseOrder = true;
+        } else {
+            link_dir_1 = X_POS;
+            link_dir_2 = X_NEG;
+        }
+    } else if (f.y >= f.x && f.y >= f.z) { // Y_AXIS
+        link_axis = Y_AXIS;
+        if (ea.y < 0) {
+            link_dir_1 = Y_NEG;
+            link_dir_2 = Y_POS;
+            reverseOrder = true;
+        } else {
+            link_dir_1 = Y_POS;
+            link_dir_2 = Y_NEG;
+        }
+    } else { // Z_AXIS
+        link_axis = Z_AXIS;
+        if (ea.z < 0) { // voxel1 is on top
+            link_dir_1 = Z_NEG;
+            link_dir_2 = Z_POS;
+            reverseOrder = true;
+        } else {
+            link_dir_1 = Z_POS;
+            link_dir_2 = Z_NEG;
+        }
+    }
+
+    // TODO: need to solve this. Create only when there's a right place to
+    // attach
+    if (voxel1->links[link_dir_1] == NULL && voxel2->links[link_dir_2] == NULL) {
+        VX3_Link *pL;
+        if (reverseOrder) {
+            pL = new VX3_Link(voxel1, link_dir_1, voxel2, link_dir_2, link_axis,
+                              k); // make the new link (change to both materials, etc.
+        } else {
+            pL = new VX3_Link(voxel2, link_dir_2, voxel1, link_dir_1, link_axis,
+                              k); // make the new link (change to both materials, etc.
+        }
+        if (!pL) {
+            printf("ERROR: Out of memory. Link not created.\n");
+            return;
+        }
+        pL->isNewLink = k->SafetyGuard;
+        k->d_v_links.push_back(pL); // add to the list
+
+        k->isSurfaceChanged = true;
+
+        // printf("createLink.... %p %p distance=> %f %f %f (%f), dir (%d and "
+        //        "%d), watchDistance %f.\n",
+        //        voxel1, voxel2, diff.x, diff.y, diff.z, diff.Length(),
+        //        link_dir_1, link_dir_2, watchDistance);
+        // printf("orientation (%f; %f, %f, %f) and (%f; %f, %f, %f).\n", a.w,
+        //        a.x, a.y, a.z, b.w, b.x, b.y, b.z);
+        // printf("ea, after inv rotate (%f, %f, %f)", ea.x, ea.y, ea.z);
+        // printf("newLink: rest %f.\n", pL->currentRestLength);
+        // printf("between (%d,%d,%d) and (%d,%d,%d).\n", voxel1->ix,
+        //        voxel1->iy, voxel1->iz, voxel2->ix, voxel2->iy, voxel2->iz);
+
+        // if a link is created, set contact force = 0 , for stable reason. (if they are connected, they should not collide.)
+        // TODO: later to verify whether it is a bug here: += ??
+        voxel1->contactForce += VX3_Vec3D<>();
+        voxel2->contactForce += VX3_Vec3D<>();
+    }
+}
+
 __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double watchDistance, VX3_VoxelyzeKernel *k) {
     int first = threadIdx.x + blockIdx.x * blockDim.x;
     int second = threadIdx.y + blockIdx.y * blockDim.y;
     if (first < num && second < first) {
         VX3_Voxel *voxel1 = surface_voxels[first];
         VX3_Voxel *voxel2 = surface_voxels[second];
-        // if both of the voxels are fixed, no need to compute.
-        if (voxel1->mat->fixed && voxel2->mat->fixed)
-            return;
-
-        VX3_Vec3D<double> diff = voxel1->pos - voxel2->pos;
-        watchDistance = 0.5 * (voxel1->baseSize(X_AXIS) + voxel2->baseSize(X_AXIS)) * watchDistance;
-
-        if (diff.x > watchDistance || diff.x < -watchDistance)
-            return;
-        if (diff.y > watchDistance || diff.y < -watchDistance)
-            return;
-        if (diff.z > watchDistance || diff.z < -watchDistance)
-            return;
-
-        if (diff.Length() > watchDistance)
-            return;
-
-        // to exclude voxels already have link between them. check in depth of
-        // 1, direct neighbor ignore the collision
-        if (is_neighbor(voxel1, voxel2, NULL, 1)) {
-            return;
-        }
-        // calculate and store contact force, apply and clean in
-        // VX3_Voxel::force()
-        // if (voxel1->mat !=
-        //     voxel2->mat) { // disable same material collision for now
-        if (k->EnableCollision) {
-            VX3_Collision collision(voxel1, voxel2);
-            collision.updateContactForce();
-            voxel1->contactForce += collision.contactForce(voxel1);
-            voxel2->contactForce += collision.contactForce(voxel2);
-            if ((voxel1->mat->isTarget && !voxel2->mat->isTarget) || (voxel2->mat->isTarget && !voxel1->mat->isTarget)) {
-                atomicAdd(&k->collisionCount, 1);
-            }
-        }
-
-        // determined by formula
-        if (!voxel1->enableAttach || !voxel2->enableAttach)
-            return;
-
-        // fixed voxels, no need to look further for attachment
-        if (voxel1->mat->fixed || voxel2->mat->fixed)
-            return;
-        // different material, no need to attach
-        if (voxel1->mat != voxel2->mat)
-            return;
-        if (!voxel1->mat->sticky)
-            return;
-
-        // to exclude voxels already have link between them. check in depth 5.
-        // closely connected part ignore the link creation.
-        if (is_neighbor(voxel1, voxel2, NULL, 5)) {
-            return;
-        }
-
-        // determine relative position
-        linkDirection link_dir_1, link_dir_2;
-        linkAxis link_axis;
-        auto a = voxel1->orientation();
-        auto b = voxel2->orientation();
-        auto c = voxel1->position();
-        auto d = voxel2->position();
-        auto e = c - d;
-        auto ea = a.RotateVec3DInv(-e);
-        auto eb = b.RotateVec3DInv(e);
-
-        // first find which is the dominant axis, then determine which one is
-        // neg which one is pos.
-        VX3_Vec3D<double> f;
-        bool reverseOrder = false;
-        f = ea.Abs();
-        if (f.x >= f.y && f.x >= f.z) { // X_AXIS
-            link_axis = X_AXIS;
-            if (ea.x < 0) {
-                link_dir_1 = X_NEG;
-                link_dir_2 = X_POS;
-                reverseOrder = true;
-            } else {
-                link_dir_1 = X_POS;
-                link_dir_2 = X_NEG;
-            }
-        } else if (f.y >= f.x && f.y >= f.z) { // Y_AXIS
-            link_axis = Y_AXIS;
-            if (ea.y < 0) {
-                link_dir_1 = Y_NEG;
-                link_dir_2 = Y_POS;
-                reverseOrder = true;
-            } else {
-                link_dir_1 = Y_POS;
-                link_dir_2 = Y_NEG;
-            }
-        } else { // Z_AXIS
-            link_axis = Z_AXIS;
-            if (ea.z < 0) { // voxel1 is on top
-                link_dir_1 = Z_NEG;
-                link_dir_2 = Z_POS;
-                reverseOrder = true;
-            } else {
-                link_dir_1 = Z_POS;
-                link_dir_2 = Z_NEG;
-            }
-        }
-
-        // TODO: need to solve this. Create only when there's a right place to
-        // attach
-        if (voxel1->links[link_dir_1] == NULL && voxel2->links[link_dir_2] == NULL) {
-            VX3_Link *pL;
-            if (reverseOrder) {
-                pL = new VX3_Link(voxel1, link_dir_1, voxel2, link_dir_2, link_axis,
-                                  k); // make the new link (change to both materials, etc.
-            } else {
-                pL = new VX3_Link(voxel2, link_dir_2, voxel1, link_dir_1, link_axis,
-                                  k); // make the new link (change to both materials, etc.
-            }
-            if (!pL) {
-                printf("ERROR: Out of memory. Link not created.\n");
-                return;
-            }
-            pL->isNewLink = k->SafetyGuard;
-            k->d_v_links.push_back(pL); // add to the list
-            
-            k->isSurfaceChanged = true;
-
-            // printf("createLink.... %p %p distance=> %f %f %f (%f), dir (%d and "
-            //        "%d), watchDistance %f.\n",
-            //        voxel1, voxel2, diff.x, diff.y, diff.z, diff.Length(),
-            //        link_dir_1, link_dir_2, watchDistance);
-            // printf("orientation (%f; %f, %f, %f) and (%f; %f, %f, %f).\n", a.w,
-            //        a.x, a.y, a.z, b.w, b.x, b.y, b.z);
-            // printf("ea, after inv rotate (%f, %f, %f)", ea.x, ea.y, ea.z);
-            // printf("newLink: rest %f.\n", pL->currentRestLength);
-            // printf("between (%d,%d,%d) and (%d,%d,%d).\n", voxel1->ix,
-            //        voxel1->iy, voxel1->iz, voxel2->ix, voxel2->iy, voxel2->iz);
-
-            // if a link is created, set contact force = 0 , for stable reason. (if they are connected, they should not collide.)
-            //TODO: later to verify whether it is a bug here: += ??
-            voxel1->contactForce += VX3_Vec3D<>();
-            voxel2->contactForce += VX3_Vec3D<>();
-        }
+        handle_collision_attachment(voxel1, voxel2, watchDistance, k);
     }
 }
 
@@ -634,7 +682,88 @@ __global__ void gpu_update_cilia_force(VX3_Voxel **surface_voxels, int num, VX3_
     if (index < num) {
         if (surface_voxels[index]->mat->Cilia == 0)
             return;
-        //rotate base cilia force and update it into voxel.
+        // rotate base cilia force and update it into voxel.
         surface_voxels[index]->CiliaForce = surface_voxels[index]->orient.RotateVec3D(surface_voxels[index]->baseCiliaForce);
+    }
+}
+
+__global__ void gpu_clear_lookupgrid(VX3_dVector<VX3_Voxel *> *d_collisionLookupGrid, int num) {
+    int index = threadIdx.x + blockIdx.x * blockDim.x;
+    if (index < num) {
+        d_collisionLookupGrid[index].clear();
+    }
+}
+__device__ int bound(int x, int min, int max) {
+    if (x < min)
+        return min;
+    if (x > max)
+        return max;
+    return x;
+}
+__global__ void gpu_insert_lookupgrid(VX3_Voxel **d_surface_voxels, int num, VX3_dVector<VX3_Voxel *> *d_collisionLookupGrid, double dx,
+                                      double dy, double dz, int lookupGrid_n) {
+    int index = threadIdx.x + blockIdx.x * blockDim.x;
+    if (index < num) {
+        VX3_Voxel *v = d_surface_voxels[index];
+        int ix = int(v->pos.x / dx + lookupGrid_n / 2);
+        int iy = int(v->pos.y / dy + lookupGrid_n / 2);
+        int iz = int(v->pos.z / dz + lookupGrid_n / 2);
+        bound(ix, 0, lookupGrid_n);
+        bound(iy, 0, lookupGrid_n);
+        bound(iz, 0, lookupGrid_n);
+        d_collisionLookupGrid[ix * lookupGrid_n * lookupGrid_n + iy * lookupGrid_n + iz].push_back(v);
+    }
+}
+
+__global__ void gpu_pairwise_detection(VX3_Voxel **voxel1, VX3_Voxel **voxel2, int num_v1, int num_v2, double watchDistance,
+                                       VX3_VoxelyzeKernel *k) {
+    int index_x = threadIdx.x + blockIdx.x * blockDim.x;
+    int index_y = threadIdx.y + blockIdx.y * blockDim.y;
+    if (index_x < num_v1 && index_y < num_v2) {
+        handle_collision_attachment(voxel1[index_x], voxel2[index_y], watchDistance, k);
+    }
+}
+
+__device__ int index_3d_to_1d(int x, int y, int z, int dim_len) { return x * dim_len * dim_len + y * dim_len + z; }
+__device__ VX3_Vec3D<int> index_1d_to_3d(int n, int dim_len) {
+    return VX3_Vec3D<int>(int(n / (dim_len * dim_len) % dim_len), int(n / (dim_len) % dim_len), int(n % dim_len));
+}
+
+__global__ void gpu_collision_attachment_lookupgrid(VX3_dVector<VX3_Voxel *> *d_collisionLookupGrid, int num, double watchDistance,
+                                                    VX3_VoxelyzeKernel *k) {
+    int index = threadIdx.x + blockIdx.x * blockDim.x;
+    if (index < num) {
+        int num_voxel_in_grid = d_collisionLookupGrid[index].size();
+        if (num_voxel_in_grid == 0)
+            return;
+        // within the grid
+        int dim_len = k->lookupGrid_n;
+        auto index_3d = index_1d_to_3d(index, dim_len);
+        int ix = index_3d.x;
+        int iy = index_3d.y;
+        int iz = index_3d.z;
+        // printf("num_voxel_in_grid %d[%d][%d][%d]: %d\n", index, ix, iy, iz, num_voxel_in_grid);
+        int blockSize = 16;
+        dim3 dimBlock(blockSize, blockSize);
+        dim3 dimGrid((num_voxel_in_grid + dimBlock.x - 1) / dimBlock.x, (num_voxel_in_grid + dimBlock.y - 1) / dimBlock.y);
+        gpu_pairwise_detection<<<dimGrid, dimBlock>>>(&d_collisionLookupGrid[index][0], &d_collisionLookupGrid[index][0], num_voxel_in_grid,
+                                                      num_voxel_in_grid, watchDistance, k);
+        // invoke two dimensional gpu threads 'CUDA C++ Programming
+        // Guide', Nov 2019, P52.
+        CUDA_CHECK_AFTER_CALL();
+        // with neighbors
+        for (int dix = -1; dix <= 1; dix++) {
+            for (int diy = -1; diy <= 1; diy++) {
+                for (int diz = -1; diz <= 1; diz++) {
+                    int num_voxel_in_grid_2 = d_collisionLookupGrid[index_3d_to_1d(ix + dix, iy + diy, iz + diz, dim_len)].size();
+                    if (num_voxel_in_grid_2 > 0) {
+                        gpu_pairwise_detection<<<dimGrid, dimBlock>>>(
+                            &d_collisionLookupGrid[index][0],
+                            &d_collisionLookupGrid[index_3d_to_1d(ix + dix, iy + diy, iz + diz, dim_len)][0], num_voxel_in_grid,
+                            num_voxel_in_grid_2, watchDistance, k);
+                    }
+                }
+            }
+        }
     }
 }
