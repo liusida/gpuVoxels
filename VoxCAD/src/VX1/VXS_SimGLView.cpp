@@ -81,6 +81,8 @@ void CVXS_SimGLView::Draw(int Selected, bool ViewSection, int SectionLayer) {
         case RVV_HISTORY:
             DrawHistory(Selected);
             break;
+        case RVV_HISTORY_ELECTRICAL:
+            DrawHistory(Selected, true);
         }
     } else { // CurViewMode == RVT_BONDS
         vfloat VoxScale = 0.2;
@@ -221,8 +223,9 @@ void CVXS_SimGLView::DrawFloor(void) {
     double z = 0.0;
 
 #ifdef VX2
-    if (CurViewVox == RVV_HISTORY) { // TODO: if showing history, should use history's voxel size. Since we didn't pass this in history
-                                     // file, hard coded for now.
+    if (CurViewVox == RVV_HISTORY ||
+        CurViewVox == RVV_HISTORY_ELECTRICAL) { // TODO: if showing history, should use history's voxel size. Since we didn't pass this in
+                                                // history file, hard coded for now.
         z = -0.01 / 2;
     } else {
         z = -pSim->Vx.voxelSize() / 2;
@@ -1012,7 +1015,7 @@ int CVXS_SimGLView::StatRqdToDraw() // returns the stats bitfield that we need
 }
 
 // Read a .history file and draw in an loop.
-void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLayer, vfloat ScaleVox) {
+void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
     if (drawCylinder) {
         Vec3D<> v1(cylinderX, cylinderY, 0.01);
         Vec3D<> v2(cylinderX, cylinderY, -0.005); // floor is actually at -voxelSize/2
@@ -1031,7 +1034,9 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
         CGL_Utils::DrawRectangle(v4, v1, true, 0, c);
     }
     QStringList pos;
-    CColor defaultColor(0.2,0.2,0.2,0.2);
+    double voltage;
+    CColor voltageColor;
+    CColor defaultColor(0.2, 0.2, 0.2, 0.2);
     CColor colorMap[10];
     colorMap[0] = CColor(0.9f, 0.2f, 0.29f, 0.5f);
     colorMap[1] = CColor(0.6f, 0.6f, 0.5f, 0.5f);
@@ -1051,10 +1056,10 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
     bool ZoomNear = false;
     bool ZoomVeryFar = false;
     // printf("pGLWin->m_Cam.Zoom: %f\n", pGLWin->m_Cam.Zoom);
-    if (pGLWin->m_Cam.Zoom<50) {
+    if (pGLWin->m_Cam.Zoom < 50) {
         ZoomNear = true;
     }
-    if (pGLWin->m_Cam.Zoom>150) {
+    if (pGLWin->m_Cam.Zoom > 150) {
         ZoomVeryFar = true;
     }
     // If it doesn't start play, check the Default.vxc file
@@ -1066,7 +1071,7 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
                 // pSim->StreamHistory->seek(0);
             }
             QString line;
-            if (HistoryPaused && currentHistoryLine!="") {
+            if (HistoryPaused && currentHistoryLine != "") {
                 line = currentHistoryLine;
             } else {
                 line = pSim->StreamHistory->readLine();
@@ -1169,9 +1174,9 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
                     double p1, p2, p3;
                     double angle, r1, r2, r3;
                     int matid;
-                    int i=0;
+                    int i = 0;
                     for (auto &v : voxel) {
-                    //for (int i = 0; i < voxel.size(); i++) {
+                        // for (int i = 0; i < voxel.size(); i++) {
                         pos = v.split(",");
                         if (pos.size() <= 1)
                             continue;
@@ -1213,16 +1218,25 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
                         if (matid < 0 || matid >= 10) {
                             matid = 0;
                         }
+                        constIterator++;
+                        voltage = (*constIterator).toDouble();
+                        voltageColor = GetRnB((voltage + 100) / 200);
 
                         glTranslated(p1, p2, p3);
                         glRotated(angle, r1, r2, r3);
                         if (nnn.Dist2(ppp) < 1) {
-                            if (matColors.find(matid) != matColors.end()) {
-                                CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, ZoomNear, 1.0, matColors[matid], ZoomVeryFar);
+                            CColor c;
+                            if (voltageView) {
+                                c = voltageColor;
                             } else {
-                                printf("Color not found %d.\n", matid);
-                                CGL_Utils::DrawCube(nnn * ScaleVox, ppp * ScaleVox, true, ZoomNear, 1.0, defaultColor, ZoomVeryFar);
+                                if (matColors.find(matid) != matColors.end()) {
+                                    c = matColors[matid];
+                                } else {
+                                    printf("Color not found %d.\n", matid);
+                                    c = defaultColor;
+                                }
                             }
+                            CGL_Utils::DrawCube(nnn, ppp, true, ZoomNear, 1.0, c, ZoomVeryFar);
                         }
                         glPopMatrix();
                         // Update camera view center, but gentlely.
@@ -1236,3 +1250,4 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool ViewSection, int SectionLaye
         }
     }
 }
+CColor CVXS_SimGLView::GetRnB(double v) { return CColor(v, 1.5 * (1 - v) * v, (1 - v), 0.6); }

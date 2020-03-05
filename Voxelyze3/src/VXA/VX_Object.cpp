@@ -1178,6 +1178,8 @@ CVXC_Material& CVXC_Material::operator=(const CVXC_Material& RefMat)
 	Alpha = RefMat.Alpha;
 
 	matid = RefMat.matid;
+	isPaceMaker = RefMat.isPaceMaker;
+	PaceMakerPeriod = RefMat.PaceMakerPeriod;
 	isTarget = RefMat.isTarget;
 	Fixed = RefMat.Fixed;
 	sticky = RefMat.sticky;
@@ -1405,6 +1407,8 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 					pXML->UpLevel();
 
 				}
+				if (!pXML->FindLoadElement("isPaceMaker", &isPaceMaker)) isPaceMaker = false;
+				if (!pXML->FindLoadElement("PaceMakerPeriod", &PaceMakerPeriod)) PaceMakerPeriod = 0;
 				if (!pXML->FindLoadElement("isTarget", &isTarget)) isTarget = false;
 				if (!pXML->FindLoadElement("Fixed", &Fixed)) Fixed = 0;
 				if (!pXML->FindLoadElement("Sticky", &sticky)) sticky = 0;

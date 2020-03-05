@@ -493,6 +493,9 @@ public:
 	vfloat PercIndex1; //ranges from 0 to 1;
 
 	bool isTarget = false;
+
+	bool isPaceMaker = false;
+	double PaceMakerPeriod = 0;  // voltage = sin(t*PaceMakerPeriod)
 };
 
 //PRSM:
