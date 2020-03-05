@@ -369,7 +369,7 @@ void QVX_Sim::SimLoop(QString *pSimMessage) {
             LOCALSLEEP(1);
         }
         ActuallyPaused = false;
-        if (pSimView->CurViewVox == RVV_HISTORY) {
+        if (pSimView->CurViewVox == RVV_HISTORY || pSimView->CurViewVox == RVV_HISTORY_ELECTRICAL) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             emit UpdateText(pSimView->Message);
             continue;

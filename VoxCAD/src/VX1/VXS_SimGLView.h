@@ -44,6 +44,7 @@ enum ViewVoxel {
 	RVV_DISCRETE, //!< Draws discrete voxels with position and orientation
 	RVV_DEFORMED, //!< Draws deformed voxels
     RVV_HISTORY,    //!< Draws only history, experimental for Sida
+	RVV_HISTORY_ELECTRICAL, //!< Draws history with electrical colors
 	RVV_SMOOTH //!< Draws a smooth mesh, whether provided or generated with marching cubes
 };
 
@@ -88,6 +89,7 @@ public:
 		else if (val > 0) return CColor(0, val*4, 1, 1.0);
 		else return CColor(0,0,1.0, 1.0);
 	};
+	CColor GetRnB(double v);
 
 #ifdef VX2
 	CColor GetCurVoxColor(CVX_Voxel* pVox, bool Selected);
@@ -108,7 +110,7 @@ public:
 #endif
 
 	//Drawing
-	void DrawHistory(int Selected = -1, bool ViewSection=false, int SectionLayer=0, vfloat ScaleVox = 1.0);
+	void DrawHistory(int Selected = -1, bool voltageView=false);
 	void DrawGeometry(int Selected = -1, bool ViewSection=false, int SectionLayer=0, vfloat ScaleVox = 1.0);
 	void DrawSurfMesh(int Selected = -1);
 	void DrawVoxMesh(int Selected = -1);

@@ -110,6 +110,8 @@ public:
 	__device__ void enableCollisions(bool enabled, float watchRadius = 0.0f); //watchRadius in voxel units
 	__device__ bool isCollisionsEnabled() const {return boolStates & COLLISIONS_ENABLED ? true : false;}
 	__device__ void generateNearby(int linkDepth, int gindex, bool surfaceOnly = true);
+
+	__device__ void updateVoltage(double currentTime);
 /* data */
     CVX_Voxel* _voxel;
 
@@ -145,6 +147,9 @@ public:
 	VX3_Vec3D<> CiliaForce;
 
 	bool enableAttach = true;
+
+	double voltage = 0; // Voltage of action potential. Here use neurons as an example. Rest at: -70mV, Threshold: -55mV, Peak at 30mV, Hyperpolarization at -100mV.
+
 };
 
 #endif // VX3_VOXEL_H

@@ -161,6 +161,9 @@ class CVX_Material {
 	bool readJSON(rapidjson::Value& mat); //!< reads this material data from the rapidjson Value.
 
 	bool isTarget = false;
+	bool isPaceMaker=false;
+	double PaceMakerPeriod=0;
+
 };
 
 #endif //VX_MATERIAL_H

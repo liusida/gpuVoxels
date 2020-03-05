@@ -80,6 +80,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                                 printf("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", nnn.x * vs, nnn.y * vs, nnn.z * vs, ppp.x * vs, ppp.y * vs,
                                        ppp.z * vs);
                                 printf("%d,", v.mat->matid); // for coloring
+                                printf("%.2f,", v.voltage); // for coloring as well.
                                 printf(";");
                             }
                         }
@@ -347,6 +348,10 @@ void VX3_SimulationManager::enlargeGPUHeapSize() {
     printf("Set GPU heap size to be %ld bytes.\n", HeapSize);
     VcudaDeviceSetLimit(cudaLimitMallocHeapSize,
                         HeapSize); // Set Heap Memory to 1G, instead of merely 8M.
+
+    // if "Lane User Stack Overflow" ocurs, maybe Stack Size too small, can try this:
+    //VcudaDeviceSetLimit(cudaLimitStackSize, 2048);
+
 }
 
 void VX3_SimulationManager::startKernel(int num_simulation, int device_index) {

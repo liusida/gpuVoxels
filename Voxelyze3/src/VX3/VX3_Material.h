@@ -148,6 +148,8 @@ public:
 	// dependentMaterials only for combinedMaterial, not used.
 
 	bool isTarget = false;
+	bool isPaceMaker = false;
+	double PaceMakerPeriod=0;
 };
 
 

@@ -97,6 +97,7 @@ Dlg_Physics::Dlg_Physics(QVX_Sim* pSimIn, QWidget *parent)
 	connect(ui.ViewDiscreteRadio, SIGNAL(clicked(bool)), this, SLOT(VoxDiscreteChanged(bool)));
     connect(ui.ViewDeformedRadio, SIGNAL(clicked(bool)), this, SLOT(VoxDeformedChanged(bool)));
     connect(ui.ViewHistoryRadio, SIGNAL(clicked(bool)), this, SLOT(VoxHistoryChanged(bool)));
+    connect(ui.ViewHistoryElectricalRadio, SIGNAL(clicked(bool)), this, SLOT(VoxHistoryElectricalChanged(bool)));
     connect(ui.ViewSmoothRadio, SIGNAL(clicked(bool)), this, SLOT(VoxSmoothChanged(bool)));
 	connect(ui.ForcesCheck, SIGNAL(clicked(bool)), this, SLOT(ForcesCheckChanged(bool)));
 	connect(ui.LocalCoordCheck, SIGNAL(clicked(bool)), this, SLOT(LCsCheckChanged(bool)));
@@ -234,6 +235,7 @@ void Dlg_Physics::UpdateUI(void)
 		case RVV_DISCRETE: ui.ViewDiscreteRadio->setChecked(true); break;
 		case RVV_DEFORMED: ui.ViewDeformedRadio->setChecked(true); break;
         case RVV_HISTORY: ui.ViewHistoryRadio->setChecked(true); break;
+		case RVV_HISTORY_ELECTRICAL: ui.ViewHistoryElectricalRadio->setChecked(true); break;
         case RVV_SMOOTH: ui.ViewSmoothRadio->setChecked(true); break;
 
 	}
