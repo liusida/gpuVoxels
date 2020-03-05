@@ -7,7 +7,7 @@
       <mtVAR>x</mtVAR>
     </FitnessFunction>
     <RecordHistory>
-      <RecordStepSize>100</RecordStepSize>
+      <RecordStepSize>0</RecordStepSize>
       <RecordVoxel>1</RecordVoxel>
       <RecordLink>0</RecordLink>
     </RecordHistory>
@@ -24,7 +24,7 @@
     </AttachDetach>
     <Integration>
       <Integrator>0</Integrator>
-      <DtFrac>0.9</DtFrac>
+      <DtFrac>0.6</DtFrac>
     </Integration>
     <Damping>
       <BondDampingZ>1</BondDampingZ>
@@ -57,7 +57,7 @@
       <StopConditionFormula>
         <mtSUB>
           <mtVAR>t</mtVAR>
-          <mtCONST>4</mtCONST>
+          <mtCONST>0.1</mtCONST>
         </mtSUB>
       </StopConditionFormula>
     </StopCondition>
