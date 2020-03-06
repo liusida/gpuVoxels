@@ -1175,6 +1175,8 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
                     double angle, r1, r2, r3;
                     int matid;
                     int i = 0;
+                    int indexCounter = 0;
+
                     for (auto &v : voxel) {
                         // for (int i = 0; i < voxel.size(); i++) {
                         pos = v.split(",");
@@ -1221,19 +1223,24 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
                         constIterator++;
                         voltage = (*constIterator).toDouble();
                         voltageColor = GetRnB((voltage + 100) / 200);
+                        glLoadName(++indexCounter); // to enable picking
 
                         glTranslated(p1, p2, p3);
                         glRotated(angle, r1, r2, r3);
                         if (nnn.Dist2(ppp) < 1) {
                             CColor c;
-                            if (voltageView) {
-                                c = voltageColor;
+                            if (Selected==indexCounter) {
+                                c = defaultColor;
                             } else {
-                                if (matColors.find(matid) != matColors.end()) {
-                                    c = matColors[matid];
+                                if (voltageView) {
+                                    c = voltageColor;
                                 } else {
-                                    printf("Color not found %d.\n", matid);
-                                    c = defaultColor;
+                                    if (matColors.find(matid) != matColors.end()) {
+                                        c = matColors[matid];
+                                    } else {
+                                        printf("Color not found %d.\n", matid);
+                                        c = defaultColor;
+                                    }
                                 }
                             }
                             CGL_Utils::DrawCube(nnn, ppp, true, ZoomNear, 1.0, c, ZoomVeryFar);
