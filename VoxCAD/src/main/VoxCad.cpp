@@ -163,7 +163,9 @@ VoxCad::VoxCad(QWidget *parent, Qt::WindowFlags flags)
 	//	http://www.qtcentre.org/threads/17880-Display-content-wirtten-to-STL-ostream-dynamically
 	//std::ostream myWidget(;
 	//std::streambuf *oldbuf = std::cout.rdbuf(myWidget.rdbuf());
-    ui.statusBar->showMessage("Come on!");
+	QString msg = "Current VoxCAD was built on: ";
+	msg += __DATE__;
+    ui.statusBar->showMessage(msg);
 }
 
 VoxCad::~VoxCad()
