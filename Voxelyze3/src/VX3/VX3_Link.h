@@ -9,11 +9,10 @@ class VX3_Voxel;
 class VX3_MaterialLink;
 
 class VX3_Link {
-public:
+  public:
     VX3_Link(CVX_Link *p, VX3_VoxelyzeKernel *k);
-    __device__ VX3_Link(VX3_Voxel *voxel1, linkDirection dir1,
-                        VX3_Voxel *voxel2, linkDirection dir2,
-                        linkAxis link_axis, VX3_VoxelyzeKernel *k);
+    __device__ VX3_Link(VX3_Voxel *voxel1, linkDirection dir1, VX3_Voxel *voxel2, linkDirection dir2, linkAxis link_axis,
+                        VX3_VoxelyzeKernel *k);
 
     __device__ void reset(); //!< Resets all current state information about
                              //!< this link to the initial value.
@@ -35,13 +34,12 @@ public:
 
     __device__ float axialStrain() const {
         return strain;
-    } //!< returns the current overall axial strain (unitless) between the two
-      //!< voxels.
-    __device__ float axialStrain(bool positiveEnd)
-        const; //!< Returns the current calculated axial strain of the half of
-               //!< the link contained in the specified voxel. @param[in]
-               //!< positiveEnd Specifies which voxel information is desired
-               //!< about.
+    }                                                     //!< returns the current overall axial strain (unitless) between the two
+                                                          //!< voxels.
+    __device__ float axialStrain(bool positiveEnd) const; //!< Returns the current calculated axial strain of the half of
+                                                          //!< the link contained in the specified voxel. @param[in]
+                                                          //!< positiveEnd Specifies which voxel information is desired
+                                                          //!< about.
     __device__ float axialStress() const {
         return _stress;
     } //!< returns the current overall true axial stress (MPa) between the two
@@ -49,50 +47,40 @@ public:
 
     __device__ bool isSmallAngle() const {
         return smallAngle;
-    } //!< Returns true if this link is currently operating with a small angle
-      //!< assumption.
-    __device__ bool
-    isYielded() const; //!< Returns true if the stress on this bond has ever
-                       //!< exceeded its yield stress
-    __device__ bool
-    isFailed() const; //!< Returns true if the stress on this bond has ever
-                      //!< exceeded its failure stress
+    }                                  //!< Returns true if this link is currently operating with a small angle
+                                       //!< assumption.
+    __device__ bool isYielded() const; //!< Returns true if the stress on this bond has ever
+                                       //!< exceeded its yield stress
+    __device__ bool isFailed() const;  //!< Returns true if the stress on this bond has ever
+                                       //!< exceeded its failure stress
 
-    __device__ float
-    strainEnergy() const; //!< Calculates and return the strain energy of this
-                          //!< link according to current forces and moments.
-                          //!< (units: Joules, or Kg m^2 / s^2)
-    __device__ float
-    axialStiffness(); //!< Calculates and returns the current linear axial
-                      //!< stiffness of this link at it's current strain.
+    __device__ float strainEnergy() const; //!< Calculates and return the strain energy of this
+                                           //!< link according to current forces and moments.
+                                           //!< (units: Joules, or Kg m^2 / s^2)
+    __device__ float axialStiffness();     //!< Calculates and returns the current linear axial
+                                           //!< stiffness of this link at it's current strain.
 
-    __device__ void
-    updateForces(); //!< Called every timestep to calculate the forces and
-                    //!< moments acting between the two constituent voxels in
-                    //!< their current relative positions and orientations.
+    __device__ void updateForces(); //!< Called every timestep to calculate the forces and
+                                    //!< moments acting between the two constituent voxels in
+                                    //!< their current relative positions and orientations.
+    __device__ void updateSignals();
+    __device__ void passSignal(VX3_Voxel *from, VX3_Voxel *to);
 
-    __device__ void
-    updateRestLength(); //!< Updates the rest length of this voxel. Call this
-                        //!< every timestep where the nominal size of either
-                        //!< voxel may have changed, due to actuation or thermal
-                        //!< expansion.
-    __device__ void
-    updateTransverseInfo(); //!< Updates information about this voxel pertaining
-                            //!< to volumetric deformations. Call this every
-                            //!< timestep if the poisson's ratio of the link
-                            //!< material is non-zero.
+    __device__ void updateRestLength();     //!< Updates the rest length of this voxel. Call this
+                                            //!< every timestep where the nominal size of either
+                                            //!< voxel may have changed, due to actuation or thermal
+                                            //!< expansion.
+    __device__ void updateTransverseInfo(); //!< Updates information about this voxel pertaining
+                                            //!< to volumetric deformations. Call this every
+                                            //!< timestep if the poisson's ratio of the link
+                                            //!< material is non-zero.
 
-    __device__ float
-    updateStrain(float axialStrain); // updates strainNeg and strainPos
-                                     // according to the provided axial strain.
-                                     // returns current stress as well (MPa)
+    __device__ float updateStrain(float axialStrain); // updates strainNeg and strainPos
+                                                      // according to the provided axial strain.
+                                                      // returns current stress as well (MPa)
 
-    __device__ bool isLocalVelocityValid() const {
-        return boolStates & LOCAL_VELOCITY_VALID ? true : false;
-    } //
-    __device__ void setBoolState(linkFlags flag, bool set = true) {
-        set ? boolStates |= (int)flag : boolStates &= ~(int)flag;
-    }
+    __device__ bool isLocalVelocityValid() const { return boolStates & LOCAL_VELOCITY_VALID ? true : false; } //
+    __device__ void setBoolState(linkFlags flag, bool set = true) { set ? boolStates |= (int)flag : boolStates &= ~(int)flag; }
 
     // beam parameters
     __device__ float a1() const;
@@ -108,8 +96,7 @@ public:
 
     // unwind a coordinate as if the bond was in the the positive X direction
     // (and back...)
-    template <typename T>
-    __device__ void toAxisX(VX3_Vec3D<T> *const pV) const {
+    template <typename T> __device__ void toAxisX(VX3_Vec3D<T> *const pV) const {
         switch (axis) {
         case Y_AXIS: {
             T tmp = pV->x;
@@ -128,8 +115,7 @@ public:
         }
     } // transforms a VX3_Vec3D in the original orientation of the bond to that
       // as if the bond was in +X direction
-    template <typename T>
-    __device__ void toAxisX(VX3_Quat3D<T> *const pQ) const {
+    template <typename T> __device__ void toAxisX(VX3_Quat3D<T> *const pQ) const {
         switch (axis) {
         case Y_AXIS: {
             T tmp = pQ->x;
@@ -147,8 +133,7 @@ public:
             break;
         }
     }
-    template <typename T>
-    __device__ VX3_Vec3D<T> toAxisX(const VX3_Vec3D<T> &v) const {
+    template <typename T> __device__ VX3_Vec3D<T> toAxisX(const VX3_Vec3D<T> &v) const {
         switch (axis) {
         case Y_AXIS:
             return VX3_Vec3D<T>(v.y, -v.x, v.z);
@@ -159,8 +144,7 @@ public:
         }
     } // transforms a VX3_Vec3D in the original orientation of the bond to that
       // as if the bond was in +X direction
-    template <typename T>
-    __device__ VX3_Quat3D<T> toAxisX(const VX3_Quat3D<T> &q) const {
+    template <typename T> __device__ VX3_Quat3D<T> toAxisX(const VX3_Quat3D<T> &q) const {
         switch (axis) {
         case Y_AXIS:
             return VX3_Quat3D<T>(q.w, q.y, -q.x, q.z);
@@ -171,8 +155,7 @@ public:
         }
     } // transforms a VX3_Vec3D in the original orientation of the bond to that
       // as if the bond was in +X direction
-    template <typename T>
-    __device__ void toAxisOriginal(VX3_Vec3D<T> *const pV) const {
+    template <typename T> __device__ void toAxisOriginal(VX3_Vec3D<T> *const pV) const {
         switch (axis) {
         case Y_AXIS: {
             T tmp = pV->y;
@@ -190,8 +173,7 @@ public:
             break;
         }
     }
-    template <typename T>
-    __device__ void toAxisOriginal(VX3_Quat3D<T> *const pQ) const {
+    template <typename T> __device__ void toAxisOriginal(VX3_Quat3D<T> *const pQ) const {
         switch (axis) {
         case Y_AXIS: {
             T tmp = pQ->y;
@@ -248,7 +230,7 @@ public:
 
     VX3_Vec3D<double> pos2, angle1v, angle2v; // pos1 is always = 0,0,0
     VX3_Quat3D<double> angle1, angle2;        // this bond in local coordinates.
-    bool smallAngle; // based on compiled precision setting
+    bool smallAngle;                          // based on compiled precision setting
     double currentRestLength;
     float currentTransverseArea,
         currentTransverseStrainSum; // so we don't have to re-calculate

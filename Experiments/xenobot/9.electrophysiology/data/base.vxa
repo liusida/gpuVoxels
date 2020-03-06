@@ -57,7 +57,7 @@
       <StopConditionFormula>
         <mtSUB>
           <mtVAR>t</mtVAR>
-          <mtCONST>4</mtCONST>
+          <mtCONST>10</mtCONST>
         </mtSUB>
       </StopConditionFormula>
     </StopCondition>
@@ -111,7 +111,7 @@
 
       <Material ID="1">
         <MatType>0</MatType>
-        <Name>MuscleOne</Name>
+        <Name>Cell</Name>
         <Display>
           <Red>1.0</Red>
           <Green>0.8</Green>
@@ -119,6 +119,7 @@
           <Alpha>0.8</Alpha>
         </Display>
         <Mechanical>
+          <isElectricalActive>1</isElectricalActive>
           <MatModel>0</MatModel>
           <Elastic_Mod>3e+07</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
@@ -138,8 +139,8 @@
         <MatType>0</MatType>
         <Name>PaceMaker</Name>
         <Display>
-          <Red>0.9</Red>
-          <Green>0.7</Green>
+          <Red>1.0</Red>
+          <Green>0.6</Green>
           <Blue>0.4</Blue>
           <Alpha>0.8</Alpha>
         </Display>

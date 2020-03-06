@@ -265,8 +265,49 @@ __device__ void VX3_Voxel::timeStep(double dt, double currentTime, VX3_VoxelyzeK
 }
 __device__ void VX3_Voxel::updateVoltage(double currentTime) {
     if (mat->isPaceMaker) {
-        voltage = 100 * sin((2*3.1415926f/mat->PaceMakerPeriod) * currentTime);
-    } else {
+        // Borrow model from Sinoatrial Nodes
+        if (voltagePhase == 0) {
+            voltageSlope = 0.05;
+            if (voltage >= 10) { // hit threshold
+                voltagePhase = 2;
+            }
+        } else if (voltagePhase == 2) {
+            voltageSlope = 0.3; // depolarization
+            if (voltage >= 100) {
+                voltagePhase = 3; // voltage peaked
+            }
+        } else if (voltagePhase == 3) {
+            voltageSlope = -0.3;  // replorization
+            if (voltage <= -50) { // hit lowest bound
+                voltagePhase = 0;
+            }
+        }
+        voltage += voltageSlope;
+        // voltage = 100 * sin((2*3.1415926f/mat->PaceMakerPeriod) * currentTime);
+    } else if (mat->isElectricalActive) {
+        // Borrow model from Neurons
+        if (voltagePhase == 0) {
+            voltageSlope = 0.1; // rest state
+            if (voltage >= 0) { // end resting
+                voltagePhase = 1;
+            }
+        } else if (voltagePhase == 1) {
+            voltageSlope = 0;    // accept stimulus
+            if (voltage >= 10) { // hit threshold
+                voltagePhase = 2;
+            }
+        } else if (voltagePhase == 2) {
+            voltageSlope = 0.3; // depolarization
+            if (voltage >= 100) {
+                voltagePhase = 3; // voltage peaked
+            }
+        } else if (voltagePhase == 3) {
+            voltageSlope = -0.3;  // replorization
+            if (voltage <= -100) { // hit lowest bound
+                voltagePhase = 0;
+            }
+        }
+        voltage += voltageSlope;
     }
 }
 __device__ VX3_Vec3D<double> VX3_Voxel::force() {

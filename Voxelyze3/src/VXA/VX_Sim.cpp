@@ -298,6 +298,7 @@ void CVX_Sim::CopyMat(CVXC_Material* pOld, CVX_Material* pNew) //copies paramete
 	pNew->matid = pOld->matid;
 	pNew->isPaceMaker = (bool)pOld->isPaceMaker;
 	pNew->PaceMakerPeriod = pOld->PaceMakerPeriod;
+	pNew->isElectricalActive = (bool)pOld->isElectricalActive;
 	pNew->isTarget = (bool)pOld->isTarget;
 	pNew->fixed = (bool)pOld->Fixed;
 	pNew->sticky = (bool)pOld->sticky;

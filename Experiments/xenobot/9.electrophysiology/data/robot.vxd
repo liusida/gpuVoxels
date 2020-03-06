@@ -1,10 +1,14 @@
 <VXD>
     <Structure replace="VXA.VXC.Structure" Compression="ASCII_READABLE">
-        <X_Voxels>1</X_Voxels>
+        <X_Voxels>20</X_Voxels>
         <Y_Voxels>1</Y_Voxels>
-        <Z_Voxels>1</Z_Voxels>
+        <Z_Voxels>5</Z_Voxels>
         <Data>
-            <Layer><![CDATA[2]]></Layer>
+            <Layer><![CDATA[20211111111111111111]]></Layer>
+            <Layer><![CDATA[10011111111111111111]]></Layer>
+            <Layer><![CDATA[11111111111111111111]]></Layer>
+            <Layer><![CDATA[00111111111111111111]]></Layer>
+            <Layer><![CDATA[21111111111111111111]]></Layer>
         </Data>
     </Structure>
 </VXD>

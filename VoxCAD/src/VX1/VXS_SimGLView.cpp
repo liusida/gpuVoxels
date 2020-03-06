@@ -1250,4 +1250,10 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
         }
     }
 }
-CColor CVXS_SimGLView::GetRnB(double v) { return CColor(v, 1.5 * (1 - v) * v, (1 - v), 0.6); }
+CColor CVXS_SimGLView::GetRnB(double v) {
+    if (v > 1)
+        v = 1;
+    else if (v < 0)
+        v = 0;
+    return CColor(v, 1.5 * (1 - v) * v, (1 - v), 0.6);
+}

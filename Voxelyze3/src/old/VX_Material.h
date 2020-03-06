@@ -163,7 +163,7 @@ class CVX_Material {
 	bool isTarget = false;
 	bool isPaceMaker=false;
 	double PaceMakerPeriod=0;
-
+	bool isElectricalActive=false;
 };
 
 #endif //VX_MATERIAL_H

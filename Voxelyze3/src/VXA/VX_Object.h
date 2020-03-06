@@ -496,6 +496,7 @@ public:
 
 	bool isPaceMaker = false;
 	double PaceMakerPeriod = 0;  // voltage = sin(t*PaceMakerPeriod)
+	bool isElectricalActive = false;
 };
 
 //PRSM:

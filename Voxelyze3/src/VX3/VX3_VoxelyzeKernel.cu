@@ -11,8 +11,8 @@ __device__ int bound(int x, int min, int max) {
 }
 
 /* Sub GPU Threads */
-__global__ void gpu_update_force(VX3_Link **links, int num);
-__global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt, double currentTime, VX3_VoxelyzeKernel *k);
+__global__ void gpu_update_links(VX3_Link **links, int num);
+__global__ void gpu_update_voxels(VX3_Voxel *voxels, int num, double dt, double currentTime, VX3_VoxelyzeKernel *k);
 __global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime);
 __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double watchDistance, VX3_VoxelyzeKernel *k);
 __global__ void gpu_update_cilia_force(VX3_Voxel **surface_voxels, int num, VX3_VoxelyzeKernel *k);
@@ -126,7 +126,7 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
     // allocate memory for collision lookup table
     num_lookupGrids = lookupGrid_n * lookupGrid_n * lookupGrid_n;
     d_collisionLookupGrid = (VX3_dVector<VX3_Voxel *> *)malloc(num_lookupGrids * sizeof(VX3_dVector<VX3_Voxel *>));
-    if (d_collisionLookupGrid==NULL) {
+    if (d_collisionLookupGrid == NULL) {
         printf("ERROR: not enough memory.\n");
     }
     for (int i = 0; i < hd_v_linkMats.size(); i++) {
@@ -244,14 +244,14 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     int blockSize;
     int minGridSize;
     if (d_v_links.size()) {
-        cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_force, 0,
+        cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_links, 0,
                                            d_v_links.size()); // Dynamically calculate blockSize
         int gridSize_links = (d_v_links.size() + blockSize - 1) / blockSize;
         int blockSize_links = d_v_links.size() < blockSize ? d_v_links.size() : blockSize;
         // if (CurStepCount % 1000 == 0 || currentTime>1.0) {
         //     printf("&d_v_links[0] %p; d_v_links.size() %d. \n", &d_v_links[0], d_v_links.size());
         // }
-        gpu_update_force<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
+        gpu_update_links<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
         CUDA_CHECK_AFTER_CALL();
         cudaDeviceSynchronize();
 
@@ -287,11 +287,11 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
         cudaDeviceSynchronize();
     }
 
-    cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_voxel, 0,
+    cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_voxels, 0,
                                        num_d_voxels); // Dynamically calculate blockSize
     int gridSize_voxels = (num_d_voxels + blockSize - 1) / blockSize;
     int blockSize_voxels = num_d_voxels < blockSize ? num_d_voxels : blockSize;
-    gpu_update_voxel<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, dt, currentTime, this);
+    gpu_update_voxels<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, dt, currentTime, this);
     CUDA_CHECK_AFTER_CALL();
     cudaDeviceSynchronize();
 
@@ -332,17 +332,17 @@ __device__ void VX3_VoxelyzeKernel::updateAttach() {
     int blockSize;
     int minGridSize;
     if (false) {
-        // the parameters of grid are set in gpu_update_voxel, so detection only useful after initialization
+        // the parameters of grid are set in gpu_update_voxels, so detection only useful after initialization
         if (gridLowerBound != gridUpperBound) {
             gridDelta = (gridUpperBound - gridLowerBound) / lookupGrid_n;
-            if (gridDelta.x < voxSize*2) {
-                gridDelta.x = voxSize*2;
+            if (gridDelta.x < voxSize * 2) {
+                gridDelta.x = voxSize * 2;
             }
-            if (gridDelta.y < voxSize*2) {
-                gridDelta.y = voxSize*2;
+            if (gridDelta.y < voxSize * 2) {
+                gridDelta.y = voxSize * 2;
             }
-            if (gridDelta.z < voxSize*2) {
-                gridDelta.z = voxSize*2;
+            if (gridDelta.z < voxSize * 2) {
+                gridDelta.z = voxSize * 2;
             }
             // printf("gridLowerBound (%f,%f,%f), gridDelta (%f,%f,%f), gridUpperBound (%f,%f,%f).\n\n", gridLowerBound.x, gridLowerBound.y,
             //        gridLowerBound.z, gridDelta.x, gridDelta.y, gridDelta.z, gridUpperBound.x, gridUpperBound.y, gridUpperBound.z);
@@ -462,7 +462,7 @@ __device__ void VX3_VoxelyzeKernel::computeTargetCloseness() {
 }
 
 /* Sub GPU Threads */
-__global__ void gpu_update_force(VX3_Link **links, int num) {
+__global__ void gpu_update_links(VX3_Link **links, int num) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         VX3_Link *t = links[gindex];
@@ -472,9 +472,10 @@ __global__ void gpu_update_force(VX3_Link **links, int num) {
         if (t->axialStrain() > 100) {
             printf("ERROR: Diverged.");
         }
+        t->updateSignals();
     }
 }
-__global__ void gpu_update_voxel(VX3_Voxel *voxels, int num, double dt, double currentTime, VX3_VoxelyzeKernel *k) {
+__global__ void gpu_update_voxels(VX3_Voxel *voxels, int num, double dt, double currentTime, VX3_VoxelyzeKernel *k) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         VX3_Voxel *t = &voxels[gindex];
