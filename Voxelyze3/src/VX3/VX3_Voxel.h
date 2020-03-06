@@ -89,10 +89,16 @@ class VX3_Voxel {
         return mat->size() * (1 + tempe * mat->alphaCTE);
     } //!< Returns the nominal size of this voxel (LCS) accounting for any specified temperature and external actuation. Specifically,
       //!< returns the zero-stress size of the voxel if all forces/moments were removed.
+    
+
+    //Change to: Actuation due to Voltage!!
     __device__ double baseSize(linkAxis axis) const {
-        return mat->size()[axis] * (1 + tempe * mat->alphaCTE);
+        //return mat->size()[axis] * (1 + tempe * mat->alphaCTE);
+        return mat->size()[axis] * (1 + voltage * mat->alphaCTE);
     } //!< Returns the nominal size of this voxel in the specified axis accounting for any specified temperature and external actuation.
       //!< Specifically, returns the zero-stress dimension of the voxel if all forces/moments were removed.
+
+
     __device__ double baseSizeAverage() const {
         VX3_Vec3D<double> bSize = baseSize();
         return (bSize.x + bSize.y + bSize.z) / 3.0f;

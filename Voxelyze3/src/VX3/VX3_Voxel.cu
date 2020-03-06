@@ -263,11 +263,18 @@ __device__ void VX3_Voxel::timeStep(double dt, double currentTime, VX3_VoxelyzeK
 
     updateVoltage(currentTime);
 }
+
 __device__ void VX3_Voxel::updateVoltage(double currentTime) {
+    
+    voltage = 0.999 * voltage; // decay or damping.
+
+    //There are two types of materials now: 
+    // 1. pacemaker and 2. electrical active
+    //
     if (mat->isPaceMaker) {
         // Borrow model from Sinoatrial Nodes
         if (voltagePhase == 0) {
-            voltageSlope = 0.05;
+            voltageSlope = 0.02;
             if (voltage >= 10) { // hit threshold
                 voltagePhase = 2;
             }

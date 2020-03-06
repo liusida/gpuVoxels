@@ -77,7 +77,10 @@ __device__ bool VX3_Link::isYielded() const { return mat->isYielded(maxStrain); 
 
 __device__ bool VX3_Link::isFailed() const { return mat->isFailed(maxStrain); }
 
-__device__ void VX3_Link::updateRestLength() { currentRestLength = 0.5 * (pVNeg->baseSize(axis) + pVPos->baseSize(axis)); }
+__device__ void VX3_Link::updateRestLength() {
+    // update rest length according to temperature of both end
+    currentRestLength = 0.5 * (pVNeg->baseSize(axis) + pVPos->baseSize(axis));
+}
 
 __device__ void VX3_Link::updateTransverseInfo() {
     currentTransverseArea = 0.5f * (pVNeg->transverseArea(axis) + pVPos->transverseArea(axis));
@@ -215,8 +218,8 @@ __device__ void VX3_Link::updateForces() {
 }
 
 __device__ void VX3_Link::passSignal(VX3_Voxel *from, VX3_Voxel *to) {
-    if (to->voltagePhase==1) { //"to" is at accumulating state
-        if (from->voltage>10) { //only accumulate voltage spike? re-study the case of pace maker and muscle cells in heart.
+    if (to->voltagePhase == 1) {  //"to" is at accumulating state
+        if (from->voltage > 10) { // only accumulate voltage spike? re-study the case of pace maker and muscle cells in heart.
             to->voltage += from->voltage * 0.001; // this parameter can somewhat control the speed of signal.
         }
     }

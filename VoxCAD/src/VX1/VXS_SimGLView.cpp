@@ -1037,6 +1037,7 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
     double voltage;
     CColor voltageColor;
     CColor defaultColor(0.2, 0.2, 0.2, 0.2);
+    CColor pickedColor(0.2,1.0,0.2,0.2);
     CColor colorMap[10];
     colorMap[0] = CColor(0.9f, 0.2f, 0.29f, 0.5f);
     colorMap[1] = CColor(0.6f, 0.6f, 0.5f, 0.5f);
@@ -1182,7 +1183,7 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
                         pos = v.split(",");
                         if (pos.size() <= 1)
                             continue;
-                        if (pos.size() < 14) {
+                        if (pos.size() < 15) {
                             qWarning() << "ERROR: a voxel has pos size is " << pos.size() << "<14." << v;
                             continue;
                         }
@@ -1224,13 +1225,15 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
                         voltage = (*constIterator).toDouble();
                         voltageColor = GetRnB((voltage + 100) / 200);
                         glLoadName(++indexCounter); // to enable picking
-
+                        if (Selected==indexCounter && !HistoryPaused) { //add a new point to the plot
+                            emit ReqUpdateVoltagePlot(historyTime, voltage, indexCounter);
+                        }
                         glTranslated(p1, p2, p3);
                         glRotated(angle, r1, r2, r3);
                         if (nnn.Dist2(ppp) < 1) {
                             CColor c;
                             if (Selected==indexCounter) {
-                                c = defaultColor;
+                                c = pickedColor;
                             } else {
                                 if (voltageView) {
                                     c = voltageColor;

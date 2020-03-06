@@ -41,6 +41,7 @@ public:
 	void SetStatusButtonText(bool IsSimRunning) {if (IsSimRunning) ui.PauseButton->setText("Pause"); else ui.PauseButton->setText("Start");}
 
 public slots:
+	void UpdateVoltagePlot(double time, double voltage, int voxelSel);
 	void SetStatusText(QString Text) {if (!ui.OutText->verticalScrollBar()->isSliderDown()){ int ScrollLoc = ui.OutText->verticalScrollBar()->value(); ui.OutText->setText(Text); ui.OutText->verticalScrollBar()->setValue(ScrollLoc);}}
 	void ApplyVoxSelection(int NewSel);
 	void AddPlotPoint(double Time);
@@ -127,11 +128,16 @@ public slots:
 	void IsOutputVisible(bool* pVisible) {*pVisible =  ui.OutText->isVisible();}
 	void IsPlotVisible(bool* pVisible);
 	
+	void ResetVoltagePlot();
+
 protected:
 	QTimer* PlotUpdateTimer;
 	double PlotUpdateRate; //in ms
 
 	QSimplePlot* pPlot;
+
+	int currentVoxelSel;
+    QVector<double> plot_x, plot_y; // initialize with entries 0..100
 
 private:
 	Ui::PhysicsDialog ui;

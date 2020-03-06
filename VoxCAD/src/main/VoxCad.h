@@ -261,10 +261,14 @@ class VoxCad : public QMainWindow {
             MainSim.ApplySelection(NewSel);
 
             ReqGLUpdateAll();
-            BCsDlg->ApplyExtSelection(NewSel);
-            VoxInfoDlg->UpdateUI();
-            FEAInfoDlg->UpdateUI();
-            PhysicsDlg->ApplyVoxSelection(NewSel);
+            if (CurViewMode == VM_PHYSICS) {
+                PhysicsDlg->ApplyVoxSelection(NewSel);
+
+            } else {
+                BCsDlg->ApplyExtSelection(NewSel);
+                VoxInfoDlg->UpdateUI();
+                FEAInfoDlg->UpdateUI();
+            }
         }
     };
     void GetCurGLSelected(int *CurSel) { *CurSel = CurGLSelected; }

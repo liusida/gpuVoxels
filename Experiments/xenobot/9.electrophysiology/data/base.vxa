@@ -129,7 +129,7 @@
           <Fail_Strain>0</Fail_Strain>
           <Density>1e+06</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0</CTE>
+          <CTE>0.001</CTE>
           <MaterialTempPhase>0</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>

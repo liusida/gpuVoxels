@@ -375,6 +375,7 @@ void VoxCad::SetupPhysicsWindow(void)
 	//connect(FEAInfoDlg, SIGNAL(GetFEAInfoString(QString*)), &MainFEA, SLOT(GetFEAInfoString(QString*)));
 	//connect(FEAInfoDlg, SIGNAL(GetFEAInfoString(int, QString*)), &MainFEA, SLOT(GetFEAInfoString(int, QString*)));
 	//connect(FEAInfoDlg, SIGNAL(DoneAnalyzing()), this, SLOT(ForceViewMode(void))); 
+	connect(MainSim.pSimView, SIGNAL(ReqUpdateVoltagePlot(double, double, int)), PhysicsDlg, SLOT(UpdateVoltagePlot(double, double, int)));
 
 	addDockWidget(Qt::RightDockWidgetArea, PhysicsDockWidget);
 }
