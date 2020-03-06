@@ -500,7 +500,7 @@ make inelastic (dead) collisions. 1.0 is critically damped.</string>
       <enum>QTabWidget::North</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -538,7 +538,7 @@ make inelastic (dead) collisions. 1.0 is critically damped.</string>
          <x>10</x>
          <y>80</y>
          <width>281</width>
-         <height>80</height>
+         <height>41</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_18">
@@ -564,6 +564,34 @@ make inelastic (dead) collisions. 1.0 is critically damped.</string>
         <widget class="QTextEdit" name="OutText"/>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Voltage</string>
+      </attribute>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>271</width>
+         <height>141</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Voltage</string>
+       </property>
+       <widget class="QCustomPlot" name="voltagePlot" native="true">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>20</y>
+          <width>271</width>
+          <height>121</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
      </widget>
      <widget class="QWidget" name="View">
       <attribute name="title">
@@ -1313,6 +1341,14 @@ Useful for highly unstable scenarios.</string>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../VoxCad.qrc"/>
  </resources>

@@ -20,8 +20,8 @@ file(GLOB VOXCAD_MAIN_SRC ${VOXCAD_MAIN}/*.c* ${VOXCAD_MAIN}/*.h)
 file(GLOB VX2_SRC ${VX2}/src/*.c* ${VX2}/src/*.h)
 file(GLOB VX1_SRC ${VX1}/*.c* ${VX1}/*.h)
 file(GLOB QTUTILS_SRC ${QTUTILS}/*.c* ${QTUTILS}/*.h)
-
-add_executable(VoxCAD VoxCad.qrc ${VOXCAD_MAIN_SRC} ${VX2_SRC} ${VX1_SRC} ${QTUTILS_SRC})
+file(GLOB QCUSTOMPLOT_SRC src/qcustomplot/*.c* src/qcustomplot/*.h)
+add_executable(VoxCAD VoxCad.qrc ${VOXCAD_MAIN_SRC} ${VX2_SRC} ${VX1_SRC} ${QTUTILS_SRC} ${QCUSTOMPLOT_SRC})
 
 # add_definitions(-DQT_XML_LIB -DQT_OPENGL_LIB -DUSE_ZLIB_COMPRESSION -DUSE_OPEN_GL -DQT_DLL -DPREC_MED -DUSE_OMP)
 add_definitions(-DQT_XML_LIB -DQT_OPENGL_LIB -DUSE_OPEN_GL -DQT_DLL -DPREC_MED -DUSE_OMP)
@@ -29,9 +29,9 @@ add_definitions(-DQT_XML_LIB -DQT_OPENGL_LIB -DUSE_OPEN_GL -DQT_DLL -DPREC_MED -
 # Add module path
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-target_include_directories(VoxCAD PUBLIC ${VOXCAD_MAIN} ${VX2}/include ${VX1} ${QTUTILS})
-find_package(Qt5 COMPONENTS Core Gui Xml OpenGL Concurrent Widgets REQUIRED)
-target_link_libraries(VoxCAD PRIVATE Qt5::Core Qt5::Gui Qt5::Xml Qt5::OpenGL Qt5::Concurrent Qt5::Widgets)
+target_include_directories(VoxCAD PUBLIC ${VOXCAD_MAIN} ${VX2}/include ${VX1} ${QTUTILS} src/qcustomplot)
+find_package(Qt5 COMPONENTS Core Gui Xml OpenGL Concurrent Widgets PrintSupport REQUIRED)
+target_link_libraries(VoxCAD PRIVATE Qt5::Core Qt5::Gui Qt5::Xml Qt5::OpenGL Qt5::Concurrent Qt5::Widgets Qt5::PrintSupport)
 
 
 #for visualization
