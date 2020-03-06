@@ -141,7 +141,7 @@ void CVX_Object::ClearPalette()
 		Palette.erase(Palette.begin(), Palette.begin()+VecSize); //erase the materials array
 
 	//add back the default (empty) first material
-	CVXC_Material Empty = CVXC_Material("Erase", NULL, NULL, NULL, NULL);
+	CVXC_Material Empty = CVXC_Material("Erase", 0, 0, 0, 0);
 
 	Palette.push_back(Empty);
 }

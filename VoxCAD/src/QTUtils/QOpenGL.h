@@ -60,7 +60,7 @@ struct GL_Light //An OpenGL light structure
 	float D[4], S[4], P[4]; //position is scaled by the size of the Envelope
 	int Index; //the index of this light
 	void SetLight(float Scale, Vec3D<>* Offset) {
-		float sP[4] = {P[0]*Scale+Offset->x, P[1]*Scale+Offset->y, P[2]*Scale+Offset->z, P[3]};
+		float sP[4] = {P[0]*Scale+(float)Offset->x, P[1]*Scale+(float)Offset->y, P[2]*Scale+(float)Offset->z, P[3]};
 		glEnable(Index); 
 		glLightfv(Index, GL_DIFFUSE, D); 
 		glLightfv(Index, GL_SPECULAR, S); 

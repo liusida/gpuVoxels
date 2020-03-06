@@ -47,7 +47,10 @@ int main() {
                 std::string command = worker.string() + " -i " + file.path().string() + " -o x";
 
                 std::cout << command << "\n";
-                std::system(command.c_str());
+                int ret = std::system(command.c_str());
+                if (ret!=0) {
+                    printf("ERROR: executable returns an error.\n");
+                }
                 
                 fs::rename(file.path(), hostname/done/file.path().filename());
             } 

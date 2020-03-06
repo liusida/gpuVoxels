@@ -49,7 +49,7 @@ if $BuildVoxCAD; then
     fi
     cd build
     if $RebuildAll; then
-        cmake -DCMAKE_BUILD_TYPE=Release -DCUDA_DEBUG=OFF ..
+        cmake -DCMAKE_BUILD_TYPE=Release ..
     fi
     cmake --build . -j 10
     cd $cwd
