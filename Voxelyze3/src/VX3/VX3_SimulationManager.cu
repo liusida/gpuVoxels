@@ -344,7 +344,7 @@ void VX3_SimulationManager::enlargeGPUHeapSize() {
             break;
         HeapSize *= 2;
     }
-    HeapSize += 1024; // add some additional size
+    HeapSize *= 1.8; // add some additional size
     printf("Set GPU heap size to be %ld bytes.\n", HeapSize);
     VcudaDeviceSetLimit(cudaLimitMallocHeapSize,
                         HeapSize); // Set Heap Memory to 1G, instead of merely 8M.

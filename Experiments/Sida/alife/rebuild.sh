@@ -19,7 +19,7 @@ done
 
 if $BuildVoxelyze3; then
     # For Voxelyze3 (Server side)
-    cd ../../Voxelyze3/
+    cd ../../../Voxelyze3/
     if $RebuildAll; then
         echo "Rebuilding Voxelyze3."
         rm build/ -rf
@@ -33,13 +33,13 @@ if $BuildVoxelyze3; then
     fi
     cmake --build . -j 10
     cd $cwd
-    cp ../../Voxelyze3/build//Voxelyze3 .
-    cp ../../Voxelyze3/build/vx3_node_worker .
+    cp ../../../Voxelyze3/build//Voxelyze3 .
+    cp ../../../Voxelyze3/build/vx3_node_worker .
 fi
 
 if $BuildVoxCAD; then
     # For VoxCAD (Client side)
-    cd ../../VoxCAD/
+    cd ../../../VoxCAD/
     if $RebuildAll; then
         echo "Rebuilding VoxCAD."
         rm build/ -rf
@@ -53,5 +53,5 @@ if $BuildVoxCAD; then
     fi
     cmake --build . -j 10
     cd $cwd
-    cp ../../VoxCAD/build/VoxCAD .
+    cp ../../../VoxCAD/build/VoxCAD .
 fi
