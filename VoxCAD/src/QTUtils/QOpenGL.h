@@ -95,7 +95,7 @@ signals:
 	void LMouseDown(float X, float Y, float Z, bool IsCtrl = false); //left mouse button pressed
 	void LMouseUp(float X, float Y, float Z); //left mouse button released
 	void PressedEscape(void); //escape key pressed
-
+	
 public slots:
 	void ZoomExtents() {GLCenterView(); updateGL();}
 	void ReqGLUpdateThis() {updateGL();}

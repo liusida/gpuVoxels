@@ -40,6 +40,10 @@ class VoxCad : public QMainWindow {
     bool GraphicsEnabled; // Turn on or off voxel rendering (off for very large models)
 
     CQOpenGL *GLWindow;
+    bool GLWindow_FullScreen = false;
+    QDialog *FullScreen_dlg;
+    QHBoxLayout *FullScreen_dlg_layout;
+
     CQDM_Edit MainObj;
     QVX_FEA MainFEA;
     QVX_Environment MainEnv;
@@ -369,8 +373,13 @@ class VoxCad : public QMainWindow {
     void PressedEscape(void) {
         if (CurViewMode == VM_EDITLAYER)
             MainObj.PressedEscape();
-        else
-            ZoomExtAll();
+        else {
+            if (GLWindow_FullScreen) {
+                showGlNormal();
+            } else {
+                ZoomExtAll();
+            }
+        }
     };
     void CtrlMouseRoll(bool Positive) {
         if (CurViewMode == VM_EDITLAYER)
@@ -415,6 +424,24 @@ class VoxCad : public QMainWindow {
         } else {
             VoxInfoDockWidget->hide();
             ui.actionInfo->setChecked(false);
+        }
+    }
+    void ViewFullScreen() {
+        GLWindow_FullScreen = true;
+        FullScreen_dlg_layout->setContentsMargins(0, 0, 0, 0);
+        FullScreen_dlg_layout->addWidget(GLWindow);
+        FullScreen_dlg->setLayout(FullScreen_dlg_layout);
+        FullScreen_dlg->showFullScreen();
+        bool r = connect(FullScreen_dlg, SIGNAL(rejected()), this, SLOT(showGlNormal()));
+        assert(r);
+        r = connect(FullScreen_dlg, SIGNAL(accepted()), this, SLOT(showGlNormal()));
+        assert(r);
+    }
+    void showGlNormal() {
+        if (GLWindow_FullScreen) {
+            GLWindow_FullScreen = false;
+            FullScreen_dlg->hide();
+            ui.horizontalLayout->layout()->addWidget(GLWindow);
         }
     }
     void ViewBCsWindow(bool Visible) {

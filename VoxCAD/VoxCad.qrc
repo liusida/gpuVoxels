@@ -35,5 +35,6 @@
         <file>assets/Icons/ViewTop.png</file>
         <file>assets/Icons/Workspace.png</file>
         <file>assets/Icons/ZoomExtents2.png</file>
+        <file>assets/Icons/FullScreen.png</file>
     </qresource>
 </RCC>
