@@ -1060,7 +1060,7 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
     if (pGLWin->m_Cam.Zoom < 50) {
         ZoomNear = true;
     }
-    if (pGLWin->m_Cam.Zoom > 150) {
+    if (pGLWin->m_Cam.Zoom > 400) {
         ZoomVeryFar = true;
     }
     // If it doesn't start play, check the Default.vxc file
@@ -1116,6 +1116,9 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
                         auto g = tree.get<double>("matcolor.g", 0);
                         auto b = tree.get<double>("matcolor.b", 0);
                         auto a = tree.get<double>("matcolor.a", 0);
+                        if (a==1) {
+                            a=0.3;
+                        }
                         matColors[id] = CColor(r, g, b, a);
                         continue;
                     }
@@ -1246,7 +1249,8 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
                                     }
                                 }
                             }
-                            CGL_Utils::DrawCube(nnn, ppp, true, ZoomNear, 1.0, c, ZoomVeryFar);
+                            CGL_Utils::DrawCube(nnn, ppp, true, true, 1.0, c, false);
+                            // CGL_Utils::DrawCube(nnn, ppp, true, ZoomNear, 1.0, c, ZoomVeryFar);
                         }
                         glPopMatrix();
                         // Update camera view center, but gentlely.

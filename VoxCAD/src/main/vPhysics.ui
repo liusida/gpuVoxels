@@ -554,6 +554,19 @@ make inelastic (dead) collisions. 1.0 is critically damped.</string>
         </item>
        </layout>
       </widget>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>180</y>
+         <width>281</width>
+         <height>111</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>DrawCube</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="Output">
       <attribute name="title">
