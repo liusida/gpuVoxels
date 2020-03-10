@@ -108,12 +108,12 @@ int main(int argc, char** argv) {
         tr_result.put("report.detail."+simulation_name+".fitness_score", res.fitness_score);
         tr_result.put("report.detail."+simulation_name+".num_voxel", res.num_voxel);
         tr_result.put("report.detail."+simulation_name+".voxSize", res.voxSize);
-        tr_result.put("report.detail."+simulation_name+".CoM.x", res.x);
-        tr_result.put("report.detail."+simulation_name+".CoM.y", res.y);
-        tr_result.put("report.detail."+simulation_name+".CoM.z", res.z);
-        tr_result.put("report.detail."+simulation_name+".Init.x", res.initialCenterOfMass.x);
-        tr_result.put("report.detail."+simulation_name+".Init.y", res.initialCenterOfMass.y);
-        tr_result.put("report.detail."+simulation_name+".Init.z", res.initialCenterOfMass.z);
+        // tr_result.put("report.detail."+simulation_name+".CoM.x", res.x);
+        // tr_result.put("report.detail."+simulation_name+".CoM.y", res.y);
+        // tr_result.put("report.detail."+simulation_name+".CoM.z", res.z);
+        // tr_result.put("report.detail."+simulation_name+".Init.x", res.initialCenterOfMass.x);
+        // tr_result.put("report.detail."+simulation_name+".Init.y", res.initialCenterOfMass.y);
+        // tr_result.put("report.detail."+simulation_name+".Init.z", res.initialCenterOfMass.z);
         // tr_result.put("report.detail."+simulation_name+".distance_by_size", res.distance);
         // tr_result.put("report.detail."+simulation_name+".distance_by_size_xy", res.distance_xy);
         // for (auto &pos: res.voxel_position) {

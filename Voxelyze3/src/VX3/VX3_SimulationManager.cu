@@ -105,11 +105,8 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         }
         d_v3->updateCurrentCenterOfMass();
         d_v3->computeFitness();
-        printf(COLORCODE_BLUE "%d) Simulation %d ends: %s Time: %f, Dist from "
-                              "Init %f, CoM: (%f %f %f) mm\n" COLORCODE_RESET,
-               device_index, thread_index, d_v3->vxa_filename, d_v3->currentTime,
-               d_v3->currentCenterOfMass.Dist(d_v3->initialCenterOfMass) * 1000, d_v3->currentCenterOfMass.x * 1000,
-               d_v3->currentCenterOfMass.y * 1000, d_v3->currentCenterOfMass.z * 1000);
+        printf(COLORCODE_BLUE "%d) Simulation %d ends: %s Time: %f\n" COLORCODE_RESET,
+               device_index, thread_index, d_v3->vxa_filename, d_v3->currentTime);
     }
 }
 
