@@ -32,7 +32,7 @@ struct VX3_MathTreeToken {
 struct VX3_MathTree {
     static bool validate(VX3_MathTreeToken *buff) {
         try {
-            eval(1, 1, 1, 1, 1, 1, 1, buff);
+            eval(1, 1, 1, 1, 1, 1, 1, 1, buff);
         } catch (...) {
             return false;
         }
@@ -42,7 +42,7 @@ struct VX3_MathTree {
     https://docs.nvidia.com/cuda/cuda-math-api/group__CUDA__MATH__DOUBLE.html
     */
     __device__ __host__ static double eval(double x, double y, double z,
-                                           double hit, double t, double angle, double closeness, VX3_MathTreeToken *buff) {
+                                           double hit, double t, double angle, double closeness, int numClosePairs, VX3_MathTreeToken *buff) {
         double values[1024];
         int values_cursor = 0;
         int process_cursor = 0;
@@ -60,20 +60,24 @@ struct VX3_MathTree {
                 values[values_cursor] = 3.14159265358979323846;
                 break;
             case mtVAR:
-                if (buff[i].value < 0.5f) {
+                if (buff[i].value < 0.5) {
                     values[values_cursor] = x;
-                } else if (buff[i].value < 1.5f) {
+                } else if (buff[i].value < 1.5) {
                     values[values_cursor] = y;
-                } else if (buff[i].value < 2.5f) {
+                } else if (buff[i].value < 2.5) {
                     values[values_cursor] = z;
-                } else if (buff[i].value < 3.5f) {
+                } else if (buff[i].value < 3.5) {
                     values[values_cursor] = hit;
-                } else if (buff[i].value < 4.5f) {
+                } else if (buff[i].value < 4.5) {
                     values[values_cursor] = t;
-                } else if (buff[i].value < 5.5f) {
+                } else if (buff[i].value < 5.5) {
                     values[values_cursor] = angle;
-                } else {
+                } else if (buff[i].value < 6.5) {
                     values[values_cursor] = closeness;
+                } else if (buff[i].value < 7.5) {
+                    values[values_cursor] = numClosePairs;
+                } else {
+                    //ERROR
                 }
                 break;
             case mtSIN:

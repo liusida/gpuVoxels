@@ -125,8 +125,9 @@ class VX3_VoxelyzeKernel {
     int EnableCilia = 0;
     double  targetCloseness = 0;
     VX3_dVector<VX3_Voxel*> d_targets;
-
+    int numClosePairs = 0;
     bool isSurfaceChanged=false;
+    double MaxDistInVoxelLengthsToCountAsPair=0.0;
 
     //Spatial Hash
     //index all surface voxels into grid, so we only need to compare neighbor grids for detecting collision

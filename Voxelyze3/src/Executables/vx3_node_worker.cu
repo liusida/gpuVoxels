@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
     
     tr_result.put("report.inputdir", input_dir.filename().string());
     tr_result.put("report.bestfit.filename", sm.h_results[0].vxa_filename);
-    tr_result.put("report.bestfit.distance", sm.h_results[0].distance);
+    // tr_result.put("report.bestfit.distance", sm.h_results[0].distance);
     tr_result.put("report.bestfit.fitness_score", sm.h_results[0].fitness_score);
 
     // this will be too much to write into the report.
@@ -114,8 +114,8 @@ int main(int argc, char** argv) {
         tr_result.put("report.detail."+simulation_name+".Init.x", res.initialCenterOfMass.x);
         tr_result.put("report.detail."+simulation_name+".Init.y", res.initialCenterOfMass.y);
         tr_result.put("report.detail."+simulation_name+".Init.z", res.initialCenterOfMass.z);
-        tr_result.put("report.detail."+simulation_name+".distance_by_size", res.distance);
-        tr_result.put("report.detail."+simulation_name+".distance_by_size_xy", res.distance_xy);
+        // tr_result.put("report.detail."+simulation_name+".distance_by_size", res.distance);
+        // tr_result.put("report.detail."+simulation_name+".distance_by_size_xy", res.distance_xy);
         // for (auto &pos: res.voxel_position) {
         //     pt::ptree t_pos;
         //     t_pos.put("x", pos.x);

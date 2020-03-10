@@ -24,7 +24,6 @@ class VX3_SimulationManager {
     void startKernel(int num_tasks, int device_index);
     void collectResults(int num_simulation, int device_index);
     void sortResults();
-    void printResults();
     void enlargeGPUHeapSize();
     void ParseMathTree(VX3_MathTreeToken *field_ptr, size_t max_length, std::string node_address, pt::ptree &tree);
 

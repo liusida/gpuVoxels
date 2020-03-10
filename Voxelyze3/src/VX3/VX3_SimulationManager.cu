@@ -200,6 +200,8 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
                 p->value = 5;
             } else if (tok.second == "targetCloseness") {
                 p->value = 6;
+            } else if (tok.second == "numClosePairs") {
+                p->value = 7;
             } else {
                 printf("ERROR: No such variable.\n");
                 break;
@@ -324,6 +326,8 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
                       "VXA.Simulator.ForceField.z_forcefield", pt_merged);
 
         h_d_tmp.EnableTargetCloseness = pt_merged.get<int>("VXA.Simulator.EnableTargetCloseness", 0);
+        h_d_tmp.MaxDistInVoxelLengthsToCountAsPair = pt_merged.get<double>("VXA.Simulator.MaxDistInVoxelLengthsToCountAsPair", 0);
+
         h_d_tmp.EnableCilia = pt_merged.get<int>("VXA.Simulator.EnableCilia", 0);
 
         VcudaMemcpy(d_voxelyze_3s[device_index] + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), cudaMemcpyHostToDevice);
@@ -344,7 +348,7 @@ void VX3_SimulationManager::enlargeGPUHeapSize() {
             break;
         HeapSize *= 2;
     }
-    HeapSize *= 1.8; // add some additional size
+    HeapSize *= 0.8; // add some additional size
     printf("Set GPU heap size to be %ld bytes.\n", HeapSize);
     VcudaDeviceSetLimit(cudaLimitMallocHeapSize,
                         HeapSize); // Set Heap Memory to 1G, instead of merely 8M.
@@ -398,15 +402,9 @@ void VX3_SimulationManager::collectResults(int num_simulation, int device_index)
         }
         delete tmp_v;
 
-        tmp.computeFitness();
+        // tmp.computeFitness();
         h_results.push_back(tmp);
     }
 }
 
-void VX3_SimulationManager::printResults() {
-    for (auto &r : h_results) {
-        printf("%s, dis: %f.\n", r.vxa_filename.c_str(), r.distance);
-    }
-}
-
-void VX3_SimulationManager::sortResults() { sort(h_results.begin(), h_results.end(), VX3_SimulationResult::compareDistance); }
+void VX3_SimulationManager::sortResults() { sort(h_results.begin(), h_results.end(), VX3_SimulationResult::compareFitnessScore); }
