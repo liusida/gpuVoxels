@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <VXA Version="1.1">
+  <GPU>
+    <HeapSize>0.6</HeapSize>
+  </GPU>
   <Simulator>
     <EnableTargetCloseness>1</EnableTargetCloseness>
     <EnableNormalThrust>0</EnableNormalThrust>

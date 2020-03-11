@@ -326,6 +326,8 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         h_d_tmp.MaxDistInVoxelLengthsToCountAsPair = pt_merged.get<double>("VXA.Simulator.MaxDistInVoxelLengthsToCountAsPair", 0);
 
         h_d_tmp.EnableCilia = pt_merged.get<int>("VXA.Simulator.EnableCilia", 0);
+        
+        HeapSize = pt_merged.get<double>("VXA.GPU.HeapSize", 1);
 
         VcudaMemcpy(d_voxelyze_3s[device_index] + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), cudaMemcpyHostToDevice);
         i++;
@@ -335,20 +337,14 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
 // GPU Heap is for in-kernel malloc(). Refer to
 // https://stackoverflow.com/a/34795830/7001199
 void VX3_SimulationManager::enlargeGPUHeapSize() {
-    size_t HeapSize = 1;
-    double ratio = 0.5; // make 10% of the total GPU memory to be heap memory
+    size_t HeapSizeInBytes;
     size_t free, total;
     VcudaMemGetInfo(&free, &total);
     printf("Total GPU memory %ld bytes.\n", total);
-    for (int i = 0; i < 100; i++) {
-        if (HeapSize >= total * ratio)
-            break;
-        HeapSize *= 2;
-    }
-    HeapSize *= 1.5; // add some additional size
-    printf("Set GPU heap size to be %ld bytes.\n", HeapSize);
+    HeapSizeInBytes = HeapSize * total; // add some additional size
+    printf("Set GPU heap size to be %ld bytes.\n", HeapSizeInBytes);
     VcudaDeviceSetLimit(cudaLimitMallocHeapSize,
-                        HeapSize); // Set Heap Memory to 1G, instead of merely 8M.
+        HeapSizeInBytes); // Set Heap Memory to 1G, instead of merely 8M.
 
     // if "Lane User Stack Overflow" ocurs, maybe Stack Size too small, can try this:
     //VcudaDeviceSetLimit(cudaLimitStackSize, 2048);

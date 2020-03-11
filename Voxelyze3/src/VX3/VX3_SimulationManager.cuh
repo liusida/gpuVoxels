@@ -41,6 +41,8 @@ class VX3_SimulationManager {
     // fs::path output_file;
 
     std::vector<VX3_SimulationResult> h_results;
+
+    double HeapSize=1;
 };
 
 #endif // VX3_SIMULATION_MANAGER
