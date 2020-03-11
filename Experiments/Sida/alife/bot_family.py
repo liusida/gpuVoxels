@@ -1,8 +1,8 @@
 from lxml import etree
 import numpy as np
 
-def read_robot(size=10, orientation=True):
-    root= etree.parse(f"data{size}/bot.vxd")
+def read_robot(size=10, orientation=1):
+    root= etree.parse(f"selection/data{size}/bot.vxd")
     data = root.findall(".//Data")[0]
     m = []
     for l in data.iter("Layer"):
@@ -12,16 +12,18 @@ def read_robot(size=10, orientation=True):
         m.append(layer)
     m = np.array(m)
     m = m.reshape([size,size,size])
-    if orientation:
+    if orientation==1:
         m = np.swapaxes(m,0,1)
+    elif orientation==3:
+        m = np.swapaxes(m,0,2)
     return m
 
-m10 = read_robot(10)
-m20 = read_robot(20)
-m30 = read_robot(30,False)
-m40 = read_robot(40,False)
-m50 = read_robot(50,False)
-m100 = read_robot(100,False)
+m10 = read_robot(10, orientation=1)
+m20 = read_robot(20, orientation=1)
+m30 = read_robot(30, orientation=2)
+m40 = read_robot(40, orientation=2)
+m50 = read_robot(50, orientation=3)
+m100 = read_robot(100,orientation=2)
 
 x = 300;  y = z = 160
 
@@ -31,12 +33,12 @@ def insert_robot(m, p = [0,0,0]):
     global world_morphology
     world_morphology[p[0]:p[0]+m.shape[0], p[1]:p[1]+m.shape[1], p[2]:p[2]+m.shape[2]] = m
 
-insert_robot(m100, [0,0,160])
-insert_robot(m50, [0,100,0])
+# insert_robot(m100, [0,0,160])
+# insert_robot(m50, [0,100,0])
 insert_robot(m40, [0,0,0])
-insert_robot(m30, [0,100,80])
-insert_robot(m20, [0,20,90])
-insert_robot(m10, [0,40,60])
+# insert_robot(m30, [0,100,80])
+# insert_robot(m20, [0,20,90])
+# insert_robot(m10, [0,40,60])
 
 world_morphology_flatten = world_morphology.reshape(z,x*y)
 

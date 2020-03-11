@@ -2,7 +2,7 @@
 <VXA Version="1.1">
   <Simulator>
     <RecordHistory replace="VXA.Simulator.RecordHistory">
-      <RecordStepSize>100</RecordStepSize>
+      <RecordStepSize>1000</RecordStepSize>
       <RecordVoxel>1</RecordVoxel>
       <RecordLink>0</RecordLink>
     </RecordHistory>
@@ -17,7 +17,7 @@
       <SlowDampingZ>0.01</SlowDampingZ>
     </Damping>
     <Collisions>
-      <SelfColEnabled>1</SelfColEnabled>
+      <SelfColEnabled>0</SelfColEnabled>
       <ColSystem>3</ColSystem>
       <CollisionHorizon>3</CollisionHorizon>
     </Collisions>
@@ -85,14 +85,14 @@
         <MatType>0</MatType>
         <Name>Fat</Name>
         <Display>
-          <Red>1</Red>
-          <Green>0.4</Green>
-          <Blue>0.2</Blue>
-          <Alpha>0.6</Alpha>
+          <Red>0</Red>
+          <Green>1</Green>
+          <Blue>1</Blue>
+          <Alpha>1</Alpha>
         </Display>
         <Mechanical>
           <MatModel>0</MatModel>
-          <Elastic_Mod>5e+07</Elastic_Mod>
+          <Elastic_Mod>5e+06</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
           <Yield_Stress>0</Yield_Stress>
           <FailModel>0</FailModel>
@@ -110,10 +110,10 @@
         <MatType>0</MatType>
         <Name>Bone</Name>
         <Display>
-          <Red>0.9</Red>
-          <Green>0.5</Green>
-          <Blue>0</Blue>
-          <Alpha>0.8</Alpha>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>1</Blue>
+          <Alpha>1</Alpha>
         </Display>
         <Mechanical>
           <MatModel>0</MatModel>
@@ -125,7 +125,7 @@
           <Fail_Strain>0</Fail_Strain>
           <Density>5e+05</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.01</CTE>
+          <CTE>0.00</CTE>
           <MaterialTempPhase>0</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>
@@ -136,9 +136,9 @@
         <Name>MuscleOne</Name>
         <Display>
           <Red>1</Red>
-          <Green>0.6</Green>
+          <Green>0</Green>
           <Blue>0</Blue>
-          <Alpha>0.8</Alpha>
+          <Alpha>1</Alpha>
         </Display>
         <Mechanical>
           <MatModel>0</MatModel>
@@ -150,7 +150,7 @@
           <Fail_Strain>0</Fail_Strain>
           <Density>5e+05</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.01</CTE>
+          <CTE>0.03</CTE>
           <MaterialTempPhase>0</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>
@@ -160,10 +160,10 @@
         <MatType>0</MatType>
         <Name>MuscleTwo</Name>
         <Display>
-          <Red>1.0</Red>
-          <Green>0.9</Green>
+          <Red>0</Red>
+          <Green>1</Green>
           <Blue>0</Blue>
-          <Alpha>0.8</Alpha>
+          <Alpha>1</Alpha>
         </Display>
         <Mechanical>
           <MatModel>0</MatModel>
@@ -175,7 +175,7 @@
           <Fail_Strain>0</Fail_Strain>
           <Density>5e+05</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.01</CTE>
+          <CTE>0.03</CTE>
           <MaterialTempPhase>0.5</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>

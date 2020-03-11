@@ -7,7 +7,7 @@
       <mtVAR>x</mtVAR>
     </FitnessFunction>
     <RecordHistory>
-      <RecordStepSize>100</RecordStepSize>
+      <RecordStepSize>0</RecordStepSize>
       <RecordVoxel>1</RecordVoxel>
       <RecordLink>0</RecordLink>
     </RecordHistory>
@@ -57,7 +57,7 @@
       <StopConditionFormula>
         <mtSUB>
           <mtVAR>t</mtVAR>
-          <mtCONST>10</mtCONST>
+          <mtCONST>0.5</mtCONST>
         </mtSUB>
       </StopConditionFormula>
     </StopCondition>
