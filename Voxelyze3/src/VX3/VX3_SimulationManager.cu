@@ -80,7 +80,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                                 printf("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", nnn.x * vs, nnn.y * vs, nnn.z * vs, ppp.x * vs, ppp.y * vs,
                                        ppp.z * vs);
                                 printf("%d,", v.mat->matid); // for coloring
-                                printf("%.2f,", v.voltage); // for coloring as well.
+                                printf("%.2f,", v.voltage);  // for coloring as well.
                                 printf(";");
                             }
                         }
@@ -105,8 +105,8 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         }
         d_v3->updateCurrentCenterOfMass();
         d_v3->computeFitness();
-        printf(COLORCODE_BLUE "%d) Simulation %d ends: %s Time: %f\n" COLORCODE_RESET,
-               device_index, thread_index, d_v3->vxa_filename, d_v3->currentTime);
+        printf(COLORCODE_BLUE "%d) Simulation %d ends: %s Time: %f, angleSampleTimes: %d.\n" COLORCODE_RESET, device_index, thread_index,
+               d_v3->vxa_filename, d_v3->currentTime, d_v3->angleSampleTimes);
     }
 }
 
@@ -326,8 +326,14 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         h_d_tmp.MaxDistInVoxelLengthsToCountAsPair = pt_merged.get<double>("VXA.Simulator.MaxDistInVoxelLengthsToCountAsPair", 0);
 
         h_d_tmp.EnableCilia = pt_merged.get<int>("VXA.Simulator.EnableCilia", 0);
-        
-        HeapSize = pt_merged.get<double>("VXA.GPU.HeapSize", 1);
+
+        HeapSize = pt_merged.get<double>("VXA.GPU.HeapSize", 0.5);
+        if (HeapSize > 1.0) {
+            HeapSize = 0.99;
+        }
+        if (HeapSize < 0.01) {
+            HeapSize = 0.01;
+        }
 
         VcudaMemcpy(d_voxelyze_3s[device_index] + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), cudaMemcpyHostToDevice);
         i++;
@@ -344,11 +350,10 @@ void VX3_SimulationManager::enlargeGPUHeapSize() {
     HeapSizeInBytes = HeapSize * total; // add some additional size
     printf("Set GPU heap size to be %ld bytes.\n", HeapSizeInBytes);
     VcudaDeviceSetLimit(cudaLimitMallocHeapSize,
-        HeapSizeInBytes); // Set Heap Memory to 1G, instead of merely 8M.
+                        HeapSizeInBytes); // Set Heap Memory to 1G, instead of merely 8M.
 
     // if "Lane User Stack Overflow" ocurs, maybe Stack Size too small, can try this:
-    //VcudaDeviceSetLimit(cudaLimitStackSize, 2048);
-
+    // VcudaDeviceSetLimit(cudaLimitStackSize, 2048);
 }
 
 void VX3_SimulationManager::startKernel(int num_simulation, int device_index) {

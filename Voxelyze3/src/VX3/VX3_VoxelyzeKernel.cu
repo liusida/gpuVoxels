@@ -451,15 +451,17 @@ __device__ void VX3_VoxelyzeKernel::registerTargets() {
 }
 
 __device__ void VX3_VoxelyzeKernel::computeTargetCloseness() {
+    // this function is called periodically. not very often. once every thousands of steps.
     double R = MaxDistInVoxelLengthsToCountAsPair * voxSize;
     double ret = 0;
     numClosePairs = 0;
     for (int i = 0; i < d_targets.size(); i++) {
         for (int j = i + 1; j < d_targets.size(); j++) {
-            if (d_targets[i]->pos.Dist(d_targets[j]->pos) < R) {
+            double distance = d_targets[i]->pos.Dist(d_targets[j]->pos);
+            if (distance < R) {
                 numClosePairs ++;
             }
-            ret += 1 / d_targets[i]->pos.Dist(d_targets[j]->pos);
+            ret += 1 / distance;
         }
     }
     targetCloseness = ret;

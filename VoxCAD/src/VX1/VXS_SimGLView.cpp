@@ -1116,9 +1116,6 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
                         auto g = tree.get<double>("matcolor.g", 0);
                         auto b = tree.get<double>("matcolor.b", 0);
                         auto a = tree.get<double>("matcolor.a", 0);
-                        if (a==1) {
-                            a=0.3;
-                        }
                         matColors[id] = CColor(r, g, b, a);
                         continue;
                     }
