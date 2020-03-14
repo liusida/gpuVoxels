@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <VXA Version="1.1">
   <Simulator>
-    <RecordHistory replace="VXA.Simulator.RecordHistory">
-      <RecordStepSize>1000</RecordStepSize>
-      <RecordVoxel>1</RecordVoxel>
-      <RecordLink>0</RecordLink>
-    </RecordHistory>
-
     <Integration>
       <Integrator>0</Integrator>
       <DtFrac>0.9</DtFrac>
@@ -150,7 +144,7 @@
           <Fail_Strain>0</Fail_Strain>
           <Density>5e+05</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.01</CTE>
+          <CTE>0.02</CTE>
           <MaterialTempPhase>0</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>
@@ -175,7 +169,7 @@
           <Fail_Strain>0</Fail_Strain>
           <Density>5e+05</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.01</CTE>
+          <CTE>0.02</CTE>
           <MaterialTempPhase>0.5</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>

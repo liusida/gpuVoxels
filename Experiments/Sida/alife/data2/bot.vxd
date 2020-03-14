@@ -1,0 +1,18 @@
+<VXD>
+    <RecordHistory replace="VXA.Simulator.RecordHistory">
+        <RecordStepSize>100</RecordStepSize>
+    </RecordHistory>
+    <Structure replace="VXA.VXC.Structure" Compression="ASCII_READABLE">
+        <X_Voxels>6</X_Voxels>
+        <Y_Voxels>6</Y_Voxels>
+        <Z_Voxels>2</Z_Voxels>
+        <Data>
+        <Layer><![CDATA[334400334400000000000000112200112200]]></Layer>
+        <Layer><![CDATA[334400334400000000000000112200112200]]></Layer>
+        </Data>
+        <PhaseOffset>
+            <Layer><![CDATA[0.0, 0.0, 0.5, 0.5, 0.0, 0.0,0.0, 0.0, 0.5, 0.5,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,]]></Layer>
+            <Layer><![CDATA[0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0,0.5, 0.5,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,]]></Layer>
+        </PhaseOffset>
+    </Structure>
+</VXD>
