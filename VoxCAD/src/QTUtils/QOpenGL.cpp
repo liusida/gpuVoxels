@@ -99,7 +99,7 @@ void CQOpenGL::EnterFastMode(bool entering) // cuts the fat of rendering for lar
         //		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
         //		glEnable(GL_LINE_SMOOTH);
         glDisable(GL_LINE_SMOOTH);
-        glEnable(GL_POLYGON_SMOOTH);
+        glDisable(GL_POLYGON_SMOOTH);
         glEnable(GL_NORMALIZE);
         glPolygonOffset(1.0, 2);
         glEnable(GL_POLYGON_OFFSET_FILL);
@@ -207,6 +207,8 @@ void CQOpenGL::keyPressEvent(QKeyEvent *event) {
     case Qt::Key_Escape:
         emit PressedEscape();
         break;
+    case Qt::Key_F5:
+        emit PressedF5();
         //		default: CQOpenGL::keyPressEvent(event); //pass along if we don't use it...
     }
 }

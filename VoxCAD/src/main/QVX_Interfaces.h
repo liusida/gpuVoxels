@@ -276,7 +276,7 @@ public slots:
 
     void GetCoM(Vec3D<> *pCoM) {
         if (Running && LockCoMToCenter) {
-            if (pSimView->CurViewVox == RVV_HISTORY || pSimView->CurViewVox == RVV_HISTORY_ELECTRICAL) {
+            if (pSimView->CurViewVox == RVV_HISTORY || pSimView->CurViewVox == RVV_HISTORY_ELECTRICAL || pSimView->CurViewVox == RVV_HISTORY_ROTATION) {
                 *pCoM = pSimView->HistoryCM;
             } else {
                 *pCoM = SS.CurCM;

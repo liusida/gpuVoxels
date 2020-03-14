@@ -100,6 +100,7 @@ public slots:
 	void VoxDeformedChanged(bool State) {if (State) pSim->pSimView->SetCurViewVox(RVV_DEFORMED);}
     void VoxHistoryChanged(bool State) {if (State) pSim->pSimView->SetCurViewVox(RVV_HISTORY);}
     void VoxHistoryElectricalChanged(bool State) {if (State) pSim->pSimView->SetCurViewVox(RVV_HISTORY_ELECTRICAL);}
+    void VoxHistoryRotationChanged(bool State) {if (State) pSim->pSimView->SetCurViewVox(RVV_HISTORY_ROTATION);}
     void VoxSmoothChanged(bool State) {if (State) pSim->pSimView->SetCurViewVox(RVV_SMOOTH);}
 
 	void ForcesCheckChanged(bool State) {pSim->pSimView->SetViewForce(State);}

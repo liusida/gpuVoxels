@@ -82,7 +82,9 @@ void CVXS_SimGLView::Draw(int Selected, bool ViewSection, int SectionLayer) {
             DrawHistory(Selected);
             break;
         case RVV_HISTORY_ELECTRICAL:
-            DrawHistory(Selected, true);
+            DrawHistory(Selected, RVV_HISTORY_ELECTRICAL);
+        case RVV_HISTORY_ROTATION:
+            DrawHistory(Selected, RVV_HISTORY_ROTATION);
         }
     } else { // CurViewMode == RVT_BONDS
         vfloat VoxScale = 0.2;
@@ -224,7 +226,8 @@ void CVXS_SimGLView::DrawFloor(void) {
 
 #ifdef VX2
     if (CurViewVox == RVV_HISTORY ||
-        CurViewVox == RVV_HISTORY_ELECTRICAL) { // TODO: if showing history, should use history's voxel size. Since we didn't pass this in
+        CurViewVox == RVV_HISTORY_ELECTRICAL ||
+        CurViewVox == RVV_HISTORY_ROTATION) { // TODO: if showing history, should use history's voxel size. Since we didn't pass this in
                                                 // history file, hard coded for now.
         z = -0.01 / 2;
     } else {
@@ -1015,7 +1018,7 @@ int CVXS_SimGLView::StatRqdToDraw() // returns the stats bitfield that we need
 }
 
 // Read a .history file and draw in an loop.
-void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
+void CVXS_SimGLView::DrawHistory(int Selected, ViewVoxel historyView) {
     if (drawCylinder) {
         Vec3D<> v1(cylinderX, cylinderY, 0.01);
         Vec3D<> v2(cylinderX, cylinderY, -0.005); // floor is actually at -voxelSize/2
@@ -1235,8 +1238,19 @@ void CVXS_SimGLView::DrawHistory(int Selected, bool voltageView) {
                             if (Selected==indexCounter) {
                                 c = pickedColor;
                             } else {
-                                if (voltageView) {
+                                if (historyView==RVV_HISTORY_ELECTRICAL) {
                                     c = voltageColor;
+                                } if (historyView==RVV_HISTORY_ROTATION) {
+                                    //c = matColors[matid];
+                                    c = CColor(0,0,0,0.8);
+                                    c.b = angle/60;
+                                    if (c.b>1) c.b=1;
+                                    c.r = 1-c.b;
+                                    c.g = (1-c.b)*0.5;
+                                    // if (indexCounter==1) {
+                                        // printf("%.02f, %.02f, %.02f, %.02f = %.02f\n", angle, r1, r2, r3, c.b);
+                                    // }
+                                    // c = GetRnB
                                 } else {
                                     if (matColors.find(matid) != matColors.end()) {
                                         c = matColors[matid];

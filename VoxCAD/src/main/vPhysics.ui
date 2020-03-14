@@ -512,7 +512,7 @@ make inelastic (dead) collisions. 1.0 is critically damped.</string>
          <x>10</x>
          <y>10</y>
          <width>281</width>
-         <height>71</height>
+         <height>161</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -530,18 +530,26 @@ make inelastic (dead) collisions. 1.0 is critically damped.</string>
           </property>
          </widget>
         </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="horizontalLayoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>80</y>
-         <width>281</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_18">
+        <item>
+         <widget class="QRadioButton" name="ViewHistoryRotationRadio">
+          <property name="text">
+           <string>History Rotation View</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="UseFloorCheck">
+          <property name="toolTip">
+           <string>Enables a flat floor.</string>
+          </property>
+          <property name="text">
+           <string>Enable Floor</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QCheckBox" name="CoMCheck">
           <property name="text">
@@ -1050,16 +1058,6 @@ Base (no expansion) is 25°.</string>
           </widget>
          </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="UseFloorCheck">
-         <property name="toolTip">
-          <string>Enables a flat floor.</string>
-         </property>
-         <property name="text">
-          <string>Enable Floor</string>
-         </property>
-        </widget>
        </item>
        <item>
         <spacer name="verticalSpacer">

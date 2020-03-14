@@ -367,6 +367,8 @@ void VoxCad::SetupPhysicsWindow(void) {
     // connect(FEAInfoDlg, SIGNAL(DoneAnalyzing()), this, SLOT(ForceViewMode(void)));
     connect(MainSim.pSimView, SIGNAL(ReqUpdateVoltagePlot(double, double, int)), PhysicsDlg, SLOT(UpdateVoltagePlot(double, double, int)));
 
+    connect(GLWindow, SIGNAL(PressedF5()), PhysicsDlg, SLOT(ClickedPause()));
+
     addDockWidget(Qt::RightDockWidgetArea, PhysicsDockWidget);
 }
 

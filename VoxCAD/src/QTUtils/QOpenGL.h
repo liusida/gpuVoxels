@@ -117,6 +117,7 @@ class CQOpenGL : public QGLWidget {
     void LMouseDown(float X, float Y, float Z, bool IsCtrl = false); // left mouse button pressed
     void LMouseUp(float X, float Y, float Z);                        // left mouse button released
     void PressedEscape(void);                                        // escape key pressed
+    void PressedF5(void);
 
   public slots:
     void ZoomExtents() {
