@@ -19,7 +19,7 @@ import shutil
 import random
 random.seed(1)
 np.random.seed(1)
-experiment_name = "v0.3"
+experiment_name = "v0.6"
 population_size = 10
 generation = 0
 body_dimension = (3, 3, 3)
@@ -31,7 +31,7 @@ population, generation = vx.load_last_generation(experiment_name)
 # if failed, start from scratch
 if population is None:
     generation = 0
-    population = {"body": [], "phaseoffset": [],
+    population = {"genotype": [], "body": [], "phaseoffset": [],
                   "firstname": [], "lastname": []}
     # random initialization
     for robot_id in range(population_size):
@@ -40,6 +40,7 @@ if population is None:
         body[body_random < 0.5] = 1
         body = vx.largest_component(body)
         phaseoffset = np.random.random(body_dimension)
+        population["genotype"].append("010101")
         population["body"].append(body)
         population["phaseoffset"].append(phaseoffset)
         population["firstname"].append(vx.names.get_first_name())
@@ -50,10 +51,7 @@ while(True):
     # write vxa vxd
     foldername = vx.prepare_directories(experiment_name, generation)
     vx.copy_vxa(experiment_name, generation)
-    for robot_id in range(len(population["body"])):
-        body = population["body"][robot_id]
-        phaseoffset = population["phaseoffset"][robot_id]
-        vx.write_vxd(experiment_name, generation, robot_id, body, phaseoffset)
+    vx.write_all_vxd(experiment_name, generation, population)
 
     # start simulator
     vx.start_simulator(experiment_name, generation)

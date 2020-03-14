@@ -31,32 +31,47 @@ def copy_vxa(experiment_name, generation):
     foldername = foldername_generation(experiment_name, generation)
     shutil.copy("assets/base.vxa", f"{foldername}/start_population/base.vxa")
 
-def write_vxd(experiment_name, generation, robot_id, body, phaseoffset=None):
-    vxd_filename = f"data/experiment_{experiment_name}/generation_{generation:04}/start_population/robot_{robot_id:04}.vxd"
-    Z,Y,X = body.shape
-    xRoot = etree.Element("VXD")
-    # Main Structure and PhaseOffset
-    xStructure = child(xRoot, "Structure")
-    xStructure.set('replace', 'VXA.VXC.Structure')
-    xStructure.set('Compression', 'ASCII_READABLE')
-    child(xStructure, "X_Voxels").text = str(X)
-    child(xStructure, "Y_Voxels").text = str(Y)
-    child(xStructure, "Z_Voxels").text = str(Z)
-    body_flatten = body.reshape([Z,-1])
-    xData = child(xStructure, "Data")
-    for i in range(body_flatten.shape[0]):
-        layer = child(xData, "Layer")
-        str_layer = "".join([str(c) for c in body_flatten[i]])
-        layer.text = etree.CDATA(str_layer)
-    if phaseoffset is not None:
-        phaseoffset_flatten = phaseoffset.reshape([Z,-1])
-        xPhaseOffset = child(xStructure, "PhaseOffset")
-        for i in range(phaseoffset_flatten.shape[0]):
-            layer = child(xPhaseOffset, "Layer")
-            str_layer = ",".join([f"{c:.03f}" for c in phaseoffset_flatten[i]])
+def write_all_vxd(experiment_name, generation, population):
+    vx_fields = {"body": "Body", "phaseoffset": "PhaseOffset"}
+    other_fields = []
+    anykey = None
+    for key in population.keys():
+        if key not in vx_fields:
+            other_fields.append(key)
+        anykey = key
+    for robot_id in range(len(population[anykey])):
+        vxd_filename = f"data/experiment_{experiment_name}/generation_{generation:04}/start_population/robot_{robot_id:04}.vxd"
+        xRoot = etree.Element("VXD")
+        # Main Structure and PhaseOffset
+        body = population["body"][robot_id]
+        phaseoffset = population["phaseoffset"][robot_id]
+        Z,Y,X = body.shape
+        xStructure = child(xRoot, "Structure")
+        xStructure.set('replace', 'VXA.VXC.Structure')
+        xStructure.set('Compression', 'ASCII_READABLE')
+        child(xStructure, "X_Voxels").text = str(X)
+        child(xStructure, "Y_Voxels").text = str(Y)
+        child(xStructure, "Z_Voxels").text = str(Z)
+        body_flatten = body.reshape([Z,-1])
+        xData = child(xStructure, "Data")
+        for i in range(body_flatten.shape[0]):
+            layer = child(xData, "Layer")
+            str_layer = "".join([str(c) for c in body_flatten[i]])
             layer.text = etree.CDATA(str_layer)
-    with open(vxd_filename, 'wb') as file:
-        file.write(etree.tostring(xRoot))
+        if phaseoffset is not None:
+            phaseoffset_flatten = phaseoffset.reshape([Z,-1])
+            xPhaseOffset = child(xStructure, "PhaseOffset")
+            for i in range(phaseoffset_flatten.shape[0]):
+                layer = child(xPhaseOffset, "Layer")
+                str_layer = ",".join([f"{c:.03f}" for c in phaseoffset_flatten[i]])
+                layer.text = etree.CDATA(str_layer)
+        # Save other fields as well
+        xOtherFields = child(xRoot, "OtherFields")
+        for key in other_fields:
+            child(xOtherFields, key).text = population[key][robot_id]
+        # Save to file
+        with open(vxd_filename, 'wb') as file:
+            file.write(etree.tostring(xRoot))
 
 def read_report(experiment_name, generation):
     import re
@@ -107,7 +122,7 @@ def load_last_generation(experiment_name):
     import numpy as np
     max_generation_number = 0
     max_genration_foldername = ""
-    if os._exists(f"data/experiment_{experiment_name}/"):
+    if os.path.exists(f"data/experiment_{experiment_name}/"):
         folders = os.listdir(f"data/experiment_{experiment_name}/")
         for folder in folders:
             g = re.findall("[0-9]+", folder)
@@ -120,10 +135,12 @@ def load_last_generation(experiment_name):
         # previous generation not found
         return None,0
     population = {"body": [], "phaseoffset": []}
+    other_fields_initiated = False
     max_genration_foldername = f"data/experiment_{experiment_name}/{max_genration_foldername}/start_population/"
     for filename in os.listdir(max_genration_foldername):
         if filename[-4:]==".vxd":
             xRoot = etree.parse(f"{max_genration_foldername}/{filename}")
+            # Load body and phaseoffset
             x = int(xRoot.xpath("/VXD/Structure/X_Voxels")[0].text)
             y = int(xRoot.xpath("/VXD/Structure/Y_Voxels")[0].text)
             z = int(xRoot.xpath("/VXD/Structure/Z_Voxels")[0].text)
@@ -147,6 +164,15 @@ def load_last_generation(experiment_name):
                 lines.append(line)
             lines = np.array(lines)
             population["phaseoffset"].append(lines.reshape([z,y,x]))
+            #Load other fields
+            if not other_fields_initiated:
+                other_fields_initiated = True
+                other_fields = xRoot.xpath("/VXD/OtherFields")[0]
+                for key in other_fields.getchildren():
+                    population[key.tag] = []
+            other_fields = xRoot.xpath("/VXD/OtherFields")[0]
+            for key in other_fields.getchildren():
+                population[key.tag].append(key.text)
     return population, max_generation_number
 
 def empty_population_like(population):
