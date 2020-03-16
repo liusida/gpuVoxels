@@ -256,6 +256,7 @@ class VX3_Voxel {
     __device__ void generateNearby(int linkDepth, int gindex, bool surfaceOnly = true);
 
     __device__ void updateVoltage(double currentTime);
+
     /* data */
     CVX_Voxel *_voxel;
 

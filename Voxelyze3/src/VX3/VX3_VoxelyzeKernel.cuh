@@ -34,6 +34,7 @@ class VX3_VoxelyzeKernel {
     __device__ void updateTemperature();
     __device__ void syncVectors();
     __device__ void updateAttach();
+    __device__ void updateDetach();
     __device__ void regenerateSurfaceVoxels();
     __device__ VX3_MaterialLink *combinedMaterial(VX3_MaterialVoxel *mat1, VX3_MaterialVoxel *mat2);
     __device__ void computeFitness();
@@ -93,6 +94,7 @@ class VX3_VoxelyzeKernel {
     VX3_dVector<VX3_Collision *> d_v_collisions;
 
     bool enableAttach;
+    bool enableDetach;
     bool EnableCollision = true;
     int RecordStepSize = 0;
     int RecordLink = 0;

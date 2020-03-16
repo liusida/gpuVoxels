@@ -21,6 +21,7 @@ __global__ void gpu_insert_lookupgrid(VX3_Voxel **d_surface_voxels, int num, VX3
                                       VX3_Vec3D<> *gridLowerBound, VX3_Vec3D<> *gridDelta, int lookupGrid_n);
 __global__ void gpu_collision_attachment_lookupgrid(VX3_dVector<VX3_Voxel *> *d_collisionLookupGrid, int num, double watchDistance,
                                                     VX3_VoxelyzeKernel *k);
+__global__ void gpu_update_detach(VX3_Link **links, int num);
 /* Host methods */
 
 VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
@@ -276,6 +277,9 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     if (enableAttach || EnableCollision) { // either attachment and collision need measurement for pairwise distances
         updateAttach();
     }
+    if (enableDetach) {
+        updateDetach();
+    }
 
     if (EnableCilia) {
         cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_cilia_force, 0,
@@ -386,6 +390,22 @@ __device__ void VX3_VoxelyzeKernel::updateAttach() {
     }
 }
 
+__device__ void VX3_VoxelyzeKernel::updateDetach() {
+    if (d_v_links.size()) {
+        int minGridSize, blockSize;
+        cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_detach, 0,
+                                           d_v_links.size()); // Dynamically calculate blockSize
+        int gridSize_links = (d_v_links.size() + blockSize - 1) / blockSize;
+        int blockSize_links = d_v_links.size() < blockSize ? d_v_links.size() : blockSize;
+        // if (CurStepCount % 1000 == 0 || currentTime>1.0) {
+        //     printf("&d_v_links[0] %p; d_v_links.size() %d. \n", &d_v_links[0], d_v_links.size());
+        // }
+        gpu_update_detach<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
+        CUDA_CHECK_AFTER_CALL();
+        cudaDeviceSynchronize();
+    }
+}
+
 __device__ void VX3_VoxelyzeKernel::updateCurrentCenterOfMass() {
     double TotalMass = 0;
     VX3_Vec3D<> Sum(0, 0, 0);
@@ -437,8 +457,8 @@ __device__ VX3_MaterialLink *VX3_VoxelyzeKernel::combinedMaterial(VX3_MaterialVo
 
 __device__ void VX3_VoxelyzeKernel::computeFitness() {
     VX3_Vec3D<> offset = currentCenterOfMass - initialCenterOfMass;
-    fitness_score =
-        VX3_MathTree::eval(offset.x, offset.y, offset.z, collisionCount, currentTime, recentAngle, targetCloseness, numClosePairs, fitness_function);
+    fitness_score = VX3_MathTree::eval(offset.x, offset.y, offset.z, collisionCount, currentTime, recentAngle, targetCloseness,
+                                       numClosePairs, fitness_function);
 }
 
 __device__ void VX3_VoxelyzeKernel::registerTargets() {
@@ -459,7 +479,7 @@ __device__ void VX3_VoxelyzeKernel::computeTargetCloseness() {
         for (int j = i + 1; j < d_targets.size(); j++) {
             double distance = d_targets[i]->pos.Dist(d_targets[j]->pos);
             if (distance < R) {
-                numClosePairs ++;
+                numClosePairs++;
             }
             ret += 1 / distance;
         }
@@ -474,6 +494,8 @@ __global__ void gpu_update_links(VX3_Link **links, int num) {
     if (gindex < num) {
         VX3_Link *t = links[gindex];
         if (t->pVPos->mat->fixed && t->pVNeg->mat->fixed)
+            return;
+        if (t->isDetached)
             return;
         t->updateForces();
         if (t->axialStrain() > 100) {
@@ -508,16 +530,16 @@ __global__ void gpu_update_voxels(VX3_Voxel *voxels, int num, double dt, double 
         }
         // update sticky status
         t->enableAttach = false;
-        if (VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->numClosePairs,
-                               k->AttachCondition[0]) > 0 &&
-            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->numClosePairs,
-                               k->AttachCondition[1]) > 0 &&
-            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->numClosePairs,
-                               k->AttachCondition[2]) > 0 &&
-            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->numClosePairs,
-                               k->AttachCondition[3]) > 0 &&
-            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->numClosePairs,
-                               k->AttachCondition[4]) > 0) {
+        if (VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                               k->numClosePairs, k->AttachCondition[0]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                               k->numClosePairs, k->AttachCondition[1]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                               k->numClosePairs, k->AttachCondition[2]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                               k->numClosePairs, k->AttachCondition[3]) > 0 &&
+            VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                               k->numClosePairs, k->AttachCondition[4]) > 0) {
             t->enableAttach = true;
         };
     }
@@ -820,4 +842,26 @@ __global__ void gpu_collision_attachment_lookupgrid(VX3_dVector<VX3_Voxel *> *d_
         }
         CUDA_CHECK_AFTER_CALL();
     }
+}
+
+__global__ void gpu_update_detach(VX3_Link **links, int num) {
+    int gindex = threadIdx.x + blockIdx.x * blockDim.x;
+    if (gindex < num) {
+        VX3_Link *t = links[gindex];
+        if (t->isDetached)
+            return;
+        // clu: vxa: MatModel=1, Fail_Stress=1e+6 => Fail_Stress => failureStress => isFailed.
+        if (t->isFailed()) {
+            t->isDetached = true;
+            for (int i=0;i<6;i++) {
+                if (t->pVNeg->links[i]==t) {
+                    t->pVNeg->links[i]=NULL;
+                }
+                if (t->pVPos->links[i]==t) {
+                    t->pVPos->links[i]=NULL;
+                }
+            }
+        }
+    }
+   
 }

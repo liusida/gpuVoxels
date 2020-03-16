@@ -262,6 +262,7 @@ __device__ void VX3_Voxel::timeStep(double dt, double currentTime, VX3_VoxelyzeK
     poissonsStrainInvalid = true;
 
     updateVoltage(currentTime);
+
 }
 
 __device__ void VX3_Voxel::updateVoltage(double currentTime) {

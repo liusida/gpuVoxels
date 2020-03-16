@@ -240,6 +240,8 @@ class VX3_Link {
 
     // Brand New Link, just after attachment
     int isNewLink = 0;
+
+    bool isDetached = false;
 };
 
 #endif // VX3_LINK_H

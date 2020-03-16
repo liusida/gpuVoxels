@@ -274,6 +274,7 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         MainEnv.pObj = &MainObj; // connect environment to object
         MainSim.pEnv = &MainEnv; // connect Simulation to envirnment
         std::string RetMessage;
+        // std::cout<<str_merged;
         MainSim.ReadVXA(&XML, &RetMessage);
         MainSim.Import(NULL, NULL, &RetMessage);
         if (!RetMessage.empty()) {
@@ -297,6 +298,7 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
                       "VXA.Simulator.StopCondition.StopConditionFormula", pt_merged);
         h_d_tmp.EnableCollision = pt_merged.get<bool>("VXA.Simulator.AttachDetach.EnableCollision", true);
         h_d_tmp.enableAttach = pt_merged.get<bool>("VXA.Simulator.AttachDetach.EnableAttach", false);
+        h_d_tmp.enableDetach = pt_merged.get<bool>("VXA.Simulator.AttachDetach.EnableDetach", false);
         h_d_tmp.watchDistance = pt_merged.get<double>("VXA.Simulator.AttachDetach.watchDistance", 1.0);
         h_d_tmp.boundingRadius = pt_merged.get<double>("VXA.Simulator.AttachDetach.boundingRadius", 0.75);
         h_d_tmp.SafetyGuard = pt_merged.get<int>("VXA.Simulator.AttachDetach.SafetyGuard", 500);

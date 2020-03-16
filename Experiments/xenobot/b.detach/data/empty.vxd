@@ -1,0 +1,93 @@
+<VXD>
+    <Structure replace="VXA.VXC.Structure" Compression="ASCII_READABLE">
+        <X_Voxels>10</X_Voxels>
+        <Y_Voxels>1</Y_Voxels>
+        <Z_Voxels>13</Z_Voxels>
+        <Data>
+            <Layer><![CDATA[0000000000]]></Layer>
+            <Layer><![CDATA[2222222222]]></Layer>
+            <Layer><![CDATA[2000000000]]></Layer>
+            <Layer><![CDATA[2000000000]]></Layer>
+            <Layer><![CDATA[2000000000]]></Layer>
+            <Layer><![CDATA[2000000000]]></Layer>
+            <Layer><![CDATA[2000000000]]></Layer>
+            <Layer><![CDATA[2000000000]]></Layer>
+            <Layer><![CDATA[2000000000]]></Layer>
+            <Layer><![CDATA[2000000000]]></Layer>
+            <Layer><![CDATA[2000000000]]></Layer>
+            <Layer><![CDATA[2000000000]]></Layer>
+            <Layer><![CDATA[1000000000]]></Layer>
+        </Data>
+    </Structure>
+    <Gravity replace="VXA.Environment.Gravity">
+        <GravEnabled>1</GravEnabled>
+        <GravAcc>-9.81</GravAcc>
+        <FloorEnabled>1</FloorEnabled>
+    </Gravity>
+    <AttachDetach replace="VXA.Simulator.AttachDetach">
+        <EnableCollision>1</EnableCollision>
+        <EnableAttach>0</EnableAttach>
+        <EnableDetach>1</EnableDetach>
+        <watchDistance>1</watchDistance>
+        <SafetyGuard>2000</SafetyGuard>
+        <AttachCondition>
+            <Condition_0>
+                <mtCONST>1</mtCONST>
+            </Condition_0>
+        </AttachCondition>
+    </AttachDetach>
+    <Palette replace="VXA.VXC.Palette">
+        <Material ID="1">
+            <MatType>0</MatType>
+            <Name>Fixed</Name>
+            <Display>
+                <Red>0.2</Red>
+                <Green>0.2</Green>
+                <Blue>0.2</Blue>
+                <Alpha>0.3</Alpha>
+            </Display>
+            <Mechanical>
+                <Fixed>1</Fixed>
+                <MatModel>0</MatModel>
+                <Elastic_Mod>3e+07</Elastic_Mod>
+                <Plastic_Mod>0</Plastic_Mod>
+                <Yield_Stress>0</Yield_Stress>
+                <FailModel>0</FailModel>
+                <Fail_Stress>0</Fail_Stress>
+                <Density>1e+06</Density>
+                <Poissons_Ratio>0.35</Poissons_Ratio>
+                <CTE>0</CTE>
+                <MaterialTempPhase>0</MaterialTempPhase>
+                <uStatic>1</uStatic>
+                <uDynamic>0.5</uDynamic>
+            </Mechanical>
+        </Material>
+        <Material ID="2">
+            <MatType>0</MatType>
+            <Name>PaceMaker</Name>
+            <Display>
+                <Red>0.9</Red>
+                <Green>0.7</Green>
+                <Blue>0.4</Blue>
+                <Alpha>0.8</Alpha>
+            </Display>
+            <Mechanical>
+                <MatModel>1</MatModel>                <!--1=MDL_LINEAR_FAIL-->
+                <Elastic_Mod>3e+07</Elastic_Mod>
+                <Plastic_Mod>0</Plastic_Mod>
+                <Yield_Stress>0</Yield_Stress>
+                <FailModel>0</FailModel>                <!--0=Fail_Stress-->
+                <Fail_Stress>1e+06</Fail_Stress>
+                <Density>1e+06</Density>
+                <Poissons_Ratio>0.35</Poissons_Ratio>
+                <CTE>0</CTE>
+                <MaterialTempPhase>0</MaterialTempPhase>
+                <uStatic>1</uStatic>
+                <uDynamic>0.5</uDynamic>
+            </Mechanical>
+        </Material>
+
+
+    </Palette>
+
+</VXD>
