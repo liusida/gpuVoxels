@@ -379,6 +379,8 @@ void VX3_SimulationManager::startKernel(int num_simulation, int device_index) {
 void VX3_SimulationManager::collectResults(int num_simulation, int device_index) {
     // insert results to h_results
     VX3_VoxelyzeKernel *result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(num_simulation * sizeof(VX3_VoxelyzeKernel));
+    printf("This infomation is to capture the bug: result_voxelyze_kernel %p, d_voxelyze_3s %p, device_index %d, num_simulation %d,  d_voxelyze_3s[device_index] %p.\n",result_voxelyze_kernel,
+                                    d_voxelyze_3s, device_index, num_simulation,  d_voxelyze_3s[device_index]);
     VcudaMemcpy(result_voxelyze_kernel, d_voxelyze_3s[device_index], num_simulation * sizeof(VX3_VoxelyzeKernel), cudaMemcpyDeviceToHost);
     for (int i = 0; i < num_simulation; i++) {
         VX3_SimulationResult tmp;
