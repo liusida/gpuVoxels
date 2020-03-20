@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "Utils/VX3_vector.cuh"
+#include <cuda_runtime.h>
 
 
 //Basic_Usage: create in host, pass to device, copy to another memory in device, return to host
@@ -208,44 +209,12 @@ TEST(VX3_dVector_Test, Has) {
     cudaMemcpy(&output, d_output, sizeof(int), cudaMemcpyDeviceToHost);
     EXPECT_EQ(output, false);
 }
-//larger_version
-__global__ void kernel_test_has_larger_version(int total_num, int target, int * output) {
-    VX3_dVector_Larger<double> d_vec;
-    for (int i=0;i<total_num;i++) {
-        if (!d_vec.push_back( 1/ ((double) i))) break;
-    }
-    *output = d_vec.has( 1/((double) target) );
-}
-TEST(VX3_dVector_Test, Has_Larger_Version) {
-    int output;
-    int * d_output;
-    cudaMalloc((void **)&d_output, sizeof(int));
-
-    kernel_test_has_larger_version<<<1,1>>>(3, 2, d_output);
-    cudaMemcpy(&output, d_output, sizeof(int), cudaMemcpyDeviceToHost);
-    EXPECT_EQ(output, true);
-
-    kernel_test_has_larger_version<<<1,1>>>(1000000, 19999, d_output);
-    cudaMemcpy(&output, d_output, sizeof(int), cudaMemcpyDeviceToHost);
-    EXPECT_EQ(output, true);
-
-    kernel_test_has_larger_version<<<1,1>>>(1000000, 1200000, d_output);
-    cudaMemcpy(&output, d_output, sizeof(int), cudaMemcpyDeviceToHost);
-    EXPECT_EQ(output, false);
-
-    kernel_test_has_larger_version<<<1,1>>>(300, 200000, d_output);
-    cudaMemcpy(&output, d_output, sizeof(int), cudaMemcpyDeviceToHost);
-    EXPECT_EQ(output, false);
-}
 
 //test default in device construction
 struct Test_TI_Material {
     __device__ Test_TI_Material() {
         d_strainData.clear();
         d_strainData.push_back(0.0f);
-
-        d_strainData_larger.clear();
-        d_strainData_larger.push_back(0.0f);
     }
     __device__ Test_TI_Material(Test_TI_Material& In) {
         d_strainData = In.d_strainData;
@@ -261,15 +230,9 @@ struct Test_TI_Material {
         for (unsigned i=0;i<hd_strainData.size();i++) {
             d_strainData.push_back(hd_strainData[i]);
         }
-        d_strainData_larger.clear();
-        d_strainData_larger.push_back(0.0f);
-        for (unsigned i=0;i<hd_strainData.size();i++) {
-            d_strainData_larger.push_back(hd_strainData[i]);
-        }
     }
     VX3_hdVector<double> hd_strainData;
     VX3_dVector<double> d_strainData;
-    VX3_dVector_Larger<double> d_strainData_larger;
 };
 __global__ void kernel_test_construction( double* output ) {
     Test_TI_Material a;
@@ -321,52 +284,3 @@ TEST(VX3_dVector_Test, Construction_in_host_then_pass_to_device_and_use) {
 }
 
 
-//test default in device construction for larger version
-__global__ void kernel_test_construction_larger( double* output ) {
-    Test_TI_Material a;
-    a.d_strainData_larger.push_back(0.2f);
-    output[0] = (double)a.d_strainData_larger.size();
-    output[1] = a.d_strainData_larger[0];
-    output[2] = a.d_strainData_larger[1];
-}
-TEST(VX3_dVector_Test, Default_Construction_larger) {
-    double* d_output;
-    double h_output[3];
-    cudaMalloc((void **)&d_output, 3*sizeof(double));
-    kernel_test_construction_larger<<<1,1>>>(d_output);
-    cudaMemcpy(&h_output[0], d_output, 3*sizeof(double), cudaMemcpyDeviceToHost);
-    EXPECT_EQ(h_output[0], 2.0f);
-    EXPECT_EQ(h_output[1], 0.0f);
-    EXPECT_EQ(h_output[2], 0.2f);
-}
-
-//test construct in host, pass to device and push
-__global__ void kernel_get_and_use_larger( Test_TI_Material* a, double* output ) {
-    a->sync_hdVector_to_dVector();
-    for (int i=0;i<100;i++) {
-        a->d_strainData_larger.push_back(0.32f);
-    }
-    output[0] = (double)a->d_strainData_larger.size();
-    output[1] = a->d_strainData_larger[1];
-    output[2] = a->d_strainData_larger[102];
-}
-TEST(VX3_dVector_Test, Construction_in_host_then_pass_to_device_and_use_larger) {
-    double* d_output;
-    double h_output[3];
-    cudaMalloc((void **)&d_output, 3*sizeof(double));
-    std::vector<double> tmp_v;
-    for (int i=0;i<100;i++) {
-        tmp_v.push_back(1.29f);
-    }
-
-    Test_TI_Material tmp_a(tmp_v);
-
-    Test_TI_Material* d_a;
-    cudaMalloc((void **)&d_a, sizeof(Test_TI_Material));
-    cudaMemcpy(d_a, &tmp_a, sizeof(Test_TI_Material), cudaMemcpyHostToDevice);
-    kernel_get_and_use_larger<<<1,1>>>(d_a, d_output);
-    cudaMemcpy(&h_output[0], d_output, 3*sizeof(double), cudaMemcpyDeviceToHost);
-    EXPECT_EQ(h_output[0], 201.0f);
-    EXPECT_EQ(h_output[1], 1.29f);
-    EXPECT_EQ(h_output[2], 0.32f);
-}
