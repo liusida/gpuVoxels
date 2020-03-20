@@ -63,8 +63,6 @@ class VX3_Link {
     __device__ void updateForces(); //!< Called every timestep to calculate the forces and
                                     //!< moments acting between the two constituent voxels in
                                     //!< their current relative positions and orientations.
-    __device__ void updateSignals();
-    __device__ void passSignal(VX3_Voxel *from, VX3_Voxel *to);
 
     __device__ void updateRestLength();     //!< Updates the rest length of this voxel. Call this
                                             //!< every timestep where the nominal size of either
