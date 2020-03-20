@@ -95,6 +95,10 @@ if (test)
   # You can also omit NAME and COMMAND. The second argument could be some other
   # test executable.
   add_test(that-other-test-I-made runUnitTests)
+  
+  set_target_properties(runUnitTests PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+
+  target_compile_options(runUnitTests         PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:-G -arch=compute_60 -code=compute_60>)
 endif()
 
 set(CMAKE_VERBOSE_MAKEFILE OFF) #turn on if we want to debug in compilation.
