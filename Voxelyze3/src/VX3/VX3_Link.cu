@@ -217,23 +217,6 @@ __device__ void VX3_Link::updateForces() {
     // forcePos.z)); //assert non QNAN
 }
 
-__device__ void VX3_Link::passSignal(VX3_Voxel *from, VX3_Voxel *to) {
-    if (to->voltagePhase == 1) {  //"to" is at accumulating state
-        if (from->voltage > 10) { // only accumulate voltage spike? re-study the case of pace maker and muscle cells in heart.
-            to->voltage += from->voltage * 0.001; // this parameter can somewhat control the speed of signal.
-        }
-    }
-}
-
-__device__ void VX3_Link::updateSignals() {
-    if (pVPos->mat->isElectricalActive) {
-        passSignal(pVNeg, pVPos);
-    }
-    if (pVNeg->mat->isElectricalActive) {
-        passSignal(pVPos, pVNeg);
-    }
-}
-
 __device__ float VX3_Link::updateStrain(float axialStrain) {
     // int di = 0;
 
