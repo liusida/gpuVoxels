@@ -39,7 +39,10 @@ template <typename T> class VX3_hdVector {
     T *main;
 };
 
+#if !defined(DEFAULT_CHUNK_SIZE)
 #define DEFAULT_CHUNK_SIZE 64
+#endif // Shared with VX3_queue
+
 template <typename T> class VX3_dVector {
     /* It should be initialized in dev, and do push_back() and get(), and it should be freed after use.
        if size<Default, use GPU local memory memory[Default], otherwise use malloc and main and store things in GPU global memory. (malloc
