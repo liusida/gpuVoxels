@@ -7,6 +7,8 @@
 #include "VX3_External.h"
 #include "VX3_Link.h"
 #include "VX3_MaterialVoxel.h"
+#include "VX3_Signal.h"
+#include "VX3_queue.cuh"
 
 class VX3_Collision;
 class VX3_VoxelyzeKernel;
@@ -89,15 +91,13 @@ class VX3_Voxel {
         return mat->size() * (1 + tempe * mat->alphaCTE);
     } //!< Returns the nominal size of this voxel (LCS) accounting for any specified temperature and external actuation. Specifically,
       //!< returns the zero-stress size of the voxel if all forces/moments were removed.
-    
 
-    //Change to: Actuation due to Voltage!!
+    // Change to: Actuation due to Voltage!!
     __device__ double baseSize(linkAxis axis) const {
         return mat->size()[axis] * (1 + tempe * mat->alphaCTE);
         // return mat->size()[axis] * (1 + voltage * mat->alphaCTE);
     } //!< Returns the nominal size of this voxel in the specified axis accounting for any specified temperature and external actuation.
       //!< Specifically, returns the zero-stress dimension of the voxel if all forces/moments were removed.
-
 
     __device__ double baseSizeAverage() const {
         VX3_Vec3D<double> bSize = baseSize();
@@ -255,7 +255,14 @@ class VX3_Voxel {
     __device__ bool isCollisionsEnabled() const { return boolStates & COLLISIONS_ENABLED ? true : false; }
     __device__ void generateNearby(int linkDepth, int gindex, bool surfaceOnly = true);
 
-    __device__ void updateVoltage(double currentTime);
+    __device__ void propagateSignal(double currentTime);
+    __device__ void packMaker(double currentTime);
+    __device__ void localSignalDecay(double currentTime);
+
+    __device__ void receiveSignal(double value, double currentTime, bool force=false);
+    __device__ void getSignal(double currentTime);
+
+    __device__ void syncVectors();
 
     /* data */
     CVX_Voxel *_voxel;
@@ -288,15 +295,16 @@ class VX3_Voxel {
 
     VX3_Vec3D<> contactForce;
     VX3_Vec3D<> baseCiliaForce;
+    VX3_Vec3D<> shiftCiliaForce;
     VX3_Vec3D<> CiliaForce;
 
     bool enableAttach = true;
 
-    double voltage = 0; // Voltage of action potential.
-    double voltageSlope = 0;
-    int voltagePhase = 0;
-    //(phase) for non-pacemaker, 0: rest, 1: stimulus, 2: depolarization, 3: repolarization;
-    // for pacemaker, 0: chargin, 2: depolarization, 3: repolarization;
+    VX3_dQueue<VX3_Signal *> d_signals;
+    double localSignal = 0.0;
+    double localSignaldt = 0.0;
+    double packmakerNextPulse = 0.0;
+    double inactiveUntil = 0.0;
 };
 
 #endif // VX3_VOXEL_H

@@ -32,6 +32,9 @@ CVX_Material& CVX_Material::operator=(const CVX_Material& vIn)
 	matid = vIn.matid;
 	isPaceMaker = vIn.isPaceMaker;
 	PaceMakerPeriod = vIn.PaceMakerPeriod;
+	signalValueDecay = vIn.signalValueDecay;
+	signalTimeDelay = vIn.signalTimeDelay;
+	
 	isElectricalActive = vIn.isElectricalActive;
 	isTarget = vIn.isTarget;
 	fixed = vIn.fixed;

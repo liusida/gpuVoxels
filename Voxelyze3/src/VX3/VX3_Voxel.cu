@@ -10,7 +10,7 @@
 VX3_Voxel::VX3_Voxel(CVX_Voxel *p, VX3_VoxelyzeKernel *k)
     : ix(p->ix), iy(p->iy), iz(p->iz), pos(p->pos), linMom(p->linMom), orient(p->orient), angMom(p->angMom), boolStates(p->boolStates),
       tempe(p->temp), pStrain(p->pStrain), poissonsStrainInvalid(p->poissonsStrainInvalid), previousDt(p->previousDt),
-      phaseOffset(p->phaseOffset), isDetached(p->isDetached), baseCiliaForce(p->baseCiliaForce) {
+      phaseOffset(p->phaseOffset), isDetached(p->isDetached), baseCiliaForce(p->baseCiliaForce), shiftCiliaForce(p->shiftCiliaForce) {
     _voxel = p;
 
     for (int i = 0; i < k->num_d_voxelMats; i++) {
@@ -64,6 +64,7 @@ VX3_Voxel::~VX3_Voxel() {
     }
 }
 
+__device__ void VX3_Voxel::syncVectors() { d_signals.clear(); }
 __device__ VX3_Voxel *VX3_Voxel::adjacentVoxel(linkDirection direction) const {
     VX3_Link *pL = links[(int)direction];
     if (pL)
@@ -182,9 +183,12 @@ __device__ void VX3_Voxel::timeStep(double dt, double currentTime, VX3_VoxelyzeK
     VX3_Vec3D<double> curForce = force();
 
     // Apply Force Field
-    curForce.x += k->force_field.x_forcefield(pos.x, pos.y, pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->numClosePairs);
-    curForce.y += k->force_field.y_forcefield(pos.x, pos.y, pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->numClosePairs);
-    curForce.z += k->force_field.z_forcefield(pos.x, pos.y, pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness, k->numClosePairs);
+    curForce.x += k->force_field.x_forcefield(pos.x, pos.y, pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                                              k->numClosePairs);
+    curForce.y += k->force_field.y_forcefield(pos.x, pos.y, pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                                              k->numClosePairs);
+    curForce.z += k->force_field.z_forcefield(pos.x, pos.y, pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
+                                              k->numClosePairs);
 
     VX3_Vec3D<double> fricForce = curForce;
 
@@ -261,63 +265,78 @@ __device__ void VX3_Voxel::timeStep(double dt, double currentTime, VX3_VoxelyzeK
 
     poissonsStrainInvalid = true;
 
-    updateVoltage(currentTime);
-
+    propagateSignal(currentTime);
+    packMaker(currentTime);
+    localSignalDecay(currentTime);
 }
 
-__device__ void VX3_Voxel::updateVoltage(double currentTime) {
-    
-    voltage = 0.999 * voltage; // decay or damping.
-
-    //There are two types of materials now: 
-    // 1. pacemaker and 2. electrical active
-    //
-    if (mat->isPaceMaker) {
-        // Borrow model from Sinoatrial Nodes
-        if (voltagePhase == 0) {
-            voltageSlope = 0.02;
-            if (voltage >= 10) { // hit threshold
-                voltagePhase = 2;
-            }
-        } else if (voltagePhase == 2) {
-            voltageSlope = 0.3; // depolarization
-            if (voltage >= 100) {
-                voltagePhase = 3; // voltage peaked
-            }
-        } else if (voltagePhase == 3) {
-            voltageSlope = -0.3;  // replorization
-            if (voltage <= -50) { // hit lowest bound
-                voltagePhase = 0;
-            }
-        }
-        voltage += voltageSlope;
-        // voltage = 100 * sin((2*3.1415926f/mat->PaceMakerPeriod) * currentTime);
-    } else if (mat->isElectricalActive) {
-        // Borrow model from Neurons
-        if (voltagePhase == 0) {
-            voltageSlope = 0.1; // rest state
-            if (voltage >= 0) { // end resting
-                voltagePhase = 1;
-            }
-        } else if (voltagePhase == 1) {
-            voltageSlope = 0;    // accept stimulus
-            if (voltage >= 10) { // hit threshold
-                voltagePhase = 2;
-            }
-        } else if (voltagePhase == 2) {
-            voltageSlope = 0.3; // depolarization
-            if (voltage >= 100) {
-                voltagePhase = 3; // voltage peaked
-            }
-        } else if (voltagePhase == 3) {
-            voltageSlope = -0.3;  // replorization
-            if (voltage <= -100) { // hit lowest bound
-                voltagePhase = 0;
-            }
-        }
-        voltage += voltageSlope;
+__device__ void VX3_Voxel::localSignalDecay(double currentTime) {
+    if (localSignaldt > currentTime)
+        return;
+    if (localSignal < 0.1) {
+        // lower than threshold, simply ignore.
+        localSignal = 0;
+    } else {
+        localSignal = localSignal * 0.9;
+        localSignaldt = currentTime + 0.01;
     }
 }
+
+__device__ void VX3_Voxel::packMaker(double currentTime) {
+    if (!mat->isPaceMaker)
+        return;
+    if (packmakerNextPulse > currentTime)
+        return;
+
+    receiveSignal(100, currentTime, true);
+    packmakerNextPulse = currentTime + mat->PaceMakerPeriod;
+}
+
+__device__ void VX3_Voxel::receiveSignal(double signalValue, double currentTime, bool force) {
+    if (!force) {
+        if (inactiveUntil > currentTime)
+            return;
+    }
+    if (signalValue < 0.1) {
+        // lower than threshold, simply ignore.
+        return;
+    }
+
+    // printf("%.03f) %d Receive %.0f.\n", currentTime, ix, signalValue);
+
+    localSignal = signalValue;
+    VX3_Signal *s = new VX3_Signal();
+    s->value = signalValue * mat->signalValueDecay;
+    s->activeTime = currentTime;
+    d_signals.push_back(s);
+    // InsertSignalQueue(signalValue, currentTime + mat->signalTimeDelay);
+}
+__device__ void VX3_Voxel::propagateSignal(double currentTime) {
+    // first one in queue, check the time
+    if (inactiveUntil > currentTime)
+        return;
+    if (d_signals.isEmpty())
+        return;
+    if (d_signals.front()->activeTime > currentTime)
+        return;
+
+    VX3_Signal *s = d_signals.pop_front();
+    for (int i = 0; i < 6; i++) {
+        if (links[i]) {
+            if (links[i]->pVNeg == this) {
+                links[i]->pVPos->receiveSignal(s->value, currentTime + mat->signalTimeDelay);
+            } else {
+                links[i]->pVNeg->receiveSignal(s->value, currentTime + mat->signalTimeDelay);
+            }
+        }
+    }
+    // printf("%.03f) %d Propagate %.0f.\n", currentTime, ix, s->value);
+
+    inactiveUntil = currentTime + 2*mat->signalTimeDelay + 0.05;
+    if (s)
+        delete s;
+}
+
 __device__ VX3_Vec3D<double> VX3_Voxel::force() {
 
     // forces from internal bonds

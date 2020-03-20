@@ -101,6 +101,8 @@ bool CVX_Sim::Import(CVX_Environment *pEnvIn, CMesh *pSurfMeshIn, std::string *R
             VoxList.back()->phaseOffset = pEnv->pObj->Structure.GetPhaseOffset(VoxList.size() - 1);
             // BaseCiliaForce
             VoxList.back()->baseCiliaForce = pEnv->pObj->Structure.GetBaseCiliaForce(VoxList.size() - 1);
+            // ShiftCiliaForce
+            VoxList.back()->shiftCiliaForce = pEnv->pObj->Structure.GetShiftCiliaForce(VoxList.size() - 1);
         }
     }
 
@@ -369,6 +371,9 @@ void CVX_Sim::CopyMat(CVXC_Material *pOld, CVX_Material *pNew) // copies paramet
     pNew->isPaceMaker = (bool)pOld->isPaceMaker;
     pNew->PaceMakerPeriod = pOld->PaceMakerPeriod;
     pNew->isElectricalActive = (bool)pOld->isElectricalActive;
+    pNew->signalValueDecay = pOld->signalValueDecay;
+    pNew->signalTimeDelay = pOld->signalTimeDelay;
+	
     pNew->isTarget = (bool)pOld->isTarget;
     pNew->fixed = (bool)pOld->Fixed;
     pNew->sticky = (bool)pOld->sticky;

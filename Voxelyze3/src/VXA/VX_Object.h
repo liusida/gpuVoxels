@@ -185,6 +185,11 @@ public:
 	inline Vec3D<> GetBaseCiliaForce(int Index) const {if (pBaseCiliaForce) return pBaseCiliaForce[Index]; return Vec3D<>();}
 	inline void InitBaseCiliaForceArray(int Size) {pBaseCiliaForce = new Vec3D<>[Size]; }
 
+	//ShiftCiliaForce
+	inline void SetpShiftCiliaForce(int Index, double x, double y, double z) {pShiftCiliaForce[Index] = Vec3D<>(x,y,z);}
+	inline Vec3D<> GetShiftCiliaForce(int Index) const {if (pShiftCiliaForce) return pShiftCiliaForce[Index]; return Vec3D<>();}
+	inline void InitShiftCiliaForceArray(int Size) {pShiftCiliaForce = new Vec3D<>[Size]; }
+
 protected:
 	//variable from file
 	std::string Compression;
@@ -208,6 +213,7 @@ protected:
 	bool usingPhaseOffset; 
 	double* pPhaseOffsets;
 	Vec3D<>* pBaseCiliaForce;
+	Vec3D<>* pShiftCiliaForce;
 
 };
 
@@ -497,6 +503,9 @@ public:
 	bool isPaceMaker = false;
 	double PaceMakerPeriod = 0;  // voltage = sin(t*PaceMakerPeriod)
 	bool isElectricalActive = false;
+
+	double signalValueDecay = 0.9; // ratio from [0,1]
+	double signalTimeDelay = 0.0; // in sec	
 };
 
 //PRSM:

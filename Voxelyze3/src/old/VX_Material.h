@@ -164,6 +164,9 @@ class CVX_Material {
 	bool isPaceMaker=false;
 	double PaceMakerPeriod=0;
 	bool isElectricalActive=false;
+
+	double signalValueDecay = 0.9; // ratio from [0,1]
+	double signalTimeDelay = 0.0; // in sec
 };
 
 #endif //VX_MATERIAL_H

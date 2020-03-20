@@ -146,6 +146,10 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
     for (int i = 0; i < num_d_linkMats; i++) {
         d_linkMats[i].syncVectors();
     }
+
+    for (int i=0; i< num_d_voxels; i++) {
+        d_voxels[i].syncVectors();
+    }
 }
 __device__ bool VX3_VoxelyzeKernel::StopConditionMet(void) // have we met the stop condition yet?
 {
@@ -501,7 +505,6 @@ __global__ void gpu_update_links(VX3_Link **links, int num) {
         if (t->axialStrain() > 100) {
             printf("ERROR: Diverged.");
         }
-        t->updateSignals();
     }
 }
 __global__ void gpu_update_voxels(VX3_Voxel *voxels, int num, double dt, double currentTime, VX3_VoxelyzeKernel *k) {
@@ -633,6 +636,11 @@ __device__ void handle_collision_attachment(VX3_Voxel *voxel1, VX3_Voxel *voxel2
         voxel2->contactForce += cache_contactForce2;
         if ((voxel1->mat->isTarget && !voxel2->mat->isTarget) || (voxel2->mat->isTarget && !voxel1->mat->isTarget)) {
             atomicAdd(&k->collisionCount, 1);
+            if (voxel1->mat->isTarget) {
+                voxel2->receiveSignal(100,k->currentTime);
+            } else {
+                voxel1->receiveSignal(100,k->currentTime);
+            }
         }
     }
 
@@ -757,7 +765,7 @@ __global__ void gpu_update_cilia_force(VX3_Voxel **surface_voxels, int num, VX3_
         if (surface_voxels[index]->mat->Cilia == 0)
             return;
         // rotate base cilia force and update it into voxel.
-        surface_voxels[index]->CiliaForce = surface_voxels[index]->orient.RotateVec3D(surface_voxels[index]->baseCiliaForce);
+        surface_voxels[index]->CiliaForce = surface_voxels[index]->orient.RotateVec3D(surface_voxels[index]->baseCiliaForce + surface_voxels[index]->localSignal * surface_voxels[index]->shiftCiliaForce);
     }
 }
 

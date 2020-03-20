@@ -80,7 +80,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                                 printf("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", nnn.x * vs, nnn.y * vs, nnn.z * vs, ppp.x * vs, ppp.y * vs,
                                        ppp.z * vs);
                                 printf("%d,", v.mat->matid); // for coloring
-                                printf("%.2f,", v.voltage);  // for coloring as well.
+                                printf("%.1f,", v.localSignal);  // for coloring as well.
                                 printf(";");
                             }
                         }
@@ -379,8 +379,8 @@ void VX3_SimulationManager::startKernel(int num_simulation, int device_index) {
 void VX3_SimulationManager::collectResults(int num_simulation, int device_index) {
     // insert results to h_results
     VX3_VoxelyzeKernel *result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(num_simulation * sizeof(VX3_VoxelyzeKernel));
-    printf("This infomation is to capture the bug: result_voxelyze_kernel %p, d_voxelyze_3s %p, device_index %d, num_simulation %d,  d_voxelyze_3s[device_index] %p.\n",result_voxelyze_kernel,
-                                    d_voxelyze_3s, device_index, num_simulation,  d_voxelyze_3s[device_index]);
+    printf("This infomation is to capture the bug: result_voxelyze_kernel %p, device_index %d, num_simulation %d,  d_voxelyze_3s[device_index] %p.\n",
+        result_voxelyze_kernel, device_index, num_simulation,  d_voxelyze_3s[device_index]);
     VcudaMemcpy(result_voxelyze_kernel, d_voxelyze_3s[device_index], num_simulation * sizeof(VX3_VoxelyzeKernel), cudaMemcpyDeviceToHost);
     for (int i = 0; i < num_simulation; i++) {
         VX3_SimulationResult tmp;

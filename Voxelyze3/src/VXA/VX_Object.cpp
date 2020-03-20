@@ -1180,6 +1180,8 @@ CVXC_Material& CVXC_Material::operator=(const CVXC_Material& RefMat)
 	matid = RefMat.matid;
 	isPaceMaker = RefMat.isPaceMaker;
 	PaceMakerPeriod = RefMat.PaceMakerPeriod;
+	signalValueDecay = RefMat.signalValueDecay;
+	signalTimeDelay = RefMat.signalTimeDelay;
 	isElectricalActive = RefMat.isElectricalActive;
 	isTarget = RefMat.isTarget;
 	Fixed = RefMat.Fixed;
@@ -1410,6 +1412,8 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 				}
 				if (!pXML->FindLoadElement("isPaceMaker", &isPaceMaker)) isPaceMaker = false;
 				if (!pXML->FindLoadElement("PaceMakerPeriod", &PaceMakerPeriod)) PaceMakerPeriod = 0;
+				if (!pXML->FindLoadElement("signalValueDecay", &signalValueDecay)) signalValueDecay = 0.9;
+				if (!pXML->FindLoadElement("signalTimeDelay", &signalTimeDelay)) signalTimeDelay = 0.03;
 				if (!pXML->FindLoadElement("isElectricalActive", &isElectricalActive)) isElectricalActive = false;
 				
 				if (!pXML->FindLoadElement("isTarget", &isTarget)) isTarget = false;
@@ -1896,6 +1900,43 @@ bool CVXC_Structure::ReadXML(CXML_Rip* pXML, std::string Version, std::string* R
 		}
 		if (paddingZeros) {
 			printf("Info: BaseCiliaForce Layer is not longer enough, just padding 0's to the end.\n");
+		}
+		pXML->UpLevel(); //Layer
+		pXML->UpLevel(); //Weights
+	}
+
+	//Read ShiftCiliaForce
+	if (pXML->FindElement("ShiftCiliaForce")){ 
+		// usingPhaseOffset = true;
+		bool paddingZeros = false;
+		int voxCounter = 0;
+		// std::cout << "found weights!" << std::endl;
+		InitShiftCiliaForceArray(X_Voxels*Y_Voxels*Z_Voxels);
+		for (int i=0; i<Z_Voxels; i++)
+		{
+			std::string DataIn;
+			std::string RawData;
+			// std::string thisValue;
+			pXML->FindLoadElement("Layer", &RawData, true, true);
+		
+			std::vector<std::string> dataArray;
+			dataArray = split(RawData,',',dataArray);
+			for (int k=0; k<X_Voxels*Y_Voxels; k++)
+			{
+				if (pData[X_Voxels*Y_Voxels*i+k] > 0)
+				{
+					if (dataArray.size()<=k*3) { // if ShiftCiliaForce Layer is not longer enough, just padding 0's.
+						SetpShiftCiliaForce(voxCounter, 0, 0, 0 );
+						paddingZeros = true;
+					} else {
+						SetpShiftCiliaForce(voxCounter, atof(dataArray[3*k].c_str()), atof(dataArray[3*k+1].c_str()), atof(dataArray[3*k+2].c_str()) );
+					}
+					voxCounter++;
+				}
+			}
+		}
+		if (paddingZeros) {
+			printf("Info: ShiftCiliaForce Layer is not longer enough, just padding 0's to the end.\n");
 		}
 		pXML->UpLevel(); //Layer
 		pXML->UpLevel(); //Weights
