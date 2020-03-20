@@ -83,8 +83,10 @@ void CVXS_SimGLView::Draw(int Selected, bool ViewSection, int SectionLayer) {
             break;
         case RVV_HISTORY_ELECTRICAL:
             DrawHistory(Selected, RVV_HISTORY_ELECTRICAL);
+            break;
         case RVV_HISTORY_ROTATION:
             DrawHistory(Selected, RVV_HISTORY_ROTATION);
+            break;
         }
     } else { // CurViewMode == RVT_BONDS
         vfloat VoxScale = 0.2;
@@ -1226,7 +1228,6 @@ void CVXS_SimGLView::DrawHistory(int Selected, ViewVoxel historyView) {
                         }
                         constIterator++;
                         voltage = (*constIterator).toDouble();
-                        voltageColor = GetRnB((voltage + 100) / 200);
                         glLoadName(++indexCounter); // to enable picking
                         if (Selected==indexCounter && !HistoryPaused) { //add a new point to the plot
                             emit ReqUpdateVoltagePlot(historyTime, voltage, indexCounter);
@@ -1239,8 +1240,9 @@ void CVXS_SimGLView::DrawHistory(int Selected, ViewVoxel historyView) {
                                 c = pickedColor;
                             } else {
                                 if (historyView==RVV_HISTORY_ELECTRICAL) {
+                                    voltageColor = GetJet(voltage/100.0);
                                     c = voltageColor;
-                                } if (historyView==RVV_HISTORY_ROTATION) {
+                                } else if (historyView==RVV_HISTORY_ROTATION) {
                                     //c = matColors[matid];
                                     c = CColor(0,0,0,0.8);
                                     c.b = angle/60;
