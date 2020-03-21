@@ -19,6 +19,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         }
         d_v3->syncVectors();           // Everytime we pass a class with VX3_vectors in
                                        // it, we should sync hd_vector to d_vector first.
+        d_v3->saveInitialPosition();
         d_v3->isSurfaceChanged = true; // trigger surface regenerating and calculate normal thrust for the first time
         d_v3->registerTargets();
         printf(COLORCODE_GREEN "%d) Simulation %d runs: %s.\n" COLORCODE_RESET, device_index, thread_index, d_v3->vxa_filename);
@@ -325,6 +326,7 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
                       "VXA.Simulator.ForceField.z_forcefield", pt_merged);
 
         h_d_tmp.EnableTargetCloseness = pt_merged.get<int>("VXA.Simulator.EnableTargetCloseness", 0);
+        h_d_tmp.SavePositionOfAllVoxels = pt_merged.get<int>("VXA.Simulator.SavePositionOfAllVoxels", 0);
         h_d_tmp.MaxDistInVoxelLengthsToCountAsPair = pt_merged.get<double>("VXA.Simulator.MaxDistInVoxelLengthsToCountAsPair", 0);
 
         h_d_tmp.EnableCilia = pt_merged.get<int>("VXA.Simulator.EnableCilia", 0);
@@ -379,8 +381,6 @@ void VX3_SimulationManager::startKernel(int num_simulation, int device_index) {
 void VX3_SimulationManager::collectResults(int num_simulation, int device_index) {
     // insert results to h_results
     VX3_VoxelyzeKernel *result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(num_simulation * sizeof(VX3_VoxelyzeKernel));
-    printf("This infomation is to capture the bug: result_voxelyze_kernel %p, device_index %d, num_simulation %d,  d_voxelyze_3s[device_index] %p.\n",
-        result_voxelyze_kernel, device_index, num_simulation,  d_voxelyze_3s[device_index]);
     VcudaMemcpy(result_voxelyze_kernel, d_voxelyze_3s[device_index], num_simulation * sizeof(VX3_VoxelyzeKernel), cudaMemcpyDeviceToHost);
     for (int i = 0; i < num_simulation; i++) {
         VX3_SimulationResult tmp;
@@ -396,11 +396,17 @@ void VX3_SimulationManager::collectResults(int num_simulation, int device_index)
         tmp.vxa_filename = result_voxelyze_kernel[i].vxa_filename;
         VX3_Voxel *tmp_v;
         tmp_v = (VX3_Voxel *)malloc(result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Voxel));
-        cudaMemcpy(tmp_v, result_voxelyze_kernel[i].d_voxels, result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Voxel),
+        VcudaMemcpy(tmp_v, result_voxelyze_kernel[i].d_voxels, result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Voxel),
                    cudaMemcpyDeviceToHost);
-
-        for (int j = 0; j < result_voxelyze_kernel[i].num_d_voxels; j++) {
-            tmp.voxel_position.push_back(Vec3D<double>(tmp_v[j].pos.x, tmp_v[j].pos.y, tmp_v[j].pos.z));
+        if (result_voxelyze_kernel[i].SavePositionOfAllVoxels) {
+            VX3_Vec3D<>* tmp_init;
+            tmp_init = (VX3_Vec3D<>*)malloc(result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Vec3D<>));
+            VcudaMemcpy(tmp_init, result_voxelyze_kernel[i].d_initialPosition, result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Vec3D<>), cudaMemcpyDeviceToHost);
+            for (int j = 0; j < result_voxelyze_kernel[i].num_d_voxels; j++) {
+                tmp.voxel_init_pos.push_back(Vec3D<>(tmp_init[j].x, tmp_init[j].y, tmp_init[j].z));
+                tmp.voxel_position.push_back(Vec3D<>(tmp_v[j].pos.x, tmp_v[j].pos.y, tmp_v[j].pos.z));
+                tmp.voxel_mats.push_back(tmp_v[j].matid);
+            }
         }
         delete tmp_v;
 

@@ -268,6 +268,7 @@ class VX3_Voxel {
     CVX_Voxel *_voxel;
 
     VX3_MaterialVoxel *mat = NULL;
+    int matid;
     short ix, iy, iz;
     VX3_External *ext = NULL;
 

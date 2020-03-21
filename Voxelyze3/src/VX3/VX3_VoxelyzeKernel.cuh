@@ -40,6 +40,7 @@ class VX3_VoxelyzeKernel {
     __device__ void computeFitness();
     __device__ void registerTargets();
     __device__ void computeTargetCloseness();
+    __device__ void saveInitialPosition();
 
     /* data */
     bool forceExit = false;
@@ -124,6 +125,7 @@ class VX3_VoxelyzeKernel {
     double recentAngle = 0;
 
     int EnableTargetCloseness = 0;
+    int SavePositionOfAllVoxels = 0;
     int EnableCilia = 0;
     double  targetCloseness = 0;
     VX3_dVector<VX3_Voxel*> d_targets;
@@ -143,6 +145,7 @@ class VX3_VoxelyzeKernel {
     int num_lookupGrids;
     VX3_dVector<VX3_Voxel*>* d_collisionLookupGrid;
 
+    VX3_Vec3D<>* d_initialPosition = NULL;
 };
 
 #endif // VX3_VOXELYZE_KERNEL_H

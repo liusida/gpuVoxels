@@ -8,7 +8,7 @@
 #include "VX3_VoxelyzeKernel.cuh"
 
 VX3_Voxel::VX3_Voxel(CVX_Voxel *p, VX3_VoxelyzeKernel *k)
-    : ix(p->ix), iy(p->iy), iz(p->iz), pos(p->pos), linMom(p->linMom), orient(p->orient), angMom(p->angMom), boolStates(p->boolStates),
+    : matid(p->matid), ix(p->ix), iy(p->iy), iz(p->iz), pos(p->pos), linMom(p->linMom), orient(p->orient), angMom(p->angMom), boolStates(p->boolStates),
       tempe(p->temp), pStrain(p->pStrain), poissonsStrainInvalid(p->poissonsStrainInvalid), previousDt(p->previousDt),
       phaseOffset(p->phaseOffset), isDetached(p->isDetached), baseCiliaForce(p->baseCiliaForce), shiftCiliaForce(p->shiftCiliaForce) {
     _voxel = p;
@@ -43,18 +43,6 @@ VX3_Voxel::VX3_Voxel(CVX_Voxel *p, VX3_VoxelyzeKernel *k)
         ext = NULL;
     }
 
-    // lastColWatchPosition(*p->lastColWatchPosition),colWatch(p->colWatch), nearby(p->nearby)
-    // if (p->lastColWatchPosition) {
-    // 	lastColWatchPosition = (*p->lastColWatchPosition);
-    // }
-    // if (p->colWatch) {
-    // 	//colWatch = (*p->colWatch);
-
-    // }
-    // if (p->nearby) {
-    // 	//nearby = (*p->nearby);
-
-    // }
 }
 
 VX3_Voxel::~VX3_Voxel() {

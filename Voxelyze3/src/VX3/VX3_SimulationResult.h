@@ -11,9 +11,11 @@ struct VX3_SimulationResult {
     // double distance_xy;
     double fitness_score; //fitness score defined in VXD file.
     std::string vxa_filename;
-    std::vector<Vec3D<double>> voxel_position;
-    Vec3D<double> initialCenterOfMass;
-    Vec3D<double> currentCenterOfMass;
+    std::vector<int> voxel_mats;
+    std::vector<Vec3D<>> voxel_init_pos;
+    std::vector<Vec3D<>> voxel_position;
+    Vec3D<> initialCenterOfMass;
+    Vec3D<> currentCenterOfMass;
 
     static bool compareFitnessScore(VX3_SimulationResult i1, VX3_SimulationResult i2) // for sorting results
     {

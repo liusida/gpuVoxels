@@ -150,6 +150,7 @@ public:
 	};
 
 	CVX_MaterialVoxel* mat;
+	int matid;
 	short ix, iy, iz;
 	CVX_External* ext;
 

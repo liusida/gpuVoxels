@@ -66,6 +66,7 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
         h_voxels.push_back(In->Vx.voxelsList[i]);
         h_lookup_voxels[In->Vx.voxelsList[i]] = d_voxels + i;
     }
+    VcudaMalloc((void **)&d_initialPosition, num_d_voxels * sizeof(Vec3D<>));
 
     num_d_links = In->Vx.linksList.size();
     std::vector<VX3_Link *> tmp_v_links;
@@ -147,8 +148,13 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
         d_linkMats[i].syncVectors();
     }
 
-    for (int i=0; i< num_d_voxels; i++) {
+    for (int i = 0; i < num_d_voxels; i++) {
         d_voxels[i].syncVectors();
+    }
+}
+__device__ void VX3_VoxelyzeKernel::saveInitialPosition() {
+    for (int i = 0; i < num_d_voxels; i++) {
+        d_initialPosition[i] = d_voxels[i].pos;
     }
 }
 __device__ bool VX3_VoxelyzeKernel::StopConditionMet(void) // have we met the stop condition yet?
@@ -637,9 +643,9 @@ __device__ void handle_collision_attachment(VX3_Voxel *voxel1, VX3_Voxel *voxel2
         if ((voxel1->mat->isTarget && !voxel2->mat->isTarget) || (voxel2->mat->isTarget && !voxel1->mat->isTarget)) {
             atomicAdd(&k->collisionCount, 1);
             if (voxel1->mat->isTarget) {
-                voxel2->receiveSignal(100,k->currentTime);
+                voxel2->receiveSignal(100, k->currentTime);
             } else {
-                voxel1->receiveSignal(100,k->currentTime);
+                voxel1->receiveSignal(100, k->currentTime);
             }
         }
     }
@@ -765,7 +771,8 @@ __global__ void gpu_update_cilia_force(VX3_Voxel **surface_voxels, int num, VX3_
         if (surface_voxels[index]->mat->Cilia == 0)
             return;
         // rotate base cilia force and update it into voxel.
-        surface_voxels[index]->CiliaForce = surface_voxels[index]->orient.RotateVec3D(surface_voxels[index]->baseCiliaForce + surface_voxels[index]->localSignal * surface_voxels[index]->shiftCiliaForce);
+        surface_voxels[index]->CiliaForce = surface_voxels[index]->orient.RotateVec3D(
+            surface_voxels[index]->baseCiliaForce + surface_voxels[index]->localSignal * surface_voxels[index]->shiftCiliaForce);
     }
 }
 
@@ -861,15 +868,14 @@ __global__ void gpu_update_detach(VX3_Link **links, int num) {
         // clu: vxa: MatModel=1, Fail_Stress=1e+6 => Fail_Stress => failureStress => isFailed.
         if (t->isFailed()) {
             t->isDetached = true;
-            for (int i=0;i<6;i++) {
-                if (t->pVNeg->links[i]==t) {
-                    t->pVNeg->links[i]=NULL;
+            for (int i = 0; i < 6; i++) {
+                if (t->pVNeg->links[i] == t) {
+                    t->pVNeg->links[i] = NULL;
                 }
-                if (t->pVPos->links[i]==t) {
-                    t->pVPos->links[i]=NULL;
+                if (t->pVPos->links[i] == t) {
+                    t->pVPos->links[i] = NULL;
                 }
             }
         }
     }
-   
 }

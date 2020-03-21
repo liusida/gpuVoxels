@@ -24,6 +24,7 @@ CVX_Voxel::CVX_Voxel(CVX_MaterialVoxel* material, short indexX, short indexY, sh
 {
 	for (int i=0; i<6; i++) links[i]=NULL;
 	mat = material;
+	matid = material->matid;
 	ix = indexX;
 	iy = indexY;
 	iz = indexZ;

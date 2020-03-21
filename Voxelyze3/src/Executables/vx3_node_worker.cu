@@ -108,21 +108,22 @@ int main(int argc, char** argv) {
         tr_result.put("report.detail."+simulation_name+".fitness_score", res.fitness_score);
         tr_result.put("report.detail."+simulation_name+".num_voxel", res.num_voxel);
         tr_result.put("report.detail."+simulation_name+".voxSize", res.voxSize);
-        // tr_result.put("report.detail."+simulation_name+".CoM.x", res.x);
-        // tr_result.put("report.detail."+simulation_name+".CoM.y", res.y);
-        // tr_result.put("report.detail."+simulation_name+".CoM.z", res.z);
-        // tr_result.put("report.detail."+simulation_name+".Init.x", res.initialCenterOfMass.x);
-        // tr_result.put("report.detail."+simulation_name+".Init.y", res.initialCenterOfMass.y);
-        // tr_result.put("report.detail."+simulation_name+".Init.z", res.initialCenterOfMass.z);
-        // tr_result.put("report.detail."+simulation_name+".distance_by_size", res.distance);
-        // tr_result.put("report.detail."+simulation_name+".distance_by_size_xy", res.distance_xy);
-        // for (auto &pos: res.voxel_position) {
-        //     pt::ptree t_pos;
-        //     t_pos.put("x", pos.x);
-        //     t_pos.put("y", pos.y);
-        //     t_pos.put("z", pos.z);
-        //     tr_result.add_child("detail."+simulation_name+".pos", t_pos);
-        // }
+        std::string str_tmp = "";
+        for (auto &pos: res.voxel_init_pos) {
+            str_tmp += std::to_string(pos.x) + "," + std::to_string(pos.y) + "," + std::to_string(pos.z) + ";";
+        }
+        tr_result.put("detail."+simulation_name+".init_pos", str_tmp);
+        str_tmp = "";
+        for (auto &pos: res.voxel_position) {
+            str_tmp += std::to_string(pos.x) + "," + std::to_string(pos.y) + "," + std::to_string(pos.z) + ";";
+        }
+        tr_result.put("detail."+simulation_name+".pos", str_tmp);
+        str_tmp = "";
+        for (auto matid: res.voxel_mats) {
+            str_tmp += std::to_string(matid) + ";";
+        }
+        tr_result.put("detail."+simulation_name+".mats", str_tmp);
+
     }
     pt::write_xml(output.string(), tr_result);
     return 0;
