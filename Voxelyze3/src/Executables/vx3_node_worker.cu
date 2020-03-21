@@ -112,17 +112,17 @@ int main(int argc, char** argv) {
         for (auto &pos: res.voxel_init_pos) {
             str_tmp += std::to_string(pos.x) + "," + std::to_string(pos.y) + "," + std::to_string(pos.z) + ";";
         }
-        tr_result.put("detail."+simulation_name+".init_pos", str_tmp);
+        tr_result.put("report.detail."+simulation_name+".init_pos", str_tmp);
         str_tmp = "";
         for (auto &pos: res.voxel_position) {
             str_tmp += std::to_string(pos.x) + "," + std::to_string(pos.y) + "," + std::to_string(pos.z) + ";";
         }
-        tr_result.put("detail."+simulation_name+".pos", str_tmp);
+        tr_result.put("report.detail."+simulation_name+".pos", str_tmp);
         str_tmp = "";
         for (auto matid: res.voxel_mats) {
             str_tmp += std::to_string(matid) + ";";
         }
-        tr_result.put("detail."+simulation_name+".mats", str_tmp);
+        tr_result.put("report.detail."+simulation_name+".mats", str_tmp);
 
     }
     pt::write_xml(output.string(), tr_result);
