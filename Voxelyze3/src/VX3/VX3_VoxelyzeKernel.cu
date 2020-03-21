@@ -227,7 +227,7 @@ __device__ void VX3_VoxelyzeKernel::updateTemperature() {
             int blockSize_voxels = num_d_voxels < blockSize ? num_d_voxels : blockSize;
             gpu_update_temperature<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, TempAmplitude, TempPeriod, currentTime);
             CUDA_CHECK_AFTER_CALL();
-            cudaDeviceSynchronize();
+            VcudaDeviceSynchronize();
         }
     }
 }
@@ -264,7 +264,7 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
         // }
         gpu_update_links<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
         CUDA_CHECK_AFTER_CALL();
-        cudaDeviceSynchronize();
+        VcudaDeviceSynchronize();
 
         // checking every link for diverge is too wasteful! using random
         // sampling.
@@ -298,7 +298,7 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
         int blockSize_voxels = num_d_surface_voxels < blockSize ? num_d_surface_voxels : blockSize;
         gpu_update_cilia_force<<<gridSize_voxels, blockSize_voxels>>>(d_surface_voxels, num_d_surface_voxels, this);
         CUDA_CHECK_AFTER_CALL();
-        cudaDeviceSynchronize();
+        VcudaDeviceSynchronize();
     }
 
     cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_update_voxels, 0,
@@ -307,7 +307,7 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     int blockSize_voxels = num_d_voxels < blockSize ? num_d_voxels : blockSize;
     gpu_update_voxels<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, dt, currentTime, this);
     CUDA_CHECK_AFTER_CALL();
-    cudaDeviceSynchronize();
+    VcudaDeviceSynchronize();
 
     int CycleStep =
         int(TempPeriod / dt); // Sample at the same time point in the cycle, to avoid the impact of actuation as much as possible.
@@ -367,7 +367,7 @@ __device__ void VX3_VoxelyzeKernel::updateAttach() {
             int blockSize_voxels = num_lookupGrids < blockSize ? num_lookupGrids : blockSize;
             gpu_clear_lookupgrid<<<gridSize_voxels, blockSize_voxels>>>(d_collisionLookupGrid, num_lookupGrids);
             CUDA_CHECK_AFTER_CALL();
-            cudaDeviceSynchronize();
+            VcudaDeviceSynchronize();
             // build lookupGrids: put surface voxels into grids
             cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_insert_lookupgrid, 0,
                                                num_d_surface_voxels); // Dynamically calculate blockSize
@@ -376,7 +376,7 @@ __device__ void VX3_VoxelyzeKernel::updateAttach() {
             gpu_insert_lookupgrid<<<gridSize_voxels, blockSize_voxels>>>(d_surface_voxels, num_d_surface_voxels, d_collisionLookupGrid,
                                                                          &gridLowerBound, &gridDelta, lookupGrid_n);
             CUDA_CHECK_AFTER_CALL();
-            cudaDeviceSynchronize();
+            VcudaDeviceSynchronize();
             // detect collision: voxels in each grid with voxels within this grid and its neighbors
             cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, gpu_collision_attachment_lookupgrid, 0,
                                                num_lookupGrids); // Dynamically calculate blockSize
@@ -385,7 +385,7 @@ __device__ void VX3_VoxelyzeKernel::updateAttach() {
             gpu_collision_attachment_lookupgrid<<<gridSize_voxels, blockSize_voxels>>>(d_collisionLookupGrid, num_lookupGrids,
                                                                                        watchDistance, this);
             CUDA_CHECK_AFTER_CALL();
-            cudaDeviceSynchronize();
+            VcudaDeviceSynchronize();
         }
     } else {
         // Pairwise detection O(n ^ 2)
@@ -412,7 +412,7 @@ __device__ void VX3_VoxelyzeKernel::updateDetach() {
         // }
         gpu_update_detach<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
         CUDA_CHECK_AFTER_CALL();
-        cudaDeviceSynchronize();
+        VcudaDeviceSynchronize();
     }
 }
 

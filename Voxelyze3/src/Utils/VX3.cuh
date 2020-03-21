@@ -65,6 +65,8 @@ __device__ __inline__ int random(int max, int random_seed=0) {
 #define VcudaMemcpyAsync(a,b,c,d,e)  {CUDA_ERROR_CHECK(cudaMemcpyAsync(a,b,c,d,e))}
 #define VcudaMalloc(a,b) {CUDA_ERROR_CHECK(cudaMalloc(a,b))}
 #define VcudaFree(a) {CUDA_ERROR_CHECK(cudaFree(a))}
+#define VcudaGetLastError() {CUDA_ERROR_CHECK(cudaGetLastError())}
+#define VcudaDeviceSynchronize() {CUDA_ERROR_CHECK(cudaDeviceSynchronize())}
 #define VcudaMemcpyHostToDevice cudaMemcpyHostToDevice
 #define VcudaMemcpyDeviceToHost cudaMemcpyDeviceToHost
 #define CUDA_CHECK_AFTER_CALL() {CUDA_ERROR_CHECK(cudaGetLastError());}
