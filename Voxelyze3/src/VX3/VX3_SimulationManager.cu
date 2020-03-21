@@ -235,6 +235,8 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
             p->op = mtLOG;
         } else if (tok.first == "mtINT") {
             p->op = mtINT;
+        } else if (tok.first == "mtABS") {
+            p->op = mtABS;
         } else if (tok.first == "mtNORMALCDF") {
             p->op = mtNORMALCDF;
         } else {
