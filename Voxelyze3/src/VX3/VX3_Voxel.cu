@@ -250,6 +250,13 @@ __device__ void VX3_Voxel::timeStep(double dt, double currentTime, VX3_VoxelyzeK
             }
         }
     }
+    //	we need to check for friction conditions here (after calculating the translation) and stop things accordingly
+    if (isFloorEnabled() && floorPenetration() >= 0) {
+        // we must catch a slowing voxel here since it all boils down to needing access to the dt of this timestep.
+        if (isFloorStaticFriction()) {
+            angMom = VX3_Vec3D<>(0,0,0);
+        }
+    }
 
     poissonsStrainInvalid = true;
 
@@ -494,8 +501,11 @@ __device__ float VX3_Voxel::transverseArea(linkAxis axis) {
 __device__ void VX3_Voxel::updateSurface() {
     bool interior = true;
     for (int i = 0; i < 6; i++)
-        if (!links[i])
-            interior = false;
+        if (!links[i]) {
+            if (!links[i]->isDetached) {
+                interior = false;
+            }
+        }
     interior ? boolStates |= SURFACE : boolStates &= ~SURFACE;
 }
 
