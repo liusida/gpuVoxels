@@ -21,7 +21,7 @@ __global__ void gpu_insert_lookupgrid(VX3_Voxel **d_surface_voxels, int num, VX3
                                       VX3_Vec3D<> *gridLowerBound, VX3_Vec3D<> *gridDelta, int lookupGrid_n);
 __global__ void gpu_collision_attachment_lookupgrid(VX3_dVector<VX3_Voxel *> *d_collisionLookupGrid, int num, double watchDistance,
                                                     VX3_VoxelyzeKernel *k);
-__global__ void gpu_update_detach(VX3_Link **links, int num);
+__global__ void gpu_update_detach(VX3_Link **links, int num, VX3_VoxelyzeKernel *k);
 /* Host methods */
 
 VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
@@ -410,7 +410,7 @@ __device__ void VX3_VoxelyzeKernel::updateDetach() {
         // if (CurStepCount % 1000 == 0 || currentTime>1.0) {
         //     printf("&d_v_links[0] %p; d_v_links.size() %d. \n", &d_v_links[0], d_v_links.size());
         // }
-        gpu_update_detach<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
+        gpu_update_detach<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size(), this);
         CUDA_CHECK_AFTER_CALL();
         VcudaDeviceSynchronize();
     }
@@ -859,7 +859,7 @@ __global__ void gpu_collision_attachment_lookupgrid(VX3_dVector<VX3_Voxel *> *d_
     }
 }
 
-__global__ void gpu_update_detach(VX3_Link **links, int num) {
+__global__ void gpu_update_detach(VX3_Link **links, int num, VX3_VoxelyzeKernel* k) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         VX3_Link *t = links[gindex];
@@ -876,6 +876,7 @@ __global__ void gpu_update_detach(VX3_Link **links, int num) {
                     t->pVPos->links[i] = NULL;
                 }
             }
+            k->isSurfaceChanged = true;
         }
     }
 }
