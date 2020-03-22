@@ -1,4 +1,16 @@
-Welcome to gpuVoxels -- a voxelized soft robotics simulator runs on GPUs
-========================================================================
+Index
+=================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   welcome
 
 
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
