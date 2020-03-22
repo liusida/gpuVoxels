@@ -43,7 +43,7 @@ template <typename T> class VX3_dQueue {
     }
     __device__ inline int step(int current) {
         int next = current + 1;
-        if (next > sizeof_chunk)
+        if (next >= sizeof_chunk)
             next -= sizeof_chunk;
         return next;
     }
@@ -77,7 +77,7 @@ template <typename T> class VX3_dQueue {
                     }
                     main = new_main;
 
-                    if (cursor_back<cursor_front)
+                    if (cursor_back < cursor_front)
                         cursor_back += sizeof_chunk;
                     main[cursor_back] = t;
                     sizeof_chunk *= 2;
@@ -118,6 +118,18 @@ template <typename T> class VX3_dQueue {
             return main[cursor_front];
         } else {
             return default_memory[cursor_front];
+        }
+    }
+    __device__ inline T back() {
+        if (isEmpty())
+            return (T)0;
+        int cursor = cursor_back - 1;
+        if (cursor < 0)
+            cursor += sizeof_chunk;  
+        if (main) {
+            return main[cursor];
+        } else {
+            return default_memory[cursor];
         }
     }
     T *main = NULL;
