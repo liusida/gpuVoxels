@@ -1,22 +1,15 @@
 gpuVoxels: Voxelyze Simulation on GPU
 =====================================
 
-
-Quick Start
------------
-
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Quick Start:
 
    get-started
 
-API
----
-
 .. toctree::
     :maxdepth: 2
-    :caption: Contents:
+    :caption: API:
 
     vxa-vxd
 
