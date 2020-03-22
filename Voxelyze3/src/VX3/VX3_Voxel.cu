@@ -502,9 +502,9 @@ __device__ void VX3_Voxel::updateSurface() {
     bool interior = true;
     for (int i = 0; i < 6; i++)
         if (!links[i]) {
-            if (!links[i]->isDetached) {
-                interior = false;
-            }
+            interior = false;
+        } else if (links[i]->isDetached) {
+            interior = false;
         }
     interior ? boolStates |= SURFACE : boolStates &= ~SURFACE;
 }
