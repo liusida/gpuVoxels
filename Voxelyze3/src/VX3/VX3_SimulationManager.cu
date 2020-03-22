@@ -92,11 +92,14 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                         printf("|[[[%d]]]", j);
                         for (int i = 0; i < d_v3->d_v_links.size(); i++) {
                             auto l = d_v3->d_v_links[i];
-                            auto v1 = l->pVPos;
-                            printf("%.4f,%.4f,%.4f,", v1->pos.x, v1->pos.y, v1->pos.z);
-                            auto v2 = l->pVNeg;
-                            printf("%.4f,%.4f,%.4f,", v2->pos.x, v2->pos.y, v2->pos.z);
-                            printf(";");
+                            // only draw links that are not detached.
+                            if (!l->isDetached) {
+                                auto v1 = l->pVPos;
+                                printf("%.4f,%.4f,%.4f,", v1->pos.x, v1->pos.y, v1->pos.z);
+                                auto v2 = l->pVNeg;
+                                printf("%.4f,%.4f,%.4f,", v2->pos.x, v2->pos.y, v2->pos.z);
+                                printf(";");
+                            }
                         }
                         printf("[[[]]]");
                     }
