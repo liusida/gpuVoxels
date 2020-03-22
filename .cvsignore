@@ -1,0 +1,50 @@
+# This file is for rsync to ignore certain kinds of files.
+
+.clangd
+.vscode
+compile_commands.json
+build
+build/*
+build-Vox*
+workspace
+tmp
+core
+*.output
+*.pro.user
+data/batch/*.vxd
+*.history
+bin
+core.*
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app

@@ -1,0 +1,10 @@
+<VXD>
+    <Structure replace="VXA.VXC.Structure" Compression="ASCII_READABLE">
+        <X_Voxels>7</X_Voxels>
+        <Y_Voxels>1</Y_Voxels>
+        <Z_Voxels>1</Z_Voxels>
+        <Data>
+            <Layer><![CDATA[2020202]]></Layer>
+        </Data>
+    </Structure>
+</VXD>

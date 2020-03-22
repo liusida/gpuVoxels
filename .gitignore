@@ -1,3 +1,38 @@
+.clangd
+.vscode
+compile_commands.json
+build
+build/*
+build-Vox*
+workspace
+tmp
+core
+*.output
+*.pro.user
+data/batch/*.vxd
+*.history
+bin
+core.*
+data/*/VoxCAD
+data/*/Voxelyze3
+data/*/vx3_node_*
+data/**/gen*.vxd
+*.bak
+output*.xml
+Experiments/*/VoxCAD
+Experiments/*/Voxelyze3
+Experiments/*/vx3_node_*
+Experiments/**/gen*.vxd
+submit*.sh
+generation01/
+generated_data_*
+.clang-format
+bot/
+v*_data/
+exp_*.vxd
+personal/
+__pycache__/
+
 # Prerequisites
 *.d
 
@@ -30,3 +65,5 @@
 *.exe
 *.out
 *.app
+.idea/
+*.pyc
