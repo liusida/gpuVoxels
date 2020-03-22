@@ -1,1 +1,11 @@
-We should provide basic support for scientists who want to do their experiments in Python or Javascript.
+## Rebuild executables and copy them here
+
+```bash
+sh rebuild.sh -f
+```
+
+## Run experiment
+
+```bash
+python3 run.py
+```
