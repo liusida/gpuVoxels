@@ -19,7 +19,7 @@ import shutil
 import random
 random.seed(1)
 np.random.seed(1)
-experiment_name = "v0.6"
+experiment_name = "v0.1"
 population_size = 10
 generation = 0
 body_dimension = (3, 3, 3)
