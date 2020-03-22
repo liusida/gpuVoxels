@@ -18,6 +18,10 @@ __global__ void dqueue_basic(int* error, int method=0) {
     }
     for (int i=0;i<test_length;i++) {
         q.push_back(i);
+        if (i!=q.back()) {
+            *error=1;
+            printf("ERROR: back() is not right.\n");
+        }
     }
     if (q.size()!=test_length) {
         *error=1;
@@ -109,4 +113,58 @@ TEST(VX3_dQueue_Test, Race_Condition) {
     cudaDeviceSynchronize();
     EXPECT_NE(*error,1);
 
+}
+
+__global__ void dqueue_push_pop(int * error) {
+    VX3_dQueue<int> q;
+    int test_length = 1000;
+    for (int i=0;i<test_length;i++) {
+        q.push_back(i);
+        int j = q.pop_front();
+        if (i!=j) {
+            *error = 1;
+            printf("ERROR: empty queue with pop_front after push_back.\n");
+            break;
+        }
+    }
+}
+
+TEST(VX3_dQueue_Test, push_pop_function) {
+    int *error;
+    cudaMallocManaged((void**)&error, sizeof(int));
+
+    *error = 0;
+    dqueue_push_pop<<<1,1>>>(error);
+    cudaDeviceSynchronize();
+    EXPECT_NE(*error,1);
+}
+
+__global__ void dqueue_back(int * error) {
+    VX3_dQueue<int> q;
+    int test_length = 1000;
+    for (int i=0;i<test_length;i++) {
+        q.push_back(i);
+        int m = q.back();
+        if (i!=m) {
+            *error = 1;
+            printf("ERROR: back after push_back.\n");
+            break;
+        }
+        int j = q.pop_front();
+        if (i!=j) {
+            *error = 1;
+            printf("ERROR: empty queue with pop_front after push_back in back.\n");
+            break;
+        }
+    }
+}
+
+TEST(VX3_dQueue_Test, back_function) {
+    int *error;
+    cudaMallocManaged((void**)&error, sizeof(int));
+
+    *error = 0;
+    dqueue_back<<<1,1>>>(error);
+    cudaDeviceSynchronize();
+    EXPECT_NE(*error,1);
 }
