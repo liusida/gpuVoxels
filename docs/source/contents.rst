@@ -1,6 +1,6 @@
 .. toctree::
    :maxdepth: 2
-   :caption: Get Started1:
+   :caption: Get Started:
 
    get-started/overview
    get-started/install

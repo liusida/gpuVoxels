@@ -3,7 +3,7 @@ Welcome to gpuVoxels' documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Get Started2:
+   :caption: Get Started:
 
    get-started/overview
    get-started/install
