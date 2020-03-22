@@ -32,6 +32,7 @@ v*_data/
 exp_*.vxd
 personal/
 __pycache__/
+*.bak
 
 # Prerequisites
 *.d
