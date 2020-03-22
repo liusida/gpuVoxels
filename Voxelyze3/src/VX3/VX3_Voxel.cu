@@ -253,6 +253,8 @@ __device__ void VX3_Voxel::timeStep(double dt, double currentTime, VX3_VoxelyzeK
 
     poissonsStrainInvalid = true;
 
+    // if (d_signals.size()==1) printf("< %p, %f, %s, %d, %d\n", this, currentTime, k->vxa_filename, d_signals.sizeof_chunk, d_signals.size());
+
     propagateSignal(currentTime);
     packMaker(currentTime);
     localSignalDecay(currentTime);
@@ -280,22 +282,23 @@ __device__ void VX3_Voxel::packMaker(double currentTime) {
     packmakerNextPulse = currentTime + mat->PaceMakerPeriod;
 }
 
-__device__ void VX3_Voxel::receiveSignal(double signalValue, double currentTime, bool force) {
+__device__ void VX3_Voxel::receiveSignal(double signalValue, double activeTime, bool force) {
     if (!force) {
-        if (inactiveUntil > currentTime)
+        if (inactiveUntil > activeTime)
             return;
     }
     if (signalValue < 0.1) {
         // lower than threshold, simply ignore.
         return;
     }
-
-    // printf("%.03f) %d Receive %.0f.\n", currentTime, ix, signalValue);
+    
+    //if received a signal, this cell will activate at activeTime, and before that, no need to receive another signal.
+    inactiveUntil = activeTime + 0.05;
 
     localSignal = signalValue;
     VX3_Signal *s = new VX3_Signal();
     s->value = signalValue * mat->signalValueDecay;
-    s->activeTime = currentTime;
+    s->activeTime = activeTime;
     d_signals.push_back(s);
     // InsertSignalQueue(signalValue, currentTime + mat->signalTimeDelay);
 }
@@ -307,7 +310,6 @@ __device__ void VX3_Voxel::propagateSignal(double currentTime) {
         return;
     if (d_signals.front()->activeTime > currentTime)
         return;
-
     VX3_Signal *s = d_signals.pop_front();
     for (int i = 0; i < 6; i++) {
         if (links[i]) {
@@ -318,7 +320,6 @@ __device__ void VX3_Voxel::propagateSignal(double currentTime) {
             }
         }
     }
-    // printf("%.03f) %d Propagate %.0f.\n", currentTime, ix, s->value);
 
     inactiveUntil = currentTime + 2*mat->signalTimeDelay + 0.05;
     if (s)
