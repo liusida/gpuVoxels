@@ -2,6 +2,10 @@
 
 (We need a well written introduction with pics. But basically this is a tool for us run experiments on Deep Green.)
 
+## Documentation
+
+Writing [https://gpuvoxels.readthedocs.io/en/dev-cuda-0.1/](https://gpuvoxels.readthedocs.io/en/dev-cuda-0.1/)...
+
 ## Typical User Case
 
 This suite includes three parts: Experiments + Voxelyze3 on DeepGreen + VoxCAD on desktop.
