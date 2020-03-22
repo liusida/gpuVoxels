@@ -439,6 +439,7 @@ __device__ void VX3_VoxelyzeKernel::regenerateSurfaceVoxels() {
     }
     VX3_dVector<VX3_Voxel *> tmp;
     for (int i = 0; i < num_d_voxels; i++) {
+        d_voxels[i].updateSurface();
         if (d_voxels[i].isSurface()) {
             tmp.push_back(&d_voxels[i]);
         }
@@ -611,7 +612,7 @@ __device__ void handle_collision_attachment(VX3_Voxel *voxel1, VX3_Voxel *voxel2
         return;
 
     VX3_Vec3D<double> diff = voxel1->pos - voxel2->pos;
-    watchDistance = 0.5 * (voxel1->baseSize(X_AXIS) + voxel2->baseSize(X_AXIS)) * watchDistance;
+    watchDistance = (voxel1->baseSizeAverage() + voxel2->baseSizeAverage()) * COLLISION_ENVELOPE_RADIUS;
 
     if (diff.x > watchDistance || diff.x < -watchDistance)
         return;
