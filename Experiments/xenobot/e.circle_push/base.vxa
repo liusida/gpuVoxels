@@ -6,11 +6,16 @@
   <Simulator>
     <EnableCilia>1</EnableCilia>
     <FitnessFunction>
-      <mtADD>
+      <mtADD> 
         <mtADD>
-          <mtVAR>angle</mtVAR>
+          <mtABS>
+            <mtVAR>angle</mtVAR>
+          </mtABS>
           <mtLOG>
-            <mtVAR>hit</mtVAR>
+            <mtADD>
+              <mtVAR>hit</mtVAR>
+              <mtCONST>1</mtCONST>
+            </mtADD>
           </mtLOG>
         </mtADD>
         <mtLOG>
@@ -54,7 +59,7 @@
       <StopConditionFormula>
         <mtSUB>
           <mtVAR>t</mtVAR>
-          <mtCONST>10</mtCONST>
+          <mtCONST>5</mtCONST>
         </mtSUB>
       </StopConditionFormula>
     </StopCondition>
@@ -115,7 +120,7 @@
           <Alpha>0.8</Alpha>
         </Display>
         <Mechanical>
-          <Cilia>5</Cilia>
+	  <Cilia>8</Cilia>
           <MatModel>0</MatModel>
           <Elastic_Mod>5e+06</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
@@ -141,7 +146,7 @@
           <Alpha>0.5</Alpha>
         </Display>
         <Mechanical>
-          <isTarget>1</isTarget>
+	  <isTarget>1</isTarget>
           <MatModel>0</MatModel>
           <Elastic_Mod>5e+06</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
@@ -167,8 +172,8 @@
         <Layer><![CDATA[0000]]></Layer>
       </Data>
       <BaseCiliaForce>
-        <Layer><![CDATA[0.0,0.0,0.0, ]]></Layer>
-        <Layer><![CDATA[0.0,0.0,0.0, ]]></Layer>
+        <Layer><![CDATA[0, 0, 0, 0, ]]></Layer>
+        <Layer><![CDATA[0, 0, 0, 0, ]]></Layer>
       </BaseCiliaForce>
     </Structure>
   </VXC>

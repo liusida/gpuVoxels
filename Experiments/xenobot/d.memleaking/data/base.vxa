@@ -4,7 +4,20 @@
     <HeapSize>0.5</HeapSize>
   </GPU>
   <Simulator>
-    <EnableCilia>1</EnableCilia>
+    <SavePositionOfAllVoxels>0</SavePositionOfAllVoxels>
+    <EnableTargetCloseness>0</EnableTargetCloseness>
+    <AttachDetach>
+      <EnableCollision>0</EnableCollision>
+      <EnableAttach>0</EnableAttach>
+      <watchDistance>1</watchDistance>
+      <SafetyGuard>2000</SafetyGuard>
+      <AttachCondition>
+        <Condition_0>
+          <mtCONST>1</mtCONST>
+        </Condition_0>
+      </AttachCondition>
+    </AttachDetach>
+    <EnableCilia>0</EnableCilia>
     <FitnessFunction>
       <mtADD>
         <mtADD>
@@ -31,13 +44,18 @@
       <Integrator>0</Integrator>
       <DtFrac>1.0</DtFrac>
     </Integration>
+    <RecordHistory>
+      <RecordStepSize>0</RecordStepSize>
+      <RecordVoxel>1</RecordVoxel>
+      <RecordLink>0</RecordLink>
+    </RecordHistory>
     <Damping>
       <BondDampingZ>1</BondDampingZ>
       <ColDampingZ>0.8</ColDampingZ>
       <SlowDampingZ>0.01</SlowDampingZ>
     </Damping>
     <Collisions>
-      <SelfColEnabled>1</SelfColEnabled>
+      <SelfColEnabled>0</SelfColEnabled>
       <ColSystem>3</ColSystem>
       <CollisionHorizon>3</CollisionHorizon>
     </Collisions>
@@ -54,7 +72,7 @@
       <StopConditionFormula>
         <mtSUB>
           <mtVAR>t</mtVAR>
-          <mtCONST>10</mtCONST>
+          <mtCONST>1000</mtCONST>
         </mtSUB>
       </StopConditionFormula>
     </StopCondition>
@@ -159,15 +177,23 @@
       </Material>
     </Palette>
     <Structure Compression="ASCII_READABLE">
-      <X_Voxels>2</X_Voxels>
-      <Y_Voxels>2</Y_Voxels>
-      <Z_Voxels>2</Z_Voxels>
+      <X_Voxels>50</X_Voxels>
+      <Y_Voxels>1</Y_Voxels>
+      <Z_Voxels>10</Z_Voxels>
       <Data>
-        <Layer><![CDATA[1111]]></Layer>
-        <Layer><![CDATA[0000]]></Layer>
+        <Layer><![CDATA[11111111111111111111111111111111111111111111111111]]></Layer>
+        <Layer><![CDATA[11111111111111111111111111111111111111111111111111]]></Layer>
+        <Layer><![CDATA[11111111111111111111111111111111111111111111111111]]></Layer>
+        <Layer><![CDATA[11111111111111111111111111111111111111111111111111]]></Layer>
+        <Layer><![CDATA[11111111111111111111111111111111111111111111111111]]></Layer>
+        <Layer><![CDATA[11111111111111111111111111111111111111111111111111]]></Layer>
+        <Layer><![CDATA[11111111111111111111111111111111111111111111111111]]></Layer>
+        <Layer><![CDATA[11111111111111111111111111111111111111111111111111]]></Layer>
+        <Layer><![CDATA[11111111111111111111111111111111111111111111111111]]></Layer>
+        <Layer><![CDATA[11111111111111111111111111111111111111111111111111]]></Layer>
       </Data>
       <BaseCiliaForce>
-        <Layer><![CDATA[0.0,0.0,0.0, ]]></Layer>
+        <Layer><![CDATA[100., 0.0, 0.0, ]]></Layer>
         <Layer><![CDATA[0.0,0.0,0.0, ]]></Layer>
       </BaseCiliaForce>
     </Structure>
