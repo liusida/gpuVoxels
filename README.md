@@ -4,7 +4,7 @@
 
 ## Documentation
 
-Writing [https://gpuvoxels.readthedocs.io/en/dev-cuda-0.1/](https://gpuvoxels.readthedocs.io/en/dev-cuda-0.1/)...
+Writing [https://gpuvoxels.readthedocs.io/en/docs/](https://gpuvoxels.readthedocs.io/en/docs/)...
 
 ## Typical User Case
 
