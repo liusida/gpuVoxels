@@ -17,6 +17,11 @@ Welcome to gpuVoxels' documentation!
    vxa-vxd/tags
 
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Zoo:
+   
+   zoo/zoo
 
 Indices and tables
 ==================

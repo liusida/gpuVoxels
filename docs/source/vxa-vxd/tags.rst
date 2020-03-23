@@ -1,6 +1,8 @@
 VXA Tags
 ========
 
+.. _vxa_tags:
+
 .. note:: Here is a sample base.vxa file.
 
 VXA.GPU
