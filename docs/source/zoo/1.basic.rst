@@ -77,6 +77,10 @@ base.vxa
     </VXC>
     </VXA>
 
+.. note:: **Short Explanation**
+
+    There are two layers: the 1st one has no element, and the 2nd one has a voxel made of the 1st material, so when the simulation starts, the voxel falls and bounces without any damping.
+
 robot.vxd
 ^^^^^^^^^
 
@@ -84,6 +88,10 @@ robot.vxd
 
     <VXD>
     </VXD>
+
+.. note:: **Short Explanation**
+
+    Here we only need one robot, so nothing to customize.
 
 For the meanings of the tags, please refer to `VXA Tags <../vxa-vxd/tags.html>`_.
 
