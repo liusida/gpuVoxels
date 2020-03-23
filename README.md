@@ -1,10 +1,10 @@
 # gpuVoxels
 
-![Voxelyze3](https://github.com/liusida/gpuVoxels/blob/dev-CUDA-0.1/doc/misc/bigGuys_small.png?raw=true)
+![Voxelyze3](https://github.com/liusida/gpuVoxels/blob/master/doc/misc/bigGuys_small.png?raw=true)
 
 ## Documentation
 
-Writing [https://gpuvoxels.readthedocs.io/en/latest/](https://gpuvoxels.readthedocs.io/en/latest/)...
+Writing [https://gpuvoxels.readthedocs.io/en/docs/](https://gpuvoxels.readthedocs.io/en/docs/)...
 
 ## Typical User Case
 
@@ -97,4 +97,4 @@ Now we have a `0001.history`. We can open the newest VoxCAD to see the playback.
 
 This is a sample screenshot of a playback:
 
-![Big Guy Runs](https://github.com/liusida/gpuVoxels/blob/dev-CUDA-0.1/doc/misc/bigGuys.png?raw=true)
+![Big Guy Runs](https://github.com/liusida/gpuVoxels/blob/master/doc/misc/bigGuys.png?raw=true)
