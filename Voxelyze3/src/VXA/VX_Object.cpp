@@ -483,6 +483,7 @@ void CVX_Object::ReadPaletteXML(CXML_Rip* pXML, std::string Version)
 
 	while (pXML->FindElement("Material")){
 		tmpMat.ReadXML(pXML, Version);
+		tmpMat.matid = Palette.size()+1;
 		Palette.push_back(tmpMat);
 	}
 
@@ -1367,7 +1368,7 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 {
 	DStrain.clear();
 	DStress.clear();
-	pXML->GetElAttribute("ID", &matid);
+	// pXML->GetElAttribute("ID", &matid);
 	if (!pXML->FindLoadElement("MatType", &MatType)){ //if there's not a MatType tag, we need some detective work...
 		if (pXML->FindElement("Structure")) {pXML->UpLevel(); MatType = INTERNAL;}
 		if (pXML->FindElement("RandIndex1")) {pXML->UpLevel(); MatType = DITHER;}
