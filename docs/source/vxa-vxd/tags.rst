@@ -323,6 +323,86 @@ VXA.VXC.Palette.Material.Display.Alpha
 
 `See RGBA color model <https://en.wikipedia.org/wiki/RGBA_color_model>`_
 
+VXA.VXC.Palette.Material.Mechanical.isTarget
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Value**: 0 or 1
+
+`1` if we want voxels made of this material to be the target, `0` if we don't.
+
+Target voxels will trigger special functionalities. For example, when a non-target voxel hit a target voxel, the former one will generate a signal; or, when we use `MeasureFitnessOfTargetMaterialOnly` tag, the fitness function will only take into account the target voxels instead of all voxels.
+
+VXA.VXC.Palette.Material.Mechanical.isMeasured
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Value**: 0 or 1 (default 1)
+
+`1` if we want to measure voxels made by this material in all MathTree functions, especially the fitness function. `0` if we want to exclude this material.
+
+
+VXA.VXC.Palette.Material.Mechanical.Fixed
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Value**: 0 or 1
+
+`1` if we don't want this material to move at all.
+
+The fixed voxels can serve as the environment, such as wall, steps, etc., or serve as a pin when we want to pin the robot down in space.
+
+VXA.VXC.Palette.Material.Mechanical.sticky
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Value**: 0 or 1
+
+`1` if we want attachment can happen to this material, `0` if we don't.
+
+VXA.VXC.Palette.Material.Mechanical.Cilia
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Value**: 0 or 1
+
+`1` if we want to enable cilia force for this material, `0` if we don't.
+
+VXA.VXC.Palette.Material.Mechanical.isPaceMaker
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Value**: 0 or 1
+
+`1` if this material can generate periodic signals spontaneously, `0` if not.
+
+VXA.VXC.Palette.Material.Mechanical.PaceMakerPeriod
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Value**: a real number in second
+
+The pace maker can generate periodic signals spontaneously. The period between two signals is defined by this variable.
+
+VXA.VXC.Palette.Material.Mechanical.signalValueDecay
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Value**: 0.0 ~ 1.0
+
+When the singal propagates to other part of the body, it has a decay ratio. This variable defines the ratio.
+
+`0.0` means the signal cannot propagate at all, `1.0` means the signal never decay and can propagate to infinity.
+
+VXA.VXC.Palette.Material.Mechanical.signalTimeDelay
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Value**: a real number in second
+
+When the singal propagates to other part of the body, it has a travel speed. The signal may be delayed at every stop (in every voxel). This variable defines how much time it will delay in each voxel.
+
+VXA.VXC.Palette.Material.Mechanical.inactivePeriod
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Value**: a real number in second
+
+Inspired by the process of action potential in living cells, in which the cell will enter an inactive state for a while to prevent the signal traveling backward.
+This variable defines the time period that a voxel stays inactive after sending out the signal.
+
+`See Action Potential <https://en.wikipedia.org/wiki/Action_potential>`_
+
 VXA.VXC.Palette.Material.Mechanical.MatModel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
