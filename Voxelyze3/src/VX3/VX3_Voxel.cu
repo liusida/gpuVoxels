@@ -262,9 +262,12 @@ __device__ void VX3_Voxel::timeStep(double dt, double currentTime, VX3_VoxelyzeK
 
     // if (d_signals.size()==1) printf("< %p, %f, %s, %d, %d\n", this, currentTime, k->vxa_filename, d_signals.sizeof_chunk, d_signals.size());
 
-    propagateSignal(currentTime);
-    packMaker(currentTime);
-    localSignalDecay(currentTime);
+    if (k->EnableSignals) {
+        // printf("%f) before propagateSignal. this=%p.\n",currentTime, this);
+        propagateSignal(currentTime);
+        packMaker(currentTime);
+        localSignalDecay(currentTime);
+    }
 }
 
 __device__ void VX3_Voxel::localSignalDecay(double currentTime) {
@@ -331,6 +334,7 @@ __device__ void VX3_Voxel::propagateSignal(double currentTime) {
     inactiveUntil = currentTime + 2*mat->signalTimeDelay + mat->inactivePeriod;
     if (s)
         delete s;
+        // printf("%f) delete s. this=%p. d_signals.size() %d. \n",currentTime, this, d_signals.size() );
 }
 
 __device__ VX3_Vec3D<double> VX3_Voxel::force() {

@@ -127,6 +127,7 @@ class VX3_VoxelyzeKernel {
     int EnableTargetCloseness = 0;
     int SavePositionOfAllVoxels = 0;
     int EnableCilia = 0;
+    int EnableSignals = 0;
     double  targetCloseness = 0;
     VX3_dVector<VX3_Voxel*> d_targets;
     int numClosePairs = 0;

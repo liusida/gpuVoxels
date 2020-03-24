@@ -340,6 +340,7 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         h_d_tmp.MaxDistInVoxelLengthsToCountAsPair = pt_merged.get<double>("VXA.Simulator.MaxDistInVoxelLengthsToCountAsPair", 0);
 
         h_d_tmp.EnableCilia = pt_merged.get<int>("VXA.Simulator.EnableCilia", 0);
+        h_d_tmp.EnableSignals = pt_merged.get<int>("VXA.Simulator.EnableSignals", 0);
         
         HeapSize = pt_merged.get<double>("VXA.GPU.HeapSize", 0.5);
         if (HeapSize > 1.0) {
