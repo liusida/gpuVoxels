@@ -650,9 +650,9 @@ __device__ void handle_collision_attachment(VX3_Voxel *voxel1, VX3_Voxel *voxel2
             atomicAdd(&k->collisionCount, 1);
             if (k->EnableSignals) {
                 if (voxel1->mat->isTarget) {
-                    voxel2->receiveSignal(100, k->currentTime, false);
+                    voxel2->receiveSignal(100, k->currentTime, true);
                 } else {
-                    voxel1->receiveSignal(100, k->currentTime, false);
+                    voxel1->receiveSignal(100, k->currentTime, true);
                 }
             }
         }
