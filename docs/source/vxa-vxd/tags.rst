@@ -145,7 +145,7 @@ VXA.Simulator.AttachDetach.AttachCondition
 
 **Value**: a set of MathTrees (refer to MathTree)
 
-if we want attachment happens whenever collision happens, we can use 
+If we want attachment happens whenever collision happens, we can define `Condition_0`, `Condition_1`, up to `Condition_4`.
 
 .. code-block:: XML
 
@@ -169,7 +169,7 @@ VXA.Simulator.ForceField
 
 **Value**: three MathTrees for x,y,z dimension (refer to MathTree)
 
-If we want to apply an external force field to the simulation, we can define it here.
+If we want to apply an external force field to the simulation, we can define it here. We can define `x_forcefield`, `y_forcefield`, and `z_forcefield`.
 
 Here is an example to define a force field that only has value on x direction.
 
@@ -187,6 +187,14 @@ Here is an example to define a force field that only has value on x direction.
         <mtCONST>0</mtCONST>
     </y_forcefield>
 
+VXA.Simulator.EnableSignals
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Value**: 0 or 1
+
+`0` if we want to disable singals. `1` if we want to enable the singals.
+
+
 VXA.Simulator.EnableCilia
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -201,6 +209,20 @@ VXA.Simulator.SavePositionOfAllVoxels
 
 `0` if we don't want the output report XML file contains the final positions of all voxels, `1` if we do.
 
+VXA.Simulator.MaxDistInVoxelLengthsToCountAsPair
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Value**: a real number with no unit
+
+Sometimes we need to count how many pairs of TARGET voxels are close to each other. By defining this variable, we can specify the threshold for counting.
+
+`0` if we don't want to count close pairs.
+
+.. note:: This quantity is the distance over average voxel length. For example, if the voxel length is 0.01 meter, then if we set this variable to 2 here, it means the distance is 2*0.01 meter.
+
+**Value**: 0 or 1
+
+`0` if we don't want to enable counting closeness
 
 VXA.Environment
 ---------------
@@ -562,3 +584,10 @@ VXA.VXC.Structure.ShiftCiliaForce
 **Value**: a set of real numbers, which define the behavior shifting of the cilia force in x,y,z dimension for each voxel in one layer.
 
 When a voxel has a signal larger than 0, there will be a shifting in behavior.
+
+VXA.RawPrint
+------------
+
+**Value**: a string
+
+What was passed here will be simply passed along to the history file (or standard output).
