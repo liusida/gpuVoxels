@@ -300,7 +300,7 @@ __device__ void VX3_Voxel::receiveSignal(double signalValue, double activeTime, 
     }
     
     //if received a signal, this cell will activate at activeTime, and before that, no need to receive another signal.
-    inactiveUntil = activeTime + 0.05;
+    inactiveUntil = activeTime + mat->inactivePeriod;
 
     localSignal = signalValue;
     VX3_Signal *s = new VX3_Signal();
@@ -328,7 +328,7 @@ __device__ void VX3_Voxel::propagateSignal(double currentTime) {
         }
     }
 
-    inactiveUntil = currentTime + 2*mat->signalTimeDelay + 0.05;
+    inactiveUntil = currentTime + 2*mat->signalTimeDelay + mat->inactivePeriod;
     if (s)
         delete s;
 }

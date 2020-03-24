@@ -420,14 +420,17 @@ __device__ void VX3_VoxelyzeKernel::updateCurrentCenterOfMass() {
     double TotalMass = 0;
     VX3_Vec3D<> Sum(0, 0, 0);
     for (int i = 0; i < num_d_voxels; i++) {
-        if (d_voxels[i].mat->isTarget || d_voxels[i].mat->fixed) {
+        if (!d_voxels[i].mat->isMeasured) {
             continue;
         }
         double ThisMass = d_voxels[i].material()->mass();
         Sum += d_voxels[i].position() * ThisMass;
         TotalMass += ThisMass;
     }
-
+    if (TotalMass==0) {
+        currentCenterOfMass = VX3_Vec3D<>();
+        return;
+    }
     currentCenterOfMass = Sum / TotalMass;
 }
 

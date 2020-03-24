@@ -373,6 +373,8 @@ void CVX_Sim::CopyMat(CVXC_Material *pOld, CVX_Material *pNew) // copies paramet
     pNew->isElectricalActive = (bool)pOld->isElectricalActive;
     pNew->signalValueDecay = pOld->signalValueDecay;
     pNew->signalTimeDelay = pOld->signalTimeDelay;
+    pNew->inactivePeriod = pOld->inactivePeriod;
+    pNew->isMeasured = pOld->isMeasured;
 	
     pNew->isTarget = (bool)pOld->isTarget;
     pNew->fixed = (bool)pOld->Fixed;
