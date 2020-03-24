@@ -209,7 +209,12 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
             }
         } else if (tok.first == "mtCONST") {
             p->op = mtCONST;
-            p->value = std::stod(tok.second);
+            try {
+                p->value = std::stod(tok.second);
+            } catch(...) {
+                printf("ERROR: mtCONST with no number.\n");
+                break;
+            }
         } else if (tok.first == "mtADD") {
             p->op = mtADD;
         } else if (tok.first == "mtSUB") {
@@ -335,7 +340,7 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         h_d_tmp.MaxDistInVoxelLengthsToCountAsPair = pt_merged.get<double>("VXA.Simulator.MaxDistInVoxelLengthsToCountAsPair", 0);
 
         h_d_tmp.EnableCilia = pt_merged.get<int>("VXA.Simulator.EnableCilia", 0);
-
+        
         HeapSize = pt_merged.get<double>("VXA.GPU.HeapSize", 0.5);
         if (HeapSize > 1.0) {
             HeapSize = 0.99;
