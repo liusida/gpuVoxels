@@ -108,6 +108,8 @@ int main(int argc, char** argv) {
         tr_result.put("report.detail."+simulation_name+".fitness_score", res.fitness_score);
         tr_result.put("report.detail."+simulation_name+".num_voxel", res.num_voxel);
         tr_result.put("report.detail."+simulation_name+".voxSize", res.voxSize);
+        tr_result.put("report.detail."+simulation_name+".numClosePairs", res.numClosePairs);
+
         std::string str_tmp = "";
         for (auto &pos: res.voxel_init_pos) {
             str_tmp += std::to_string(pos.x) + "," + std::to_string(pos.y) + "," + std::to_string(pos.z) + ";";
