@@ -335,7 +335,7 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         ParseMathTree(h_d_tmp.force_field.token_z_forcefield, sizeof(h_d_tmp.force_field.token_z_forcefield),
                       "VXA.Simulator.ForceField.z_forcefield", pt_merged);
 
-        h_d_tmp.EnableTargetCloseness = pt_merged.get<int>("VXA.Simulator.EnableTargetCloseness", 0);
+        // h_d_tmp.EnableTargetCloseness = pt_merged.get<int>("VXA.Simulator.EnableTargetCloseness", 0); abandoned.
         h_d_tmp.SavePositionOfAllVoxels = pt_merged.get<int>("VXA.Simulator.SavePositionOfAllVoxels", 0);
         h_d_tmp.MaxDistInVoxelLengthsToCountAsPair = pt_merged.get<double>("VXA.Simulator.MaxDistInVoxelLengthsToCountAsPair", 0);
 
@@ -401,6 +401,7 @@ void VX3_SimulationManager::collectResults(int num_simulation, int device_index)
         result_voxelyze_kernel[i].initialCenterOfMass.copyTo(tmp.initialCenterOfMass);
         result_voxelyze_kernel[i].currentCenterOfMass.copyTo(tmp.currentCenterOfMass);
 
+        tmp.numClosePairs = result_voxelyze_kernel[i].numClosePairs;
         tmp.voxSize = result_voxelyze_kernel[i].voxSize;
         tmp.num_voxel = result_voxelyze_kernel[i].num_d_voxels;
         tmp.vxa_filename = result_voxelyze_kernel[i].vxa_filename;

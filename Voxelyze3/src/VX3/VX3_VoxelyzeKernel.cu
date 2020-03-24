@@ -486,6 +486,8 @@ __device__ void VX3_VoxelyzeKernel::registerTargets() {
 
 __device__ void VX3_VoxelyzeKernel::computeTargetCloseness() {
     // this function is called periodically. not very often. once every thousands of steps.
+    if (MaxDistInVoxelLengthsToCountAsPair==0)
+        return;
     double R = MaxDistInVoxelLengthsToCountAsPair * voxSize;
     double ret = 0;
     numClosePairs = 0;
