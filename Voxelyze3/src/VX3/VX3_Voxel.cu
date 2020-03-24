@@ -306,35 +306,38 @@ __device__ void VX3_Voxel::receiveSignal(double signalValue, double activeTime, 
     inactiveUntil = activeTime + mat->inactivePeriod;
 
     localSignal = signalValue;
-    VX3_Signal *s = new VX3_Signal();
-    s->value = signalValue * mat->signalValueDecay;
-    s->activeTime = activeTime;
-    d_signals.push_back(s);
+    // VX3_Signal *s = new VX3_Signal();
+    d_signal.value = signalValue * mat->signalValueDecay;
+    if (d_signal.value<0.1)
+        d_signal.value=0;
+    d_signal.activeTime = activeTime;
+    // d_signals.push_back(s);
     // InsertSignalQueue(signalValue, currentTime + mat->signalTimeDelay);
 }
 __device__ void VX3_Voxel::propagateSignal(double currentTime) {
     // first one in queue, check the time
-    if (inactiveUntil > currentTime)
+    // if (inactiveUntil > currentTime)
+    //     return;
+    if (d_signal.activeTime > currentTime)
         return;
-    if (d_signals.isEmpty())
+    if (d_signal.value<0.1) {
+        d_signal.value=0;    // VX3_Signal *s = d_signals.pop_front();
         return;
-    if (d_signals.front()->activeTime > currentTime)
-        return;
-    VX3_Signal *s = d_signals.pop_front();
+    }
     for (int i = 0; i < 6; i++) {
         if (links[i]) {
             if (links[i]->pVNeg == this) {
-                links[i]->pVPos->receiveSignal(s->value, currentTime + mat->signalTimeDelay);
+                links[i]->pVPos->receiveSignal(d_signal.value, currentTime + mat->signalTimeDelay, false);
             } else {
-                links[i]->pVNeg->receiveSignal(s->value, currentTime + mat->signalTimeDelay);
+                links[i]->pVNeg->receiveSignal(d_signal.value, currentTime + mat->signalTimeDelay, false);
             }
         }
     }
 
     inactiveUntil = currentTime + 2*mat->signalTimeDelay + mat->inactivePeriod;
-    if (s)
-        delete s;
-        // printf("%f) delete s. this=%p. d_signals.size() %d. \n",currentTime, this, d_signals.size() );
+    // if (s)
+    //     delete s;
+    //     // printf("%f) delete s. this=%p. d_signals.size() %d. \n",currentTime, this, d_signals.size() );
 }
 
 __device__ VX3_Vec3D<double> VX3_Voxel::force() {

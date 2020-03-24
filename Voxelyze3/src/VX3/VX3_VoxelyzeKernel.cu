@@ -648,10 +648,12 @@ __device__ void handle_collision_attachment(VX3_Voxel *voxel1, VX3_Voxel *voxel2
         voxel2->contactForce += cache_contactForce2;
         if ((voxel1->mat->isTarget && !voxel2->mat->isTarget) || (voxel2->mat->isTarget && !voxel1->mat->isTarget)) {
             atomicAdd(&k->collisionCount, 1);
-            if (voxel1->mat->isTarget) {
-                voxel2->receiveSignal(100, k->currentTime);
-            } else {
-                voxel1->receiveSignal(100, k->currentTime);
+            if (k->EnableSignals) {
+                if (voxel1->mat->isTarget) {
+                    voxel2->receiveSignal(100, k->currentTime, false);
+                } else {
+                    voxel1->receiveSignal(100, k->currentTime, false);
+                }
             }
         }
     }
