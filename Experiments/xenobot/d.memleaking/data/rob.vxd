@@ -1,0 +1,4 @@
+<VXD>
+  <EnableCilia replace="VXA.Simulator.EnableCilia">0</EnableCilia>
+
+</VXD>

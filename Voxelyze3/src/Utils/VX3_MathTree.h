@@ -17,9 +17,14 @@ enum VX3_MathTreeOperator {
     mtCOS,
     mtTAN,
     mtATAN,
-    mtLOG,       // log_e
-    mtINT,       // round to nearest integer. e.g. 0.9 --> 1.0
+    mtLOG, // log_e
+    mtINT, // round to nearest integer. e.g. 0.9 --> 1.0
     mtABS,
+    mtNOT,
+    mtGREATERTHAN,
+    mtLESSTHAN,
+    mtAND,
+    mtOR,
     mtNORMALCDF, // normal CDF function
 };
 struct VX3_MathTreeToken {
@@ -42,8 +47,8 @@ struct VX3_MathTree {
     /* Standard implementation is CUDA Math API
     https://docs.nvidia.com/cuda/cuda-math-api/group__CUDA__MATH__DOUBLE.html
     */
-    __device__ __host__ static double eval(double x, double y, double z,
-                                           double hit, double t, double angle, double closeness, int numClosePairs, VX3_MathTreeToken *buff) {
+    __device__ __host__ static double eval(double x, double y, double z, double hit, double t, double angle, double closeness,
+                                           int numClosePairs, VX3_MathTreeToken *buff) {
         double values[1024];
         int values_cursor = 0;
         int process_cursor = 0;
@@ -78,7 +83,7 @@ struct VX3_MathTree {
                 } else if (buff[i].value < 7.5) {
                     values[values_cursor] = numClosePairs;
                 } else {
-                    //ERROR
+                    // ERROR
                 }
                 break;
             case mtSIN:
@@ -110,28 +115,23 @@ struct VX3_MathTree {
                 process_cursor++;
                 break;
             case mtADD:
-                values[values_cursor] =
-                    values[process_cursor + 1] + values[process_cursor];
+                values[values_cursor] = values[process_cursor + 1] + values[process_cursor];
                 process_cursor += 2;
                 break;
             case mtSUB:
-                values[values_cursor] =
-                    values[process_cursor + 1] - values[process_cursor];
+                values[values_cursor] = values[process_cursor + 1] - values[process_cursor];
                 process_cursor += 2;
                 break;
             case mtMUL:
-                values[values_cursor] =
-                    values[process_cursor + 1] * values[process_cursor];
+                values[values_cursor] = values[process_cursor + 1] * values[process_cursor];
                 process_cursor += 2;
                 break;
             case mtDIV:
-                values[values_cursor] =
-                    values[process_cursor + 1] / values[process_cursor];
+                values[values_cursor] = values[process_cursor + 1] / values[process_cursor];
                 process_cursor += 2;
                 break;
             case mtPOW:
-                values[values_cursor] =
-                    pow(values[process_cursor + 1], values[process_cursor]);
+                values[values_cursor] = pow(values[process_cursor + 1], values[process_cursor]);
                 process_cursor += 2;
                 break;
             case mtSQRT:
@@ -142,6 +142,27 @@ struct VX3_MathTree {
                 values[values_cursor] = abs(values[process_cursor]);
                 process_cursor++;
                 break;
+            case mtNOT:
+                values[values_cursor] = !values[process_cursor];
+                process_cursor++;
+                break;
+            case mtGREATERTHAN:
+                values[values_cursor] = values[process_cursor + 1] > values[process_cursor];
+                process_cursor += 2;
+                break;
+            case mtLESSTHAN:
+                values[values_cursor] = values[process_cursor + 1] < values[process_cursor];
+                process_cursor += 2;
+                break;
+            case mtAND:
+                values[values_cursor] = values[process_cursor + 1] && values[process_cursor];
+                process_cursor += 2;
+                break;
+            case mtOR:
+                values[values_cursor] = values[process_cursor + 1] || values[process_cursor];
+                process_cursor += 2;
+                break;
+
             default:
 #ifdef __CUDA_ARCH__
                 printf("ERROR: not implemented.\n");

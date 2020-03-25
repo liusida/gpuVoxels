@@ -506,6 +506,8 @@ public:
 
 	double signalValueDecay = 0.9; // ratio from [0,1]
 	double signalTimeDelay = 0.0; // in sec	
+	double inactivePeriod = 0.05; // in sec
+	int isMeasured = 1;
 };
 
 //PRSM:

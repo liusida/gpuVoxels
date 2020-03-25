@@ -8,9 +8,10 @@
 #include "VX3_VoxelyzeKernel.cuh"
 
 VX3_Voxel::VX3_Voxel(CVX_Voxel *p, VX3_VoxelyzeKernel *k)
-    : matid(p->matid), ix(p->ix), iy(p->iy), iz(p->iz), pos(p->pos), linMom(p->linMom), orient(p->orient), angMom(p->angMom), boolStates(p->boolStates),
-      tempe(p->temp), pStrain(p->pStrain), poissonsStrainInvalid(p->poissonsStrainInvalid), previousDt(p->previousDt),
-      phaseOffset(p->phaseOffset), isDetached(p->isDetached), baseCiliaForce(p->baseCiliaForce), shiftCiliaForce(p->shiftCiliaForce) {
+    : matid(p->matid), ix(p->ix), iy(p->iy), iz(p->iz), pos(p->pos), linMom(p->linMom), orient(p->orient), angMom(p->angMom),
+      boolStates(p->boolStates), tempe(p->temp), pStrain(p->pStrain), poissonsStrainInvalid(p->poissonsStrainInvalid),
+      previousDt(p->previousDt), phaseOffset(p->phaseOffset), isDetached(p->isDetached), baseCiliaForce(p->baseCiliaForce),
+      shiftCiliaForce(p->shiftCiliaForce) {
     _voxel = p;
 
     for (int i = 0; i < k->num_d_voxelMats; i++) {
@@ -42,7 +43,6 @@ VX3_Voxel::VX3_Voxel(CVX_Voxel *p, VX3_VoxelyzeKernel *k)
     } else {
         ext = NULL;
     }
-
 }
 
 VX3_Voxel::~VX3_Voxel() {
@@ -52,7 +52,12 @@ VX3_Voxel::~VX3_Voxel() {
     }
 }
 
-__device__ void VX3_Voxel::syncVectors() { d_signals.clear(); }
+__device__ void VX3_Voxel::syncVectors() {
+    d_signal.value = 0;
+    d_signal.activeTime = 0;
+
+    d_signals.clear();
+}
 __device__ VX3_Voxel *VX3_Voxel::adjacentVoxel(linkDirection direction) const {
     VX3_Link *pL = links[(int)direction];
     if (pL)
@@ -250,14 +255,25 @@ __device__ void VX3_Voxel::timeStep(double dt, double currentTime, VX3_VoxelyzeK
             }
         }
     }
+    //	we need to check for friction conditions here (after calculating the translation) and stop things accordingly
+    if (isFloorEnabled() && floorPenetration() >= 0) {
+        // we must catch a slowing voxel here since it all boils down to needing access to the dt of this timestep.
+        if (isFloorStaticFriction()) {
+            angMom = VX3_Vec3D<>(0, 0, 0);
+        }
+    }
 
     poissonsStrainInvalid = true;
 
-    // if (d_signals.size()==1) printf("< %p, %f, %s, %d, %d\n", this, currentTime, k->vxa_filename, d_signals.sizeof_chunk, d_signals.size());
+    // if (d_signals.size()==1) printf("< %p, %f, %s, %d, %d\n", this, currentTime, k->vxa_filename, d_signals.sizeof_chunk,
+    // d_signals.size());
 
-    propagateSignal(currentTime);
-    packMaker(currentTime);
-    localSignalDecay(currentTime);
+    if (k->EnableSignals) {
+        // printf("%f) before propagateSignal. this=%p.\n",currentTime, this);
+        propagateSignal(currentTime);
+        packMaker(currentTime);
+        localSignalDecay(currentTime);
+    }
 }
 
 __device__ void VX3_Voxel::localSignalDecay(double currentTime) {
@@ -291,39 +307,44 @@ __device__ void VX3_Voxel::receiveSignal(double signalValue, double activeTime, 
         // lower than threshold, simply ignore.
         return;
     }
-    
-    //if received a signal, this cell will activate at activeTime, and before that, no need to receive another signal.
-    inactiveUntil = activeTime + 0.05;
+
+    // if received a signal, this cell will activate at activeTime, and before that, no need to receive another signal.
+    inactiveUntil = activeTime + mat->inactivePeriod;
 
     localSignal = signalValue;
-    VX3_Signal *s = new VX3_Signal();
-    s->value = signalValue * mat->signalValueDecay;
-    s->activeTime = activeTime;
-    d_signals.push_back(s);
+    // VX3_Signal *s = new VX3_Signal();
+    d_signal.value = signalValue * mat->signalValueDecay;
+    if (d_signal.value < 0.1)
+        d_signal.value = 0;
+    d_signal.activeTime = activeTime;
+    // d_signals.push_back(s);
     // InsertSignalQueue(signalValue, currentTime + mat->signalTimeDelay);
 }
 __device__ void VX3_Voxel::propagateSignal(double currentTime) {
     // first one in queue, check the time
-    if (inactiveUntil > currentTime)
+    // if (inactiveUntil > currentTime)
+    //     return;
+    if (d_signal.activeTime > currentTime)
         return;
-    if (d_signals.isEmpty())
+    if (d_signal.value < 0.1) {
         return;
-    if (d_signals.front()->activeTime > currentTime)
-        return;
-    VX3_Signal *s = d_signals.pop_front();
+    }
     for (int i = 0; i < 6; i++) {
         if (links[i]) {
             if (links[i]->pVNeg == this) {
-                links[i]->pVPos->receiveSignal(s->value, currentTime + mat->signalTimeDelay);
+                links[i]->pVPos->receiveSignal(d_signal.value, currentTime + mat->signalTimeDelay, false);
             } else {
-                links[i]->pVNeg->receiveSignal(s->value, currentTime + mat->signalTimeDelay);
+                links[i]->pVNeg->receiveSignal(d_signal.value, currentTime + mat->signalTimeDelay, false);
             }
         }
     }
 
-    inactiveUntil = currentTime + 2*mat->signalTimeDelay + 0.05;
-    if (s)
-        delete s;
+    d_signal.value=0;
+    d_signal.activeTime=0;
+    inactiveUntil = currentTime + 2 * mat->signalTimeDelay + mat->inactivePeriod;
+    // if (s)
+    //     delete s;
+    //     // printf("%f) delete s. this=%p. d_signals.size() %d. \n",currentTime, this, d_signals.size() );
 }
 
 __device__ VX3_Vec3D<double> VX3_Voxel::force() {
@@ -494,8 +515,11 @@ __device__ float VX3_Voxel::transverseArea(linkAxis axis) {
 __device__ void VX3_Voxel::updateSurface() {
     bool interior = true;
     for (int i = 0; i < 6; i++)
-        if (!links[i])
+        if (!links[i]) {
             interior = false;
+        } else if (links[i]->isDetached) {
+            interior = false;
+        }
     interior ? boolStates |= SURFACE : boolStates &= ~SURFACE;
 }
 

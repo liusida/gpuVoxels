@@ -259,7 +259,7 @@ class VX3_Voxel {
     __device__ void packMaker(double currentTime);
     __device__ void localSignalDecay(double currentTime);
 
-    __device__ void receiveSignal(double value, double currentTime, bool force=false);
+    __device__ void receiveSignal(double value, double currentTime, bool force);
     __device__ void getSignal(double currentTime);
 
     __device__ void syncVectors();
@@ -302,6 +302,7 @@ class VX3_Voxel {
     bool enableAttach = true;
 
     VX3_dQueue<VX3_Signal *> d_signals;
+    VX3_Signal d_signal;
     double localSignal = 0.0;
     double localSignaldt = 0.0;
     double packmakerNextPulse = 0.0;

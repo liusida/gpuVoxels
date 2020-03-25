@@ -3,7 +3,7 @@
 
 VX3_Material::VX3_Material(CVX_Material *p, VX3_VoxelyzeKernel *k)
     : r(p->r), g(p->g), b(p->b), a(p->a), isTarget(p->isTarget), isPaceMaker(p->isPaceMaker), PaceMakerPeriod(p->PaceMakerPeriod),
-      signalValueDecay(p->signalValueDecay), signalTimeDelay(p->signalTimeDelay), isElectricalActive(p->isElectricalActive),
+      signalValueDecay(p->signalValueDecay), signalTimeDelay(p->signalTimeDelay), inactivePeriod(p->inactivePeriod), isMeasured(p->isMeasured), isElectricalActive(p->isElectricalActive),
       matid(p->matid), fixed(p->fixed), sticky(p->sticky), Cilia(p->Cilia), linear(p->linear), E(p->E), sigmaYield(p->sigmaYield),
       sigmaFail(p->sigmaFail), epsilonYield(p->epsilonYield), epsilonFail(p->epsilonFail), hd_strainData(p->strainData),
       hd_stressData(

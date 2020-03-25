@@ -16,6 +16,7 @@ struct VX3_SimulationResult {
     std::vector<Vec3D<>> voxel_position;
     Vec3D<> initialCenterOfMass;
     Vec3D<> currentCenterOfMass;
+    int numClosePairs = 0;
 
     static bool compareFitnessScore(VX3_SimulationResult i1, VX3_SimulationResult i2) // for sorting results
     {

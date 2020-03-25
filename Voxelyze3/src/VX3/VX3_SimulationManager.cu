@@ -92,11 +92,14 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                         printf("|[[[%d]]]", j);
                         for (int i = 0; i < d_v3->d_v_links.size(); i++) {
                             auto l = d_v3->d_v_links[i];
-                            auto v1 = l->pVPos;
-                            printf("%.4f,%.4f,%.4f,", v1->pos.x, v1->pos.y, v1->pos.z);
-                            auto v2 = l->pVNeg;
-                            printf("%.4f,%.4f,%.4f,", v2->pos.x, v2->pos.y, v2->pos.z);
-                            printf(";");
+                            // only draw links that are not detached.
+                            if (!l->isDetached) {
+                                auto v1 = l->pVPos;
+                                printf("%.4f,%.4f,%.4f,", v1->pos.x, v1->pos.y, v1->pos.z);
+                                auto v2 = l->pVNeg;
+                                printf("%.4f,%.4f,%.4f,", v2->pos.x, v2->pos.y, v2->pos.z);
+                                printf(";");
+                            }
                         }
                         printf("[[[]]]");
                     }
@@ -152,7 +155,7 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
     tokens.push(make_pair((std::string) "mtEND", (std::string) ""));
     auto root = tree.get_child_optional(node_address);
     if (!root) {
-        // printf("ERROR: No ParseMathTree %s in VXA.\n", node_address.c_str());
+        // printf(COLORCODE_BOLD_RED "ERROR: No ParseMathTree %s in VXA.\n", node_address.c_str());
         return;
     }
     frontier.push(tree.get_child(node_address));
@@ -175,7 +178,7 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
     int i = 0;
     while (!tokens.empty()) {
         if (i > max_length) {
-            printf("ERROR: Token size overflow.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: Token size overflow.\n");
             return;
         }
         std::pair<std::string, std::string> tok = tokens.top();
@@ -201,12 +204,17 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
             } else if (tok.second == "numClosePairs") {
                 p->value = 7;
             } else {
-                printf("ERROR: No such variable.\n");
+                printf(COLORCODE_BOLD_RED "ERROR: No such variable.\n");
                 break;
             }
         } else if (tok.first == "mtCONST") {
             p->op = mtCONST;
-            p->value = std::stod(tok.second);
+            try {
+                p->value = std::stod(tok.second);
+            } catch(...) {
+                printf(COLORCODE_BOLD_RED "ERROR: mtCONST with no number.\n");
+                break;
+            }
         } else if (tok.first == "mtADD") {
             p->op = mtADD;
         } else if (tok.first == "mtSUB") {
@@ -237,10 +245,20 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
             p->op = mtINT;
         } else if (tok.first == "mtABS") {
             p->op = mtABS;
+        } else if (tok.first == "mtNOT") {
+            p->op = mtNOT;
+        } else if (tok.first == "mtGREATERTHAN") {
+            p->op = mtGREATERTHAN;
+        } else if (tok.first == "mtLESSTHAN") {
+            p->op = mtLESSTHAN;
+        } else if (tok.first == "mtAND") {
+            p->op = mtAND;
+        } else if (tok.first == "mtOR") {
+            p->op = mtOR;
         } else if (tok.first == "mtNORMALCDF") {
             p->op = mtNORMALCDF;
         } else {
-            printf("ERROR: Token Operation not implemented.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: Token Operation not implemented.\n");
             break;
         }
         i++;
@@ -327,12 +345,13 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         ParseMathTree(h_d_tmp.force_field.token_z_forcefield, sizeof(h_d_tmp.force_field.token_z_forcefield),
                       "VXA.Simulator.ForceField.z_forcefield", pt_merged);
 
-        h_d_tmp.EnableTargetCloseness = pt_merged.get<int>("VXA.Simulator.EnableTargetCloseness", 0);
+        // h_d_tmp.EnableTargetCloseness = pt_merged.get<int>("VXA.Simulator.EnableTargetCloseness", 0); abandoned.
         h_d_tmp.SavePositionOfAllVoxels = pt_merged.get<int>("VXA.Simulator.SavePositionOfAllVoxels", 0);
         h_d_tmp.MaxDistInVoxelLengthsToCountAsPair = pt_merged.get<double>("VXA.Simulator.MaxDistInVoxelLengthsToCountAsPair", 0);
 
         h_d_tmp.EnableCilia = pt_merged.get<int>("VXA.Simulator.EnableCilia", 0);
-
+        h_d_tmp.EnableSignals = pt_merged.get<int>("VXA.Simulator.EnableSignals", 0);
+        
         HeapSize = pt_merged.get<double>("VXA.GPU.HeapSize", 0.5);
         if (HeapSize > 1.0) {
             HeapSize = 0.99;
@@ -393,6 +412,7 @@ void VX3_SimulationManager::collectResults(int num_simulation, int device_index)
         result_voxelyze_kernel[i].initialCenterOfMass.copyTo(tmp.initialCenterOfMass);
         result_voxelyze_kernel[i].currentCenterOfMass.copyTo(tmp.currentCenterOfMass);
 
+        tmp.numClosePairs = result_voxelyze_kernel[i].numClosePairs;
         tmp.voxSize = result_voxelyze_kernel[i].voxSize;
         tmp.num_voxel = result_voxelyze_kernel[i].num_d_voxels;
         tmp.vxa_filename = result_voxelyze_kernel[i].vxa_filename;

@@ -483,6 +483,7 @@ void CVX_Object::ReadPaletteXML(CXML_Rip* pXML, std::string Version)
 
 	while (pXML->FindElement("Material")){
 		tmpMat.ReadXML(pXML, Version);
+		tmpMat.matid = Palette.size();
 		Palette.push_back(tmpMat);
 	}
 
@@ -1182,6 +1183,8 @@ CVXC_Material& CVXC_Material::operator=(const CVXC_Material& RefMat)
 	PaceMakerPeriod = RefMat.PaceMakerPeriod;
 	signalValueDecay = RefMat.signalValueDecay;
 	signalTimeDelay = RefMat.signalTimeDelay;
+	inactivePeriod = RefMat.inactivePeriod;
+	isMeasured = RefMat.isMeasured;
 	isElectricalActive = RefMat.isElectricalActive;
 	isTarget = RefMat.isTarget;
 	Fixed = RefMat.Fixed;
@@ -1367,7 +1370,7 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 {
 	DStrain.clear();
 	DStress.clear();
-	pXML->GetElAttribute("ID", &matid);
+	// pXML->GetElAttribute("ID", &matid);
 	if (!pXML->FindLoadElement("MatType", &MatType)){ //if there's not a MatType tag, we need some detective work...
 		if (pXML->FindElement("Structure")) {pXML->UpLevel(); MatType = INTERNAL;}
 		if (pXML->FindElement("RandIndex1")) {pXML->UpLevel(); MatType = DITHER;}
@@ -1414,6 +1417,9 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 				if (!pXML->FindLoadElement("PaceMakerPeriod", &PaceMakerPeriod)) PaceMakerPeriod = 0;
 				if (!pXML->FindLoadElement("signalValueDecay", &signalValueDecay)) signalValueDecay = 0.9;
 				if (!pXML->FindLoadElement("signalTimeDelay", &signalTimeDelay)) signalTimeDelay = 0.03;
+				if (!pXML->FindLoadElement("inactivePeriod", &inactivePeriod)) inactivePeriod = 0.03;
+				if (!pXML->FindLoadElement("isMeasured", &isMeasured)) isMeasured = 1;
+
 				if (!pXML->FindLoadElement("isElectricalActive", &isElectricalActive)) isElectricalActive = false;
 				
 				if (!pXML->FindLoadElement("isTarget", &isTarget)) isTarget = false;

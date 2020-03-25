@@ -21,7 +21,7 @@ __global__ void gpu_insert_lookupgrid(VX3_Voxel **d_surface_voxels, int num, VX3
                                       VX3_Vec3D<> *gridLowerBound, VX3_Vec3D<> *gridDelta, int lookupGrid_n);
 __global__ void gpu_collision_attachment_lookupgrid(VX3_dVector<VX3_Voxel *> *d_collisionLookupGrid, int num, double watchDistance,
                                                     VX3_VoxelyzeKernel *k);
-__global__ void gpu_update_detach(VX3_Link **links, int num);
+__global__ void gpu_update_detach(VX3_Link **links, int num, VX3_VoxelyzeKernel *k);
 /* Host methods */
 
 VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVX_Sim *In) {
@@ -129,7 +129,7 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
     num_lookupGrids = lookupGrid_n * lookupGrid_n * lookupGrid_n;
     d_collisionLookupGrid = (VX3_dVector<VX3_Voxel *> *)malloc(num_lookupGrids * sizeof(VX3_dVector<VX3_Voxel *>));
     if (d_collisionLookupGrid == NULL) {
-        printf("ERROR: not enough memory.\n");
+        printf(COLORCODE_BOLD_RED "ERROR: not enough memory.\n");
     }
     for (int i = 0; i < hd_v_linkMats.size(); i++) {
         d_v_linkMats.push_back(hd_v_linkMats[i]);
@@ -188,7 +188,7 @@ __device__ double VX3_VoxelyzeKernel::recommendedTimeStep() {
         printf("WARNING: No links.\n");
     }
     if (!num_d_voxels) {
-        printf("ERROR: No voxels.\n");
+        printf(COLORCODE_BOLD_RED "ERROR: No voxels.\n");
     }
     for (int i = 0; i < num_d_links; i++) {
         VX3_Link *pL = d_links + i;
@@ -410,7 +410,7 @@ __device__ void VX3_VoxelyzeKernel::updateDetach() {
         // if (CurStepCount % 1000 == 0 || currentTime>1.0) {
         //     printf("&d_v_links[0] %p; d_v_links.size() %d. \n", &d_v_links[0], d_v_links.size());
         // }
-        gpu_update_detach<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size());
+        gpu_update_detach<<<gridSize_links, blockSize_links>>>(&d_v_links[0], d_v_links.size(), this);
         CUDA_CHECK_AFTER_CALL();
         VcudaDeviceSynchronize();
     }
@@ -420,14 +420,17 @@ __device__ void VX3_VoxelyzeKernel::updateCurrentCenterOfMass() {
     double TotalMass = 0;
     VX3_Vec3D<> Sum(0, 0, 0);
     for (int i = 0; i < num_d_voxels; i++) {
-        if (d_voxels[i].mat->isTarget || d_voxels[i].mat->fixed) {
+        if (!d_voxels[i].mat->isMeasured) {
             continue;
         }
         double ThisMass = d_voxels[i].material()->mass();
         Sum += d_voxels[i].position() * ThisMass;
         TotalMass += ThisMass;
     }
-
+    if (TotalMass==0) {
+        currentCenterOfMass = VX3_Vec3D<>();
+        return;
+    }
     currentCenterOfMass = Sum / TotalMass;
 }
 
@@ -439,6 +442,7 @@ __device__ void VX3_VoxelyzeKernel::regenerateSurfaceVoxels() {
     }
     VX3_dVector<VX3_Voxel *> tmp;
     for (int i = 0; i < num_d_voxels; i++) {
+        d_voxels[i].updateSurface();
         if (d_voxels[i].isSurface()) {
             tmp.push_back(&d_voxels[i]);
         }
@@ -482,6 +486,8 @@ __device__ void VX3_VoxelyzeKernel::registerTargets() {
 
 __device__ void VX3_VoxelyzeKernel::computeTargetCloseness() {
     // this function is called periodically. not very often. once every thousands of steps.
+    if (MaxDistInVoxelLengthsToCountAsPair==0)
+        return;
     double R = MaxDistInVoxelLengthsToCountAsPair * voxSize;
     double ret = 0;
     numClosePairs = 0;
@@ -509,7 +515,7 @@ __global__ void gpu_update_links(VX3_Link **links, int num) {
             return;
         t->updateForces();
         if (t->axialStrain() > 100) {
-            printf("ERROR: Diverged.");
+            printf(COLORCODE_BOLD_RED "ERROR: Diverged.");
         }
     }
 }
@@ -611,7 +617,7 @@ __device__ void handle_collision_attachment(VX3_Voxel *voxel1, VX3_Voxel *voxel2
         return;
 
     VX3_Vec3D<double> diff = voxel1->pos - voxel2->pos;
-    watchDistance = 0.5 * (voxel1->baseSize(X_AXIS) + voxel2->baseSize(X_AXIS)) * watchDistance;
+    watchDistance = (voxel1->baseSizeAverage() + voxel2->baseSizeAverage()) * COLLISION_ENVELOPE_RADIUS;
 
     if (diff.x > watchDistance || diff.x < -watchDistance)
         return;
@@ -642,10 +648,12 @@ __device__ void handle_collision_attachment(VX3_Voxel *voxel1, VX3_Voxel *voxel2
         voxel2->contactForce += cache_contactForce2;
         if ((voxel1->mat->isTarget && !voxel2->mat->isTarget) || (voxel2->mat->isTarget && !voxel1->mat->isTarget)) {
             atomicAdd(&k->collisionCount, 1);
-            if (voxel1->mat->isTarget) {
-                voxel2->receiveSignal(100, k->currentTime);
-            } else {
-                voxel1->receiveSignal(100, k->currentTime);
+            if (k->EnableSignals) {
+                if (voxel1->mat->isTarget) {
+                    voxel2->receiveSignal(100, k->currentTime, true);
+                } else {
+                    voxel1->receiveSignal(100, k->currentTime, true);
+                }
             }
         }
     }
@@ -729,7 +737,7 @@ __device__ void handle_collision_attachment(VX3_Voxel *voxel1, VX3_Voxel *voxel2
                               k); // make the new link (change to both materials, etc.
         }
         if (!pL) {
-            printf("ERROR: Out of memory. Link not created.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: Out of memory. Link not created.\n");
             return;
         }
         pL->isNewLink = k->SafetyGuard;
@@ -859,7 +867,7 @@ __global__ void gpu_collision_attachment_lookupgrid(VX3_dVector<VX3_Voxel *> *d_
     }
 }
 
-__global__ void gpu_update_detach(VX3_Link **links, int num) {
+__global__ void gpu_update_detach(VX3_Link **links, int num, VX3_VoxelyzeKernel* k) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         VX3_Link *t = links[gindex];
@@ -876,6 +884,7 @@ __global__ void gpu_update_detach(VX3_Link **links, int num) {
                     t->pVPos->links[i] = NULL;
                 }
             }
+            k->isSurfaceChanged = true;
         }
     }
 }

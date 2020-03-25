@@ -9,38 +9,38 @@ __global__ void dqueue_basic(int* error, int method=0) {
         q.push_back(219);
         if (q.front()!=219) {
             *error=1;
-            printf("ERROR: front() is not right.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: front() is not right.\n");
         }
         if (q.pop_front()!=219) {
             *error=1;
-            printf("ERROR: pop_front() is not right.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: pop_front() is not right.\n");
         }        
     }
     for (int i=0;i<test_length;i++) {
         q.push_back(i);
         if (i!=q.back()) {
             *error=1;
-            printf("ERROR: back() is not right.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: back() is not right.\n");
         }
     }
     if (q.size()!=test_length) {
         *error=1;
-        printf("ERROR: size\n");
+        printf(COLORCODE_BOLD_RED "ERROR: size\n");
     }
     for (int i=0;i<test_length;i++) {
         if (q.isEmpty()) {
             *error = 1;
-            printf("ERROR: is empty.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: is empty.\n");
         }
         auto j = q.pop_front();
         if (i!=j) {
             *error=1;
-            printf("ERROR: %d != %d\n", i,j);
+            printf(COLORCODE_BOLD_RED "ERROR: %d != %d\n", i,j);
         }
     }
     if (q.size()!=0 || !q.isEmpty()) {
         *error=1;
-        printf("ERROR: size at end.\n");
+        printf(COLORCODE_BOLD_RED "ERROR: size at end.\n");
     }
 }
 
@@ -91,7 +91,7 @@ __global__ void dqueue_race_check(int* error, VX3_dQueue<int>* dq) {
     for (int i=0;i<1000;i++) {
         if (arr[i] != i) {
             *error = 1;
-            printf("ERROR: difference after push, pop, and bubble sort.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: difference after push, pop, and bubble sort.\n");
         }
     }
 }
@@ -123,7 +123,7 @@ __global__ void dqueue_push_pop(int * error) {
         int j = q.pop_front();
         if (i!=j) {
             *error = 1;
-            printf("ERROR: empty queue with pop_front after push_back.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: empty queue with pop_front after push_back.\n");
             break;
         }
     }
@@ -147,13 +147,13 @@ __global__ void dqueue_back(int * error) {
         int m = q.back();
         if (i!=m) {
             *error = 1;
-            printf("ERROR: back after push_back.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: back after push_back.\n");
             break;
         }
         int j = q.pop_front();
         if (i!=j) {
             *error = 1;
-            printf("ERROR: empty queue with pop_front after push_back in back.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: empty queue with pop_front after push_back in back.\n");
             break;
         }
     }

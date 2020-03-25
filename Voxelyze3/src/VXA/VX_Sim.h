@@ -61,7 +61,7 @@ public:
 	void ClearAll(void); //!< Clears all environment-specific information form the simulation.
 
 	//Integration/simulation running
-	vfloat DtFrac; //percent of maximum dt to use
+	vfloat DtFrac = 0.9; //percent of maximum dt to use
 	vfloat OptimalDt; //calculated optimal dt
 	vfloat dt; //actual seconds per timestep
 	vfloat CurTime; //The current absolute time of the simulation in seconds.
