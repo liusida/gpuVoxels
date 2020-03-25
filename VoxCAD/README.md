@@ -12,7 +12,7 @@ sudo apt upgrade
 # clone the repo
 git clone https://github.com/liusida/gpuVoxels.git
 cd gpuVoxels
-git checkout dev-CUDA-0.1
+git checkout dev
 
 # install gcc g++ 8.0
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
@@ -50,4 +50,4 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . -j 10
 ```
 
-![VoxCAD](https://github.com/liusida/gpuVoxels/blob/dev-CUDA-0.1/doc/misc/VoxCAD.png?raw=true)
+![VoxCAD](https://github.com/liusida/gpuVoxels/blob/master/doc/misc/VoxCAD.png?raw=true)

@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<report><inputdir>.</inputdir><bestfit><filename>robot_g99_r35.vxd</filename><distance>57.519917807264584</distance></bestfit><detail><robot_g99_r35><num_voxel>140</num_voxel><voxSize>0.01</voxSize><CoM><x>-0.0056662773963211711</x><y>-0.54938074495518319</y><z>0.024944281539686242</z></CoM><Init><x>0.024999999999999967</x><y>0.024999999999999977</y><z>0.024285714285714303</z></Init><distance_by_size>57.519917807264584</distance_by_size><distance_by_size_xy>57.51988010632666</distance_by_size_xy></robot_g99_r35></detail></report>
