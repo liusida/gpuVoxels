@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     int nDevices=0;
     VcudaGetDeviceCount(&nDevices);
     if (nDevices<=0) {
-        printf("Error: No GPU found.\n");
+        printf(COLORCODE_BOLD_RED "ERROR: No GPU found.\n");
         return 1;
     } else {
         printf("%d GPU found.\n", nDevices);

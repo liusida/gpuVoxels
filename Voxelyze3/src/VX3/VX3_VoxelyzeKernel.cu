@@ -129,7 +129,7 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
     num_lookupGrids = lookupGrid_n * lookupGrid_n * lookupGrid_n;
     d_collisionLookupGrid = (VX3_dVector<VX3_Voxel *> *)malloc(num_lookupGrids * sizeof(VX3_dVector<VX3_Voxel *>));
     if (d_collisionLookupGrid == NULL) {
-        printf("ERROR: not enough memory.\n");
+        printf(COLORCODE_BOLD_RED "ERROR: not enough memory.\n");
     }
     for (int i = 0; i < hd_v_linkMats.size(); i++) {
         d_v_linkMats.push_back(hd_v_linkMats[i]);
@@ -188,7 +188,7 @@ __device__ double VX3_VoxelyzeKernel::recommendedTimeStep() {
         printf("WARNING: No links.\n");
     }
     if (!num_d_voxels) {
-        printf("ERROR: No voxels.\n");
+        printf(COLORCODE_BOLD_RED "ERROR: No voxels.\n");
     }
     for (int i = 0; i < num_d_links; i++) {
         VX3_Link *pL = d_links + i;
@@ -515,7 +515,7 @@ __global__ void gpu_update_links(VX3_Link **links, int num) {
             return;
         t->updateForces();
         if (t->axialStrain() > 100) {
-            printf("ERROR: Diverged.");
+            printf(COLORCODE_BOLD_RED "ERROR: Diverged.");
         }
     }
 }
@@ -737,7 +737,7 @@ __device__ void handle_collision_attachment(VX3_Voxel *voxel1, VX3_Voxel *voxel2
                               k); // make the new link (change to both materials, etc.
         }
         if (!pL) {
-            printf("ERROR: Out of memory. Link not created.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: Out of memory. Link not created.\n");
             return;
         }
         pL->isNewLink = k->SafetyGuard;

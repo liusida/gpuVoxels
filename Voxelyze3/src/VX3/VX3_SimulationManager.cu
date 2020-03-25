@@ -155,7 +155,7 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
     tokens.push(make_pair((std::string) "mtEND", (std::string) ""));
     auto root = tree.get_child_optional(node_address);
     if (!root) {
-        // printf("ERROR: No ParseMathTree %s in VXA.\n", node_address.c_str());
+        // printf(COLORCODE_BOLD_RED "ERROR: No ParseMathTree %s in VXA.\n", node_address.c_str());
         return;
     }
     frontier.push(tree.get_child(node_address));
@@ -178,7 +178,7 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
     int i = 0;
     while (!tokens.empty()) {
         if (i > max_length) {
-            printf("ERROR: Token size overflow.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: Token size overflow.\n");
             return;
         }
         std::pair<std::string, std::string> tok = tokens.top();
@@ -204,7 +204,7 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
             } else if (tok.second == "numClosePairs") {
                 p->value = 7;
             } else {
-                printf("ERROR: No such variable.\n");
+                printf(COLORCODE_BOLD_RED "ERROR: No such variable.\n");
                 break;
             }
         } else if (tok.first == "mtCONST") {
@@ -212,7 +212,7 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
             try {
                 p->value = std::stod(tok.second);
             } catch(...) {
-                printf("ERROR: mtCONST with no number.\n");
+                printf(COLORCODE_BOLD_RED "ERROR: mtCONST with no number.\n");
                 break;
             }
         } else if (tok.first == "mtADD") {
@@ -245,10 +245,20 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
             p->op = mtINT;
         } else if (tok.first == "mtABS") {
             p->op = mtABS;
+        } else if (tok.first == "mtNOT") {
+            p->op = mtNOT;
+        } else if (tok.first == "mtGREATERTHAN") {
+            p->op = mtGREATERTHAN;
+        } else if (tok.first == "mtLESSTHAN") {
+            p->op = mtLESSTHAN;
+        } else if (tok.first == "mtAND") {
+            p->op = mtAND;
+        } else if (tok.first == "mtOR") {
+            p->op = mtOR;
         } else if (tok.first == "mtNORMALCDF") {
             p->op = mtNORMALCDF;
         } else {
-            printf("ERROR: Token Operation not implemented.\n");
+            printf(COLORCODE_BOLD_RED "ERROR: Token Operation not implemented.\n");
             break;
         }
         i++;

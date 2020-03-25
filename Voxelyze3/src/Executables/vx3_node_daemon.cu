@@ -49,7 +49,7 @@ int main() {
                 std::cout << command << "\n";
                 int ret = std::system(command.c_str());
                 if (ret!=0) {
-                    printf("ERROR: executable returns an error.\n");
+                    printf(COLORCODE_BOLD_RED "ERROR: executable returns an error.\n");
                 }
                 
                 fs::rename(file.path(), hostname/done/file.path().filename());

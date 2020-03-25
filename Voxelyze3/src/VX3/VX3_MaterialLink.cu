@@ -15,7 +15,7 @@ _sqB2xFMp(p->_sqB2xFMp), _sqB3xIp(p->_sqB3xIp) {
 		}
 	}
 	if (vox1Mat==NULL || vox2Mat==NULL) {
-		printf("ERROR: Cannot find voxel for voxelMats.\n");
+		printf(COLORCODE_BOLD_RED "ERROR: Cannot find voxel for voxelMats.\n");
 	}
 }
 VX3_MaterialLink::~VX3_MaterialLink() {
