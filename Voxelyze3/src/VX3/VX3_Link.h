@@ -240,6 +240,9 @@ class VX3_Link {
     int isNewLink = 0;
 
     bool isDetached = false;
+
+	// for Secondary Experiment
+    bool removed = false;
 };
 
 #endif // VX3_LINK_H

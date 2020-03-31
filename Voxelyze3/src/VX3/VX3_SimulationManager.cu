@@ -72,6 +72,8 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                         printf("<<<Step%d Time:%f>>>", j, d_v3->currentTime);
                         for (int i = 0; i < d_v3->num_d_voxels; i++) {
                             auto &v = d_v3->d_voxels[i];
+                            if (v.removed)
+                                continue;
                             if (v.isSurface()) {
                                 printf("%.1f,%.1f,%.1f,", v.pos.x * vs, v.pos.y * vs, v.pos.z * vs);
                                 printf("%.1f,%.2f,%.2f,%.2f,", v.orient.AngleDegrees(), v.orient.x, v.orient.y, v.orient.z);
@@ -92,6 +94,8 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                         printf("|[[[%d]]]", j);
                         for (int i = 0; i < d_v3->d_v_links.size(); i++) {
                             auto l = d_v3->d_v_links[i];
+                            if (l->removed)
+                                continue;
                             // only draw links that are not detached.
                             if (!l->isDetached) {
                                 auto v1 = l->pVPos;
@@ -352,6 +356,9 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         h_d_tmp.EnableCilia = pt_merged.get<int>("VXA.Simulator.EnableCilia", 0);
         h_d_tmp.EnableSignals = pt_merged.get<int>("VXA.Simulator.EnableSignals", 0);
         
+
+        h_d_tmp.SecondaryExperiment = pt_merged.get<int>("VXA.Simulator.SecondaryExperiment", 0);
+
         HeapSize = pt_merged.get<double>("VXA.GPU.HeapSize", 0.5);
         if (HeapSize > 1.0) {
             HeapSize = 0.99;

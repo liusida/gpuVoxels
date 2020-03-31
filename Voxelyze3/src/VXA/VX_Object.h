@@ -504,6 +504,8 @@ public:
 	double PaceMakerPeriod = 0;  // voltage = sin(t*PaceMakerPeriod)
 	bool isElectricalActive = false;
 
+	double RemoveFromSimulationAfterThisManySeconds = 0.0;
+
 	double signalValueDecay = 0.9; // ratio from [0,1]
 	double signalTimeDelay = 0.0; // in sec	
 	double inactivePeriod = 0.05; // in sec

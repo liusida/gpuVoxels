@@ -37,6 +37,8 @@ CVX_Material& CVX_Material::operator=(const CVX_Material& vIn)
 	inactivePeriod = vIn.inactivePeriod;
 	isMeasured = vIn.isMeasured;
 	
+	RemoveFromSimulationAfterThisManySeconds = vIn.RemoveFromSimulationAfterThisManySeconds;
+	
 	isElectricalActive = vIn.isElectricalActive;
 	isTarget = vIn.isTarget;
 	fixed = vIn.fixed;

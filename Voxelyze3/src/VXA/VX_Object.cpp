@@ -1191,6 +1191,8 @@ CVXC_Material& CVXC_Material::operator=(const CVXC_Material& RefMat)
 	sticky = RefMat.sticky;
 	Cilia = RefMat.Cilia;
 
+	RemoveFromSimulationAfterThisManySeconds = RefMat.RemoveFromSimulationAfterThisManySeconds;
+
 	Elastic_Mod = RefMat.Elastic_Mod;
 	Plastic_Mod = RefMat.Plastic_Mod;
 	Yield_Stress = RefMat.Yield_Stress;
@@ -1419,6 +1421,8 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 				if (!pXML->FindLoadElement("signalTimeDelay", &signalTimeDelay)) signalTimeDelay = 0.03;
 				if (!pXML->FindLoadElement("inactivePeriod", &inactivePeriod)) inactivePeriod = 0.03;
 				if (!pXML->FindLoadElement("isMeasured", &isMeasured)) isMeasured = 1;
+
+				if (!pXML->FindLoadElement("RemoveFromSimulationAfterThisManySeconds", &RemoveFromSimulationAfterThisManySeconds)) RemoveFromSimulationAfterThisManySeconds = 0.0;
 
 				if (!pXML->FindLoadElement("isElectricalActive", &isElectricalActive)) isElectricalActive = false;
 				
