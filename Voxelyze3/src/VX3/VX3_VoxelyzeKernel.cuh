@@ -45,6 +45,7 @@ class VX3_VoxelyzeKernel {
 
     // for Secondary Experiment
     __device__ void removeVoxels();
+    __device__ void InitializeCenterOfMass();
 
     /* data */
     bool forceExit = false;
@@ -154,6 +155,8 @@ class VX3_VoxelyzeKernel {
 
     //for Secondary Experiment
     int SecondaryExperiment = 0;
+    double ReinitializeCenterOfMassAfterThisManySeconds = 0.0;
+    bool CenterOfMassReinitialized = false;
 };
 
 #endif // VX3_VOXELYZE_KERNEL_H

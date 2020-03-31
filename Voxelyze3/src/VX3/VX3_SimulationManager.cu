@@ -50,7 +50,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         double vs = 1 / 0.001;
 
         d_v3->updateCurrentCenterOfMass();
-        d_v3->initialCenterOfMass = d_v3->currentCenterOfMass;
+        d_v3->InitializeCenterOfMass();
         int real_stepsize = int(d_v3->RecordStepSize / (10000 * d_v3->recommendedTimeStep() * d_v3->DtFrac));
         printf("real_stepsize: %d ; recommendedTimeStep %f; d_v3->DtFrac %f . \n", real_stepsize, d_v3->recommendedTimeStep(),
                d_v3->DtFrac);
@@ -356,8 +356,9 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         h_d_tmp.EnableCilia = pt_merged.get<int>("VXA.Simulator.EnableCilia", 0);
         h_d_tmp.EnableSignals = pt_merged.get<int>("VXA.Simulator.EnableSignals", 0);
         
-
+        // for Secondary Experiment
         h_d_tmp.SecondaryExperiment = pt_merged.get<int>("VXA.Simulator.SecondaryExperiment", 0);
+        h_d_tmp.ReinitializeCenterOfMassAfterThisManySeconds = pt_merged.get<double>("VXA.Simulator.ReinitializeCenterOfMassAfterThisManySeconds", 0.0);
 
         HeapSize = pt_merged.get<double>("VXA.GPU.HeapSize", 0.5);
         if (HeapSize > 1.0) {

@@ -332,12 +332,16 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     }
 
     if (SecondaryExperiment) {
-        // handle tags:
+        // SecondaryExperiment handle tags:
         // RemoveFromSimulationAfterThisManySeconds
         // InitializeCenterOfMassAfterThisManySeconds
         // TurnOnThermalExpansionAfterThisManySeconds
 
         removeVoxels();
+        if (CenterOfMassReinitialized == false && ReinitializeCenterOfMassAfterThisManySeconds < currentTime) {
+            CenterOfMassReinitialized = true;
+            InitializeCenterOfMass();
+        }
 
     }
 
@@ -348,6 +352,10 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     //     printf("\t%d) %ld clock cycles.\n", i,
     //     time_measures[i+1]-time_measures[i]);
     return true;
+}
+
+__device__ void VX3_VoxelyzeKernel::InitializeCenterOfMass() {
+    initialCenterOfMass = currentCenterOfMass;
 }
 
 __device__ void VX3_VoxelyzeKernel::removeVoxels() {
