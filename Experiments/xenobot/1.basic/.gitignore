@@ -1,8 +1,0 @@
-data/
-bestfit/
-__pycache__/
-test*
-tmp*
-VoxCAD
-Voxelyze3
-vx3_node_worker

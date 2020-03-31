@@ -1,6 +1,6 @@
 # gpuVoxels
 
-(We need a well written introduction with pics. But basically this is a tool for us run experiments on Deep Green.)
+![Voxelyze3](https://github.com/liusida/gpuVoxels/blob/master/doc/misc/bigGuys_small.png?raw=true)
 
 ## Documentation
 
@@ -97,4 +97,4 @@ Now we have a `0001.history`. We can open the newest VoxCAD to see the playback.
 
 This is a sample screenshot of a playback:
 
-![Big Guy Runs](https://github.com/liusida/gpuVoxels/blob/dev-CUDA-0.1/doc/misc/bigGuys.png?raw=true)
+![Big Guy Runs](https://github.com/liusida/gpuVoxels/blob/master/doc/misc/bigGuys.png?raw=true)
