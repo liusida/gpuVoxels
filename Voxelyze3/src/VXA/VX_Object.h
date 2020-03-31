@@ -505,6 +505,7 @@ public:
 	bool isElectricalActive = false;
 
 	double RemoveFromSimulationAfterThisManySeconds = 0.0;
+	double TurnOnThermalExpansionAfterThisManySeconds = 0.0;
 
 	double signalValueDecay = 0.9; // ratio from [0,1]
 	double signalTimeDelay = 0.0; // in sec	

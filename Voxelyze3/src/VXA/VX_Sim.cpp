@@ -377,6 +377,7 @@ void CVX_Sim::CopyMat(CVXC_Material *pOld, CVX_Material *pNew) // copies paramet
     pNew->isMeasured = pOld->isMeasured;
 
     pNew->RemoveFromSimulationAfterThisManySeconds = pOld->RemoveFromSimulationAfterThisManySeconds;
+    pNew->TurnOnThermalExpansionAfterThisManySeconds = pOld->TurnOnThermalExpansionAfterThisManySeconds;
 	
     pNew->isTarget = (bool)pOld->isTarget;
     pNew->fixed = (bool)pOld->Fixed;

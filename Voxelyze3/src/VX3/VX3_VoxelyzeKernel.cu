@@ -618,6 +618,8 @@ __global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAm
         VX3_Voxel *t = &voxels[gindex];
         if (t->removed)
             return;
+        if (t->mat->TurnOnThermalExpansionAfterThisManySeconds > currentTime)
+            return;
         if (t->mat->fixed)
             return; // fixed voxels, no need to update temperature
         double currentTemperature =

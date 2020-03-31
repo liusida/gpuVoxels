@@ -38,6 +38,7 @@ CVX_Material& CVX_Material::operator=(const CVX_Material& vIn)
 	isMeasured = vIn.isMeasured;
 	
 	RemoveFromSimulationAfterThisManySeconds = vIn.RemoveFromSimulationAfterThisManySeconds;
+	TurnOnThermalExpansionAfterThisManySeconds = vIn.TurnOnThermalExpansionAfterThisManySeconds;
 	
 	isElectricalActive = vIn.isElectricalActive;
 	isTarget = vIn.isTarget;
