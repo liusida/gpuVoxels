@@ -155,8 +155,8 @@ class VX3_VoxelyzeKernel {
 
     //for Secondary Experiment
     int SecondaryExperiment = 0;
-    double ReinitializeCenterOfMassAfterThisManySeconds = 0.0;
-    bool CenterOfMassReinitialized = false;
+    double ReinitializeInitialPositionAfterThisManySeconds = 0.0;
+    bool InitialPositionReinitialized = false;
 };
 
 #endif // VX3_VOXELYZE_KERNEL_H

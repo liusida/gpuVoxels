@@ -155,6 +155,8 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
 __device__ void VX3_VoxelyzeKernel::saveInitialPosition() {
     for (int i = 0; i < num_d_voxels; i++) {
         d_initialPosition[i] = d_voxels[i].pos;
+        // Save this value to voxel, so it can be read out when collecting results in cpu.
+        d_voxels[i].isMeasured = (bool) d_voxels[i].mat->isMeasured;
     }
 }
 __device__ bool VX3_VoxelyzeKernel::StopConditionMet(void) // have we met the stop condition yet?
@@ -334,13 +336,14 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     if (SecondaryExperiment) {
         // SecondaryExperiment handle tags:
         // RemoveFromSimulationAfterThisManySeconds
-        // InitializeCenterOfMassAfterThisManySeconds
+        // ReinitializeInitialPositionAfterThisManySeconds
         // TurnOnThermalExpansionAfterThisManySeconds
 
         removeVoxels();
-        if (CenterOfMassReinitialized == false && ReinitializeCenterOfMassAfterThisManySeconds < currentTime) {
-            CenterOfMassReinitialized = true;
+        if (InitialPositionReinitialized == false && ReinitializeInitialPositionAfterThisManySeconds < currentTime) {
+            InitialPositionReinitialized = true;
             InitializeCenterOfMass();
+            saveInitialPosition();
         }
 
     }
@@ -388,6 +391,7 @@ __device__ void VX3_VoxelyzeKernel::removeVoxels() {
                 }
             }
             d_voxelMats[i].removed = true;
+            isSurfaceChanged = true;
         }
     }
 

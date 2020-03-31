@@ -107,25 +107,29 @@ int main(int argc, char** argv) {
         std::string simulation_name = split(res.vxa_filename, '.')[0];
         tr_result.put("report.detail."+simulation_name+".fitness_score", res.fitness_score);
         tr_result.put("report.detail."+simulation_name+".num_voxel", res.num_voxel);
+        tr_result.put("report.detail."+simulation_name+".num_measured_voxel", res.num_measured_voxel);
         tr_result.put("report.detail."+simulation_name+".voxSize", res.voxSize);
         tr_result.put("report.detail."+simulation_name+".numClosePairs", res.numClosePairs);
 
-        std::string str_tmp = "";
-        for (auto &pos: res.voxel_init_pos) {
-            str_tmp += std::to_string(pos.x) + "," + std::to_string(pos.y) + "," + std::to_string(pos.z) + ";";
-        }
-        tr_result.put("report.detail."+simulation_name+".init_pos", str_tmp);
-        str_tmp = "";
-        for (auto &pos: res.voxel_position) {
-            str_tmp += std::to_string(pos.x) + "," + std::to_string(pos.y) + "," + std::to_string(pos.z) + ";";
-        }
-        tr_result.put("report.detail."+simulation_name+".pos", str_tmp);
-        str_tmp = "";
-        for (auto matid: res.voxel_mats) {
-            str_tmp += std::to_string(matid) + ";";
-        }
-        tr_result.put("report.detail."+simulation_name+".mats", str_tmp);
+        tr_result.put("report.detail."+simulation_name+".total_distance_of_all_voxels", res.total_distance_of_all_voxels);
 
+        if (res.SavePositionOfAllVoxels) {
+            std::string str_tmp = "";
+            for (auto &pos: res.voxel_init_pos) {
+                str_tmp += std::to_string(pos.x) + "," + std::to_string(pos.y) + "," + std::to_string(pos.z) + ";";
+            }
+            tr_result.put("report.detail."+simulation_name+".init_pos", str_tmp);
+            str_tmp = "";
+            for (auto &pos: res.voxel_position) {
+                str_tmp += std::to_string(pos.x) + "," + std::to_string(pos.y) + "," + std::to_string(pos.z) + ";";
+            }
+            tr_result.put("report.detail."+simulation_name+".pos", str_tmp);
+            str_tmp = "";
+            for (auto matid: res.voxel_mats) {
+                str_tmp += std::to_string(matid) + ";";
+            }
+            tr_result.put("report.detail."+simulation_name+".mats", str_tmp);
+        }
     }
     pt::write_xml(output.string(), tr_result);
     return 0;

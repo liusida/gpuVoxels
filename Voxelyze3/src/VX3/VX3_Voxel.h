@@ -311,6 +311,7 @@ class VX3_Voxel {
 
     // for Secondary Experiment
     bool removed = false;
+    bool isMeasured = true;
 };
 
 #endif // VX3_VOXEL_H
