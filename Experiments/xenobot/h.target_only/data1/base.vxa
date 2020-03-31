@@ -1,28 +1,33 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <VXA Version="1.1">
+  <GPU>
+    <HeapSize>0.5</HeapSize>
+  </GPU>
   <Simulator>
-    <SavePositionOfAllVoxels>0</SavePositionOfAllVoxels>
-    <EnableTargetCloseness>0</EnableTargetCloseness>
-    <EnableCilia>0</EnableCilia>
-    <FitnessFunction>
-      <mtVAR>x</mtVAR>
-    </FitnessFunction>
     <EnableSignals>1</EnableSignals>
-
     <RecordHistory>
-      <RecordStepSize>100</RecordStepSize>
+      <RecordStepSize>200</RecordStepSize>
       <RecordVoxel>1</RecordVoxel>
       <RecordLink>0</RecordLink>
     </RecordHistory>
+    <EnableCilia>1</EnableCilia>
+    <EnableNormalThrust>0</EnableNormalThrust>
+    <MaxDistInVoxelLengthsToCountAsPair>3</MaxDistInVoxelLengthsToCountAsPair>
+    <FitnessFunction>
+      <mtVAR>z</mtVAR>
+    </FitnessFunction>
     <AttachDetach>
       <EnableCollision>1</EnableCollision>
-      <EnableAttach>0</EnableAttach>
+      <EnableDetach>1</EnableDetach>
+      <EnableAttach>1</EnableAttach>
+      <watchDistance>1.0</watchDistance>
+      <boundingRadius>0.75</boundingRadius>
+      <SafetyGuard>100000</SafetyGuard>
       <AttachCondition>
         <Condition_0>
           <mtCONST>1</mtCONST>
         </Condition_0>
       </AttachCondition>
-      <SafetyGuard>2000</SafetyGuard>
     </AttachDetach>
     <Integration>
       <Integrator>0</Integrator>
@@ -59,7 +64,7 @@
       <StopConditionFormula>
         <mtSUB>
           <mtVAR>t</mtVAR>
-          <mtCONST>4</mtCONST>
+          <mtCONST>10</mtCONST>
         </mtSUB>
       </StopConditionFormula>
     </StopCondition>
@@ -81,7 +86,7 @@
     </Boundary_Conditions>
     <Gravity>
       <GravEnabled>1</GravEnabled>
-      <GravAcc>-9.81</GravAcc>
+      <GravAcc>-1</GravAcc>
       <FloorEnabled>1</FloorEnabled>
     </Gravity>
     <Thermal>
@@ -89,7 +94,7 @@
       <TempAmplitude>7.72173</TempAmplitude>
       <TempBase>25</TempBase>
       <VaryTempEnabled>1</VaryTempEnabled>
-      <TempPeriod>0.2</TempPeriod>
+      <TempPeriod>0.1</TempPeriod>
     </Thermal>
   </Environment>
   <VXC Version="0.94">
@@ -110,28 +115,26 @@
       <Z_Squeeze>1</Z_Squeeze>
     </Voxel>
     <Palette>
-
       <Material ID="1">
         <MatType>0</MatType>
-        <Name>Cilia</Name>
+        <Name>NoCilia</Name>
         <Display>
-          <Red>1.0</Red>
-          <Green>0.8</Green>
-          <Blue>0.2</Blue>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>1</Blue>
           <Alpha>0.8</Alpha>
         </Display>
         <Mechanical>
-          <Cilia>1</Cilia>
           <MatModel>0</MatModel>
-          <Elastic_Mod>3e+07</Elastic_Mod>
+          <Elastic_Mod>5e+06</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
           <Yield_Stress>0</Yield_Stress>
           <FailModel>0</FailModel>
           <Fail_Stress>0</Fail_Stress>
           <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
+          <Density>5e+05</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.005</CTE>
+          <CTE>0</CTE>
           <MaterialTempPhase>0</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>
@@ -139,24 +142,28 @@
       </Material>
       <Material ID="2">
         <MatType>0</MatType>
-        <Name>MuscleTwo</Name>
+        <Name>Cilia</Name>
         <Display>
-          <Red>0.9</Red>
-          <Green>0.7</Green>
-          <Blue>0.4</Blue>
+          <Red>0.44</Red>
+          <Green>0.93</Green>
+          <Blue>0.72</Blue>
           <Alpha>0.8</Alpha>
         </Display>
         <Mechanical>
+          <inactivePeriod>0.5</inactivePeriod>
+          <signalValueDecay>0.9</signalValueDecay>
+          <signalTimeDelay>0.01</signalTimeDelay>
+          <Cilia>5</Cilia>
           <MatModel>0</MatModel>
-          <Elastic_Mod>3e+07</Elastic_Mod>
+          <Elastic_Mod>5e+06</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
           <Yield_Stress>0</Yield_Stress>
           <FailModel>0</FailModel>
           <Fail_Stress>0</Fail_Stress>
           <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
+          <Density>5e+05</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.03</CTE>
+          <CTE>0</CTE>
           <MaterialTempPhase>0</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>
@@ -164,41 +171,45 @@
       </Material>
       <Material ID="3">
         <MatType>0</MatType>
-        <Name>MuscleOne</Name>
+        <Name>StickyTargetPebble</Name>
         <Display>
-          <Red>0.8</Red>
-          <Green>0.6</Green>
-          <Blue>0.0</Blue>
-          <Alpha>0.8</Alpha>
+          <Red>1</Red>
+          <Green>0.435</Green>
+          <Blue>0.38</Blue>
+          <Alpha>0.5</Alpha>
         </Display>
         <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>3e+07</Elastic_Mod>
+          <Sticky>1</Sticky>
+          <isTarget>1</isTarget>
+          <isMeasured>1</isMeasured>
+          <MatModel>1</MatModel>          <!--1=MDL_LINEAR_FAIL-->
+          <Elastic_Mod>1e+07</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
           <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
+          <FailModel>0</FailModel>          <!--0=Fail_Stress-->
+          <Fail_Stress>1.5e+07</Fail_Stress>
           <Fail_Strain>0</Fail_Strain>
           <Density>1e+06</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.03</CTE>
+          <CTE>0</CTE>
           <MaterialTempPhase>0</MaterialTempPhase>
           <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
+          <uDynamic>1</uDynamic>
         </Mechanical>
       </Material>
       <Material ID="4">
         <MatType>0</MatType>
-        <Name>MuscleTwo</Name>
+        <Name>Fixed</Name>
         <Display>
-          <Red>0.7</Red>
-          <Green>0.5</Green>
-          <Blue>0.2</Blue>
-          <Alpha>0.8</Alpha>
+          <Red>1</Red>
+          <Green>1</Green>
+          <Blue>1</Blue>
+          <Alpha>1</Alpha>
         </Display>
         <Mechanical>
+          <Fixed>1</Fixed>
           <MatModel>0</MatModel>
-          <Elastic_Mod>3e+07</Elastic_Mod>
+          <Elastic_Mod>5e+06</Elastic_Mod>
           <Plastic_Mod>0</Plastic_Mod>
           <Yield_Stress>0</Yield_Stress>
           <FailModel>0</FailModel>
@@ -206,123 +217,31 @@
           <Fail_Strain>0</Fail_Strain>
           <Density>1e+06</Density>
           <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.03</CTE>
+          <CTE>0</CTE>
           <MaterialTempPhase>0</MaterialTempPhase>
           <uStatic>1</uStatic>
           <uDynamic>0.5</uDynamic>
         </Mechanical>
       </Material>
-
-      <Material ID="5">
-        <MatType>0</MatType>
-        <Name>MuscleOne</Name>
-        <Display>
-          <Red>0.9</Red>
-          <Green>0.8</Green>
-          <Blue>0.2</Blue>
-          <Alpha>0.8</Alpha>
-        </Display>
-        <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>3e+07</Elastic_Mod>
-          <Plastic_Mod>0</Plastic_Mod>
-          <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
-          <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
-          <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.03</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
-          <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
-        </Mechanical>
-      </Material>
-      <Material ID="6">
-        <MatType>0</MatType>
-        <Name>MuscleTwo</Name>
-        <Display>
-          <Red>0.8</Red>
-          <Green>0.7</Green>
-          <Blue>0.4</Blue>
-          <Alpha>0.8</Alpha>
-        </Display>
-        <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>3e+07</Elastic_Mod>
-          <Plastic_Mod>0</Plastic_Mod>
-          <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
-          <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
-          <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.03</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
-          <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
-        </Mechanical>
-      </Material>
-      <Material ID="7">
-        <MatType>0</MatType>
-        <Name>MuscleOne</Name>
-        <Display>
-          <Red>0.7</Red>
-          <Green>0.6</Green>
-          <Blue>0.0</Blue>
-          <Alpha>0.8</Alpha>
-        </Display>
-        <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>3e+07</Elastic_Mod>
-          <Plastic_Mod>0</Plastic_Mod>
-          <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
-          <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
-          <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.03</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
-          <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
-        </Mechanical>
-      </Material>
-      <Material ID="8">
-        <MatType>0</MatType>
-        <Name>MuscleTwo</Name>
-        <Display>
-          <Red>0.6</Red>
-          <Green>0.5</Green>
-          <Blue>0.2</Blue>
-          <Alpha>0.8</Alpha>
-        </Display>
-        <Mechanical>
-          <MatModel>0</MatModel>
-          <Elastic_Mod>3e+07</Elastic_Mod>
-          <Plastic_Mod>0</Plastic_Mod>
-          <Yield_Stress>0</Yield_Stress>
-          <FailModel>0</FailModel>
-          <Fail_Stress>0</Fail_Stress>
-          <Fail_Strain>0</Fail_Strain>
-          <Density>1e+06</Density>
-          <Poissons_Ratio>0.35</Poissons_Ratio>
-          <CTE>0.03</CTE>
-          <MaterialTempPhase>0</MaterialTempPhase>
-          <uStatic>1</uStatic>
-          <uDynamic>0.5</uDynamic>
-        </Mechanical>
-      </Material>
-
     </Palette>
     <Structure Compression="ASCII_READABLE">
-    <X_Voxels>2</X_Voxels>
-    <Y_Voxels>2</Y_Voxels>
-    <Z_Voxels>2</Z_Voxels>
-    <Data>
-      <Layer><![CDATA[1000]]></Layer>
-      <Layer><![CDATA[0100]]></Layer>
-    </Data>
-  </Structure>
+      <X_Voxels>6</X_Voxels>
+      <Y_Voxels>6</Y_Voxels>
+      <Z_Voxels>5</Z_Voxels>
+      <Data>
+        <Layer><![CDATA[::00::::3333333333333333333333::00::]]></Layer>
+        <Layer><![CDATA[::00::::3333333333333333333333333333]]></Layer>
+        <Layer><![CDATA[333333333333333333333333333333333333]]></Layer>
+        <Layer><![CDATA[333333333333333333333333333333333333]]></Layer>
+        <Layer><![CDATA[333333333333333333333333333333333333]]></Layer>
+      </Data>
+      <BaseCiliaForce>
+        <Layer><![CDATA[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]]></Layer>
+        <Layer><![CDATA[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]]></Layer>
+        <Layer><![CDATA[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]]></Layer>
+        <Layer><![CDATA[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]]></Layer>
+        <Layer><![CDATA[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]]></Layer>
+      </BaseCiliaForce>
+    </Structure>
   </VXC>
 </VXA>

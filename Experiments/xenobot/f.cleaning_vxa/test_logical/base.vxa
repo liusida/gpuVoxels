@@ -1,26 +1,44 @@
 <VXA Version="1.1">
   <Simulator>
-    <MaxDistInVoxelLengthsToCountAsPair>5</MaxDistInVoxelLengthsToCountAsPair>
-    <EnableCilia>1</EnableCilia>
     <RecordHistory>
-      <RecordStepSize>0</RecordStepSize>
+      <RecordStepSize>100</RecordStepSize>
       <RecordVoxel>1</RecordVoxel>
       <RecordLink>0</RecordLink>
     </RecordHistory>
+    <ForceField>
+      <x_forcefield>
+        <mtMUL>
+          <mtLESSTHAN>
+            <mtVAR>t</mtVAR>
+            <mtCONST>1.1</mtCONST>
+          </mtLESSTHAN>
+          <mtCONST>0.1</mtCONST>
+        </mtMUL>
+      </x_forcefield>
+      <z_forcefield>
+        <mtMUL>
+          <mtAND>
+            <mtGREATERTHAN>
+              <mtVAR>t</mtVAR>
+              <mtCONST>1</mtCONST>
+            </mtGREATERTHAN>
+            <mtLESSTHAN>
+              <mtVAR>t</mtVAR>
+              <mtCONST>1.1</mtCONST>
+            </mtLESSTHAN>
+          </mtAND>
+          <mtCONST>0.01</mtCONST>
+        </mtMUL>
+      </z_forcefield>
+    </ForceField>
     <StopCondition>
       <StopConditionFormula>
         <mtSUB>
           <mtVAR>t</mtVAR>
-          <mtCONST>5</mtCONST>
+          <mtCONST>2</mtCONST>
         </mtSUB>
       </StopConditionFormula>
     </StopCondition>
-    <FitnessFunction>
-      <mtADD>
-        <mtVAR>x</mtVAR>
-        <mtVAR>y</mtVAR>
-      </mtADD>
-    </FitnessFunction>
   </Simulator>
   <VXC Version="0.94">
     <Lattice>
@@ -28,16 +46,14 @@
     </Lattice>
     <Palette>
       <Material>
-        <Name>Default</Name>
+        <Name>Green</Name>
         <Display>
-          <Red>1</Red>
-          <Green>0.6</Green>
+          <Red>0</Red>
+          <Green>1</Green>
           <Blue>0</Blue>
-          <Alpha>0.5</Alpha>
+          <Alpha>1</Alpha>
         </Display>
         <Mechanical>
-          <isMeasured>1</isMeasured>
-          <Cilia>1</Cilia>
           <MatModel>0</MatModel>
           <Elastic_Mod>1e+05</Elastic_Mod>
           <Fail_Stress>0</Fail_Stress>
@@ -50,16 +66,15 @@
         </Mechanical>
       </Material>
       <Material>
-        <Name>Target</Name>
+        <Name>Fixed</Name>
         <Display>
-          <Red>1</Red>
+          <Red>0</Red>
           <Green>0</Green>
           <Blue>0</Blue>
-          <Alpha>1</Alpha>
+          <Alpha>0.5</Alpha>
         </Display>
         <Mechanical>
-          <isMeasured>1</isMeasured>
-          <isTarget>1</isTarget>
+          <Fixed>1</Fixed>
           <MatModel>0</MatModel>
           <Elastic_Mod>1e+05</Elastic_Mod>
           <Fail_Stress>0</Fail_Stress>
@@ -71,17 +86,15 @@
           <uDynamic>0.8</uDynamic>
         </Mechanical>
       </Material>
+
     </Palette>
     <Structure Compression="ASCII_READABLE">
       <X_Voxels>5</X_Voxels>
       <Y_Voxels>1</Y_Voxels>
       <Z_Voxels>1</Z_Voxels>
       <Data>
-        <Layer><![CDATA[10202]]></Layer>
+        <Layer><![CDATA[10002]]></Layer>
       </Data>
-      <BaseCiliaForce>
-        <Layer><![CDATA[0.01,0,0,]]></Layer>
-      </BaseCiliaForce>
     </Structure>
   </VXC>
 </VXA>
