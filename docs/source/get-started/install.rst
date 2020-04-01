@@ -34,6 +34,8 @@ On Desktop/Laptop with GPUs
 
 If you have access to root, the best way to get started is using Docker, since Nvidia provide ready to use CUDA docker image files.
 
+.. code:: bash
+
     docker pull nvidia/cuda:10.2-devel-ubuntu18.04
     docker run -it nvidia/cuda:10.2-devel-ubuntu18.04 /bin/bash
     # inside-docker
