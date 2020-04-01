@@ -64,8 +64,6 @@ This is a name used in VX1. In VX2 it's called `CollisionDamping` or `zetaCollis
 
 `0.0` if we want the voxel bouncing on the floor, `1.0` if we don't want it bouncing.
 
-.. note:: This variable DOES NOT affect the collision between voxels. It only affect the damping between the voxel and floor.
-
 .. note:: **Why the robot still bounce even when this variable is set to zero?**
 
     Because the links between vertical voxels will produce a bouncing force. 
