@@ -500,7 +500,7 @@ __device__ void VX3_VoxelyzeKernel::regenerateSurfaceVoxels() {
     VX3_dVector<VX3_Voxel *> tmp;
     for (int i = 0; i < num_d_voxels; i++) {
         d_voxels[i].updateSurface();
-        if (d_voxels[i].isSurface()) {
+        if (d_voxels[i].isSurface() && !d_voxels[i].removed) {
             tmp.push_back(&d_voxels[i]);
         }
     }

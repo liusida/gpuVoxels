@@ -70,20 +70,20 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                     if (d_v3->RecordVoxel) {
                         // Voxels
                         printf("<<<Step%d Time:%f>>>", j, d_v3->currentTime);
-                        for (int i = 0; i < d_v3->num_d_voxels; i++) {
-                            auto &v = d_v3->d_voxels[i];
-                            if (v.removed)
+                        for (int i = 0; i < d_v3->num_d_surface_voxels; i++) {
+                            auto v = d_v3->d_surface_voxels[i];
+                            if (v->removed)
                                 continue;
-                            if (v.isSurface()) {
-                                printf("%.1f,%.1f,%.1f,", v.pos.x * vs, v.pos.y * vs, v.pos.z * vs);
-                                printf("%.1f,%.2f,%.2f,%.2f,", v.orient.AngleDegrees(), v.orient.x, v.orient.y, v.orient.z);
+                            if (v->isSurface()) {
+                                printf("%.1f,%.1f,%.1f,", v->pos.x * vs, v->pos.y * vs, v->pos.z * vs);
+                                printf("%.1f,%.2f,%.2f,%.2f,", v->orient.AngleDegrees(), v->orient.x, v->orient.y, v->orient.z);
                                 VX3_Vec3D<double> ppp, nnn;
-                                nnn = v.cornerOffset(NNN);
-                                ppp = v.cornerOffset(PPP);
+                                nnn = v->cornerOffset(NNN);
+                                ppp = v->cornerOffset(PPP);
                                 printf("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", nnn.x * vs, nnn.y * vs, nnn.z * vs, ppp.x * vs, ppp.y * vs,
                                        ppp.z * vs);
-                                printf("%d,", v.mat->matid); // for coloring
-                                printf("%.1f,", v.localSignal);  // for coloring as well.
+                                printf("%d,", v->mat->matid); // for coloring
+                                printf("%.1f,", v->localSignal);  // for coloring as well.
                                 printf(";");
                             }
                         }
