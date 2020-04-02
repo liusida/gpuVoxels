@@ -1193,6 +1193,7 @@ CVXC_Material& CVXC_Material::operator=(const CVXC_Material& RefMat)
 
 	RemoveFromSimulationAfterThisManySeconds = RefMat.RemoveFromSimulationAfterThisManySeconds;
 	TurnOnThermalExpansionAfterThisManySeconds = RefMat.TurnOnThermalExpansionAfterThisManySeconds;
+	TurnOnCiliaAfterThisManySeconds = RefMat.TurnOnCiliaAfterThisManySeconds;
 
 	Elastic_Mod = RefMat.Elastic_Mod;
 	Plastic_Mod = RefMat.Plastic_Mod;
@@ -1425,6 +1426,8 @@ void CVXC_Material::ReadXML(CXML_Rip* pXML, std::string Version, std::string* Re
 
 				if (!pXML->FindLoadElement("RemoveFromSimulationAfterThisManySeconds", &RemoveFromSimulationAfterThisManySeconds)) RemoveFromSimulationAfterThisManySeconds = 0.0;
 				if (!pXML->FindLoadElement("TurnOnThermalExpansionAfterThisManySeconds", &TurnOnThermalExpansionAfterThisManySeconds)) TurnOnThermalExpansionAfterThisManySeconds = 0.0;
+				if (!pXML->FindLoadElement("TurnOnCiliaAfterThisManySeconds", &TurnOnCiliaAfterThisManySeconds)) TurnOnCiliaAfterThisManySeconds = 0.0;
+				
 
 				if (!pXML->FindLoadElement("isElectricalActive", &isElectricalActive)) isElectricalActive = false;
 				

@@ -338,6 +338,7 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
         // RemoveFromSimulationAfterThisManySeconds
         // ReinitializeInitialPositionAfterThisManySeconds
         // TurnOnThermalExpansionAfterThisManySeconds
+        // TurnOnCiliaAfterThisManySeconds
 
         removeVoxels();
         if (InitialPositionReinitialized == false && ReinitializeInitialPositionAfterThisManySeconds < currentTime) {
@@ -846,6 +847,8 @@ __global__ void gpu_update_cilia_force(VX3_Voxel **surface_voxels, int num, VX3_
         if (surface_voxels[index]->removed)
             return;
         if (surface_voxels[index]->mat->Cilia == 0)
+            return;
+        if (surface_voxels[index]->mat->TurnOnCiliaAfterThisManySeconds > k->currentTime)
             return;
         // rotate base cilia force and update it into voxel.
         surface_voxels[index]->CiliaForce = surface_voxels[index]->orient.RotateVec3D(
