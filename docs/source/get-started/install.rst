@@ -34,10 +34,14 @@ On Desktop/Laptop with GPUs
 
 If you have access to root, the best way to get started is using Docker, since Nvidia provide ready to use CUDA docker image files.
 
+First, install `Docker<https://www.docker.com/get-started>`_ and `nvidia-docker<https://github.com/NVIDIA/nvidia-docker>`_
+
+Then, do these:
+
 .. code:: bash
 
     docker pull nvidia/cuda:10.2-devel-ubuntu18.04
-    docker run -it nvidia/cuda:10.2-devel-ubuntu18.04 /bin/bash
+    docker run --gpus all -it nvidia/cuda:10.2-devel-ubuntu18.04 /bin/bash
     # inside-docker
     apt update
     apt install git cmake libboost-all-dev
