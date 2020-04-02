@@ -34,7 +34,7 @@ On Desktop/Laptop with GPUs
 
 If you have access to root, the best way to get started is using Docker, since Nvidia provide ready to use CUDA docker image files.
 
-First, install `Docker<https://www.docker.com/get-started>`_ and `nvidia-docker<https://github.com/NVIDIA/nvidia-docker>`_
+First, install `Docker <https://www.docker.com/get-started>`_, `nvidia-container-runtime <https://nvidia.github.io/nvidia-container-runtime/>`_, and `nvidia-docker <https://github.com/NVIDIA/nvidia-docker>`_
 
 Then, do these:
 
