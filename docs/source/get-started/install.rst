@@ -1,18 +1,13 @@
 Install
 =======
 
-Executables
------------
+Files needed to run
+-------------------
 
 Voxelyze3
 ^^^^^^^^^
 
-**Voxelyze3** is an executable that split tasks into multiple groups, and call **vx_node_worker** to execute them on different GPUs.
-
-vx_node_worker
-^^^^^^^^^^^^^^
-
-**vx_node_worker** works with **Voxelyze3** and is the one who actually carry out the calculation. (So don't delete it.)
+**Voxelyze3** is an executable that split tasks into multiple groups, and call **vx_node_worker** to execute them on different GPUs. **vx_node_worker** works with **Voxelyze3** and is the one who actually carry out the calculation. (So don't delete it.)
 
 VoxCAD
 ^^^^^^
@@ -48,6 +43,9 @@ Then, start the container:
 .. code:: bash
 
     docker run --gpus all --name=gpuVoxels --volume=/tmp:/gpuVoxels/host -it sidaliu/gpuvoxels:1.0
+
+.. note::
+    You can copy **Voxelyze3** and **vx_node_worker** to wherever you want and run it there.
 
 .. note::
     You can change the path /tmp to anywhere you want, and keep your code and data there.
@@ -116,4 +114,26 @@ If there's already CUDA 10.1 or 10.2 on the server, you'll need to compile and i
 Install VoxCAD
 --------------
 
-**VoxCAD** need OpenGL, Boost, etc. You will need to build VoxCAD from source. Instructions will come later.
+**VoxCAD** need OpenGL (libglfw3-dev, freeglut3-dev, libglm-dev, mesa-utils), Boost (libboost-all-dev), QT5 (qtbase5-dev). 
+You will need to build VoxCAD from source.
+
+Here I demostrate how to do it in Ubuntu 18.04.
+
+.. code:: bash
+
+    sudo apt install -y git cmake libboost-all-dev qtbase5-dev libglfw3-dev freeglut3-dev libglm-dev mesa-utils
+    # this will take a while...
+    git clone https://github.com/liusida/gpuVoxels.git gpuVoxels_src
+    cd /gpuVoxels_src/VoxCAD
+    mkdir build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Release ..
+    cmake --build .
+    # done.
+
+.. note::
+    Now you can copy the file **VoxCAD** and **Default.vxc** to wherever you want and run it there.
+
+.. note::
+    If you forget the file **Default.vxc**, the simulation will stuck at every step.
+
