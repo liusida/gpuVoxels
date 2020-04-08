@@ -207,6 +207,8 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
                 p->value = 6;
             } else if (tok.second == "numClosePairs") {
                 p->value = 7;
+            } else if (tok.second == "num_voxel") {
+                p->value = 8;
             } else {
                 printf(COLORCODE_BOLD_RED "ERROR: No such variable.\n");
                 break;

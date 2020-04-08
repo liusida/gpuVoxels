@@ -162,7 +162,7 @@ __device__ void VX3_VoxelyzeKernel::saveInitialPosition() {
 __device__ bool VX3_VoxelyzeKernel::StopConditionMet(void) // have we met the stop condition yet?
 {
     if (VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, collisionCount, currentTime, recentAngle,
-                           targetCloseness, numClosePairs, StopConditionFormula) > 0) {
+                           targetCloseness, numClosePairs, num_d_voxels, StopConditionFormula) > 0) {
         // double a =
         //     VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, collisionCount, currentTime,
         //     StopConditionFormula);
@@ -530,7 +530,7 @@ __device__ VX3_MaterialLink *VX3_VoxelyzeKernel::combinedMaterial(VX3_MaterialVo
 __device__ void VX3_VoxelyzeKernel::computeFitness() {
     VX3_Vec3D<> offset = currentCenterOfMass - initialCenterOfMass;
     fitness_score = VX3_MathTree::eval(offset.x, offset.y, offset.z, collisionCount, currentTime, recentAngle, targetCloseness,
-                                       numClosePairs, fitness_function);
+                                       numClosePairs, num_d_voxels, fitness_function);
 }
 
 __device__ void VX3_VoxelyzeKernel::registerTargets() {
@@ -608,15 +608,15 @@ __global__ void gpu_update_voxels(VX3_Voxel *voxels, int num, double dt, double 
         // update sticky status
         t->enableAttach = false;
         if (VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
-                               k->numClosePairs, k->AttachCondition[0]) > 0 &&
+                               k->numClosePairs, k->num_d_voxels, k->AttachCondition[0]) > 0 &&
             VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
-                               k->numClosePairs, k->AttachCondition[1]) > 0 &&
+                               k->numClosePairs, k->num_d_voxels, k->AttachCondition[1]) > 0 &&
             VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
-                               k->numClosePairs, k->AttachCondition[2]) > 0 &&
+                               k->numClosePairs, k->num_d_voxels, k->AttachCondition[2]) > 0 &&
             VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
-                               k->numClosePairs, k->AttachCondition[3]) > 0 &&
+                               k->numClosePairs, k->num_d_voxels, k->AttachCondition[3]) > 0 &&
             VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
-                               k->numClosePairs, k->AttachCondition[4]) > 0) {
+                               k->numClosePairs, k->num_d_voxels, k->AttachCondition[4]) > 0) {
             t->enableAttach = true;
         };
     }
