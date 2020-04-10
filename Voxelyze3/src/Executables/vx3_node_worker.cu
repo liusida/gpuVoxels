@@ -105,11 +105,18 @@ int main(int argc, char** argv) {
     // this will be too much to write into the report.
     for (auto &res: sm.h_results) {
         std::string simulation_name = split(res.vxa_filename, '.')[0];
+        tr_result.put("report.detail."+simulation_name+".currentTime", res.currentTime);
         tr_result.put("report.detail."+simulation_name+".fitness_score", res.fitness_score);
         tr_result.put("report.detail."+simulation_name+".num_voxel", res.num_voxel);
         tr_result.put("report.detail."+simulation_name+".num_measured_voxel", res.num_measured_voxel);
         tr_result.put("report.detail."+simulation_name+".voxSize", res.voxSize);
         tr_result.put("report.detail."+simulation_name+".numClosePairs", res.numClosePairs);
+        tr_result.put("report.detail."+simulation_name+".initialCenterOfMass.x", res.initialCenterOfMass.x);
+        tr_result.put("report.detail."+simulation_name+".initialCenterOfMass.y", res.initialCenterOfMass.y);
+        tr_result.put("report.detail."+simulation_name+".initialCenterOfMass.z", res.initialCenterOfMass.z);
+        tr_result.put("report.detail."+simulation_name+".currentCenterOfMass.x", res.currentCenterOfMass.x);
+        tr_result.put("report.detail."+simulation_name+".currentCenterOfMass.y", res.currentCenterOfMass.y);
+        tr_result.put("report.detail."+simulation_name+".currentCenterOfMass.z", res.currentCenterOfMass.z);
 
         tr_result.put("report.detail."+simulation_name+".total_distance_of_all_voxels", res.total_distance_of_all_voxels);
 

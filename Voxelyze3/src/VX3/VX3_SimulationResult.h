@@ -6,6 +6,7 @@ struct VX3_SimulationResult {
     double y;
     double z;
     double voxSize;
+    double currentTime = 0.0;
     int num_voxel;
     int num_measured_voxel = 0;
     // double distance; //a unitless distance

@@ -415,6 +415,7 @@ void VX3_SimulationManager::collectResults(int num_simulation, int device_index)
     VcudaMemcpy(result_voxelyze_kernel, d_voxelyze_3s[device_index], num_simulation * sizeof(VX3_VoxelyzeKernel), cudaMemcpyDeviceToHost);
     for (int i = 0; i < num_simulation; i++) {
         VX3_SimulationResult tmp;
+        tmp.currentTime = result_voxelyze_kernel[i].currentTime;
         tmp.fitness_score = result_voxelyze_kernel[i].fitness_score;
         tmp.x = result_voxelyze_kernel[i].currentCenterOfMass.x;
         tmp.y = result_voxelyze_kernel[i].currentCenterOfMass.y;
