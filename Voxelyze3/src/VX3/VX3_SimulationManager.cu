@@ -38,20 +38,22 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         // }
         //
         if (d_v3->RecordStepSize) { // output History file
-
+            // rescale the whole space. so history file can contain less digits. ( e.g. not 0.000221, but 2.21 )
             printf("\n{{{setting}}}<rescale>0.001</rescale>\n");
+            // materials' color
             for (int i = 0; i < d_v3->num_d_voxelMats; i++) {
                 auto &mat = d_v3->d_voxelMats[i];
                 printf("{{{setting}}}<matcolor><id>%d</id><r>%.2f</r><g>%.2f</g><b>%.2f</b><a>%.2f</a></matcolor>\n", mat.matid,
                        mat.r / 255., mat.g / 255., mat.b / 255., mat.a / 255.);
             }
+            printf("\n{{{setting}}}<voxel_size>%f</voxel_size>\n", d_v3->voxSize);
         }
 
         double vs = 1 / 0.001;
 
         d_v3->updateCurrentCenterOfMass();
         d_v3->InitializeCenterOfMass();
-        int real_stepsize = int(d_v3->RecordStepSize / (10000 * d_v3->recommendedTimeStep() * d_v3->DtFrac));
+        int real_stepsize = int(d_v3->RecordStepSize / (10000 * d_v3->recommendedTimeStep() * d_v3->DtFrac))+1;
         printf("real_stepsize: %d ; recommendedTimeStep %f; d_v3->DtFrac %f . \n", real_stepsize, d_v3->recommendedTimeStep(),
                d_v3->DtFrac);
         // printf("Initial CoM: %f %f %f mm\n",

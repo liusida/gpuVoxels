@@ -149,6 +149,7 @@ class CVXS_SimGLView : public QObject{
     bool drawFlash = false;
     double flashT;
     double rescale = 1.0;
+    double voxel_size = 0.01;
 
     QString Message;
 
