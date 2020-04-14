@@ -638,10 +638,10 @@ __global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAm
         double currentTemperature =
             TempAmplitude * sin(2 * 3.1415926f * (currentTime / TempPeriod + t->phaseOffset)); // update the global temperature
         // TODO: if we decide not to use PhaseOffset any more, we can move this calculation outside.
-        // Important: Sida: This change in actuation will affect older experiment!
-        if (currentTemperature > 0) {
-            currentTemperature = 0;
-        }
+        // // Important: Sida: This change in actuation will affect older experiment!
+        // if (currentTemperature > 0) {
+        //     currentTemperature = 0;
+        // }
         t->setTemperature(currentTemperature);
         // t->setTemperature(0.0f);
     }
