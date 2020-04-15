@@ -157,6 +157,8 @@ class VX3_VoxelyzeKernel {
     int SecondaryExperiment = 0;
     double ReinitializeInitialPositionAfterThisManySeconds = 0.0;
     bool InitialPositionReinitialized = false;
+
+    int EnableExpansion=0;
 };
 
 #endif // VX3_VOXELYZE_KERNEL_H

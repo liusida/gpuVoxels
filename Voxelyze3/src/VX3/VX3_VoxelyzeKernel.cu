@@ -13,7 +13,7 @@ __device__ int bound(int x, int min, int max) {
 /* Sub GPU Threads */
 __global__ void gpu_update_links(VX3_Link **links, int num);
 __global__ void gpu_update_voxels(VX3_Voxel *voxels, int num, double dt, double currentTime, VX3_VoxelyzeKernel *k);
-__global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime);
+__global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime, VX3_VoxelyzeKernel* k);
 __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double watchDistance, VX3_VoxelyzeKernel *k);
 __global__ void gpu_update_cilia_force(VX3_Voxel **surface_voxels, int num, VX3_VoxelyzeKernel *k);
 __global__ void gpu_clear_lookupgrid(VX3_dVector<VX3_Voxel *> *d_collisionLookupGrid, int num);
@@ -227,7 +227,7 @@ __device__ void VX3_VoxelyzeKernel::updateTemperature() {
                                                num_d_voxels); // Dynamically calculate blockSize
             int gridSize_voxels = (num_d_voxels + blockSize - 1) / blockSize;
             int blockSize_voxels = num_d_voxels < blockSize ? num_d_voxels : blockSize;
-            gpu_update_temperature<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, TempAmplitude, TempPeriod, currentTime);
+            gpu_update_temperature<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, TempAmplitude, TempPeriod, currentTime, this);
             CUDA_CHECK_AFTER_CALL();
             VcudaDeviceSynchronize();
         }
@@ -622,7 +622,7 @@ __global__ void gpu_update_voxels(VX3_Voxel *voxels, int num, double dt, double 
     }
 }
 
-__global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime) {
+__global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime, VX3_VoxelyzeKernel* k) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         // vfloat tmp = pEnv->GetTempAmplitude() *
@@ -638,10 +638,12 @@ __global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAm
         double currentTemperature =
             TempAmplitude * sin(2 * 3.1415926f * (currentTime / TempPeriod + t->phaseOffset)); // update the global temperature
         // TODO: if we decide not to use PhaseOffset any more, we can move this calculation outside.
-        // // Important: Sida: This change in actuation will affect older experiment!
-        // if (currentTemperature > 0) {
-        //     currentTemperature = 0;
-        // }
+        // By default we don't enable expansion. But we can enable that in VXA.
+        if (!k->EnableExpansion) {
+            if (currentTemperature > 0) {
+                currentTemperature = 0;
+            }
+        }
         t->setTemperature(currentTemperature);
         // t->setTemperature(0.0f);
     }
