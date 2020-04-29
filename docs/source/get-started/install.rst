@@ -114,8 +114,14 @@ If there's already CUDA 10.1 or 10.2 on the server, you'll need to compile and i
 Install VoxCAD
 --------------
 
-**VoxCAD** need OpenGL (libglfw3-dev, freeglut3-dev, libglm-dev, mesa-utils), Boost (libboost-all-dev), QT5 (qtbase5-dev). 
-You will need to build VoxCAD from source.
+**VoxCAD** need OpenGL, Boost, QT5. You will need to build VoxCAD from source. Here are instructions for Ubuntu and Mac.
+
+On Ubuntu
+^^^^^^^^^
+
+The package names in Ubuntu are:
+
+OpenGL (libglfw3-dev, freeglut3-dev, libglm-dev, mesa-utils), Boost (libboost-all-dev), QT5 (qtbase5-dev). 
 
 Here I demostrate how to do it in Ubuntu 18.04.
 
@@ -137,3 +143,48 @@ Here I demostrate how to do it in Ubuntu 18.04.
 .. note::
     If you forget the file **Default.vxc**, the simulation will stuck at every step.
 
+On Mac
+^^^^^^
+
+.. code:: bash
+    brew install cmake
+    brew install boost
+    brew install qt5
+    brew install glfw3
+    brew cask install xquartz
+    brew install freeglut
+    brew install glm
+    brew install mesa
+
+    # this will take a while...
+
+    git clone https://github.com/liusida/gpuVoxels.git gpuVoxels_src
+    cd gpuVoxels_src/VoxCAD/
+    mkdir build
+    cd build/
+    cmake -DCMAKE_BUILD_TYPE=Release ..
+
+
+Wait a minute, you need to make two changes in the source files:
+
+first is `VoxCAD/src/QTUtils/QOpenGL.cpp`
+.. code:: bash
+    Change line 11 from 
+        #include "GL/glu.h"
+    To    
+        #include "OpenGL/glu.h"
+
+second is `VoxCAD/CMakeFiles.txt`
+.. code:: bash
+    Change line 70 from
+        find_package(glm CONFIG REQUIRED) # glm
+    to 
+        # find_package(glm CONFIG REQUIRED) # glm
+
+OK, let's continue.
+
+.. code:: bash
+    cmake --build .
+    # done.
+
+Thank Arlo Cohen at University of Vermont for providing the instruction on Mac.
