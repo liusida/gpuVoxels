@@ -137,16 +137,11 @@ Here I demostrate how to do it in Ubuntu 18.04.
     cmake --build .
     # done.
 
-.. note::
-    Now you can copy the file **VoxCAD** and **Default.vxc** to wherever you want and run it there.
-
-.. note::
-    If you forget the file **Default.vxc**, the simulation will stuck at every step.
-
 On Mac
 ^^^^^^
 
 .. code:: bash
+
     brew install cmake
     brew install boost
     brew install qt5
@@ -165,26 +160,51 @@ On Mac
     cmake -DCMAKE_BUILD_TYPE=Release ..
 
 
-Wait a minute, you need to make two changes in the source files:
+Wait a minute, you need to make a little bit of hacking in the source files:
 
 first is `VoxCAD/src/QTUtils/QOpenGL.cpp`
-.. code:: bash
+
+.. code:: c
+
     Change line 11 from 
         #include "GL/glu.h"
     To    
         #include "OpenGL/glu.h"
 
 second is `VoxCAD/CMakeFiles.txt`
+
 .. code:: bash
+
     Change line 70 from
         find_package(glm CONFIG REQUIRED) # glm
     to 
         # find_package(glm CONFIG REQUIRED) # glm
 
+    Change line 44 from
+        target_link_libraries(VoxCAD PRIVATE ${OpenGL_LIBRARIES} GL)
+    to 
+        target_link_libraries(VoxCAD PRIVATE ${OpenGL_LIBRARIES})
+
 OK, let's continue.
 
 .. code:: bash
+
     cmake --build .
     # done.
 
 Thank Arlo Cohen at University of Vermont for providing the instruction on Mac.
+
+Running VoxCAD
+^^^^^^^^^^^^^^
+
+Run VoxCAD using command:
+
+.. code:: bash
+
+    ./VoxCAD <filename.history>
+
+.. note::
+    Now you can copy the file **VoxCAD** and **Default.vxc** to wherever you want and run it there.
+
+.. note::
+    If you forget the file **Default.vxc**, the simulation will stuck at every step.
