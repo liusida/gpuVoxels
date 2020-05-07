@@ -379,9 +379,11 @@ VXA.VXC.Palette.Material.Mechanical.sticky
 VXA.VXC.Palette.Material.Mechanical.Cilia
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Value**: 0 or 1
+**Value**: a real number
 
 `1` if we want to enable cilia force for this material, `0` if we don't.
+
+Other real number if you want to change the magnitude of the cilia force.
 
 VXA.VXC.Palette.Material.Mechanical.isPaceMaker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
