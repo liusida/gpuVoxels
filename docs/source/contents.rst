@@ -4,6 +4,7 @@
 
    get-started/overview
    get-started/install
+   get-started/try
    get-started/run
 
 .. toctree::
