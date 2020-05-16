@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
+option(BUILD_SHARED_LIBS "Build shared library" OFF)
+option(BUILD_STATIC_LIBS "Build static library" ON)
 
 project(voxcad3 LANGUAGES CXX)
 include_directories(/usr/include)
@@ -22,6 +24,7 @@ file(GLOB VX1_SRC ${VX1}/*.c* ${VX1}/*.h)
 file(GLOB QTUTILS_SRC ${QTUTILS}/*.c* ${QTUTILS}/*.h)
 file(GLOB QCUSTOMPLOT_SRC src/qcustomplot/*.c* src/qcustomplot/*.h)
 add_executable(voxcad3 VoxCad.qrc ${VOXCAD_MAIN_SRC} ${VX2_SRC} ${VX1_SRC} ${QTUTILS_SRC} ${QCUSTOMPLOT_SRC})
+install(TARGETS voxcad3 DESTINATION bin)
 
 # add_definitions(-DQT_XML_LIB -DQT_OPENGL_LIB -DUSE_ZLIB_COMPRESSION -DUSE_OPEN_GL -DQT_DLL -DPREC_MED -DUSE_OMP)
 add_definitions(-DQT_XML_LIB -DQT_OPENGL_LIB -DUSE_OPEN_GL -DQT_DLL -DPREC_MED -DUSE_OMP)
