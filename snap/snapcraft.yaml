@@ -46,6 +46,7 @@ parts:
       - mesa-utils
       - zlib1g-dev
       - libqt5opengl5-dev
+      - libboost-all-dev
     stage-packages:
       - libglu1-mesa
 
