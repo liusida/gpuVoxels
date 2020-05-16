@@ -81,27 +81,29 @@ If the file is not found, arbitrary defaults are used.
 void CVX_Object::InitializeMatter(void) //loads default 
 {
 	if(!LoadVXCFile("Default.vxc")){ //try loading default file (must be in working directory)... if not default to 10x 1mm cubes
+		CXML_Rip XML;
+		XML.fromXMLText(&Defaultvxc);
+		ReadXML(&XML); 
+		// ClearMatter();
+		// AddMat("Flexible");
+		// AddMat("Stiff");
+		// AddMat("Light");
+		// Palette[1].SetColor(1, 0, 0);
+		// Palette[1].SetElasticMod(10000.0);
+		// Palette[1].SetDensity(10000.0);
 
-		ClearMatter();
-		AddMat("Flexible");
-		AddMat("Stiff");
-		AddMat("Light");
-		Palette[1].SetColor(1, 0, 0);
-		Palette[1].SetElasticMod(1000000.0);
-		Palette[1].SetDensity(1000000.0);
+		// Palette[2].SetColor(0, 0, 1);
+		// Palette[2].SetElasticMod(10000.0);
+		// Palette[2].SetDensity(10000.0);
 
-		Palette[2].SetColor(0, 0, 1);
-		Palette[2].SetElasticMod(100000000.0);
-		Palette[2].SetDensity(1000000.0);
+		// Palette[3].SetColor(1, 1, 0);
+		// Palette[3].SetElasticMod(10000.0);
+		// Palette[3].SetDensity(10000.0);
 
-		Palette[3].SetColor(1, 1, 0);
-		Palette[3].SetElasticMod(10000000.0);
-		Palette[3].SetDensity(100000.0);
+		// Lattice.SetLattice(0.01);
 
-		Lattice.SetLattice(0.001);
-
-		Voxel.SetVoxName(VS_BOX); 
-		Structure.CreateStructure(10, 10, 10);
+		// Voxel.SetVoxName(VS_BOX); 
+		// Structure.CreateStructure(3, 3, 3);
 	}
 }
 
