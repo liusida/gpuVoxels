@@ -20,7 +20,7 @@ Install Voxelyze3
 On DeepGreen
 ^^^^^^^^^^^^
 
-DeepGreen is UVM's GPU cluster. We have already depolied on DeepGreen, so it will be quite easy to use **Voxelyze3** on DeepGreen.
+DeepGreen is UVM's GPU cluster. We have already compiled on DeepGreen, so it will be quite easy to use **Voxelyze3** on DeepGreen.
 
 Follow a five-minute instruction here: `https://github.com/liusida/gpuVoxels-dg-installation <https://github.com/liusida/gpuVoxels-dg-installation>`_
 
