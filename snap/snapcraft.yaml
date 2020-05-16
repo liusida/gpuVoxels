@@ -1,0 +1,59 @@
+name: voxcad3
+base: core18 # the base snap is the execution environment for this snap
+version: '3.0' # just for humans, typically '1.2+git' or '1.3.2'
+summary: Design your voxel-based soft robot
+description: |
+  This is an unofficial upgrade of the original VoxCAD2 developed by Jonathan Hiller.
+  VoxCAD3 can play .history file produced by Voxelyze3.
+  Refer to: https://github.com/liusida/gpuVoxels
+
+grade: devel # must be 'stable' to release into candidate/stable channels
+confinement: devmode # use 'strict' once you have the right plugs and slots
+
+parts:
+  cmake:
+    source: https://github.com/Kitware/CMake
+    source-type: git
+    plugin: cmake
+    override-build: |
+      mkdir -p build
+      cd build
+      cmake \
+        -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_STAGE/cmake \
+        $SNAPCRAFT_PART_SRC
+      make -j 10
+      make install
+    build-packages:
+      - libssl-dev
+  voxcad3:
+    after: [cmake]
+    plugin: make
+    source: https://github.com/liusida/gpuVoxels
+    source-type: git
+    override-build: |
+      $SNAPCRAFT_STAGE/cmake/bin/cmake \
+        -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL/usr/local \
+        -DCMAKE_BUILD_TYPE=Release \
+        $SNAPCRAFT_PART_SRC/VoxCAD
+      make -j 10
+      make install
+    build-packages:
+      - g++
+      - qt5-default
+      - libglfw3-dev
+      - freeglut3-dev
+      - libglm-dev
+      - mesa-utils
+      - zlib1g-dev
+      - libqt5opengl5-dev
+    stage-packages:
+      - libglu1-mesa
+
+apps:
+  voxcad3:
+    command: bin/voxcad3
+    extensions:
+      - kde-neon
+    plugs:
+      - opengl
+    
