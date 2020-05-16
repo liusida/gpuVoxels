@@ -42,6 +42,11 @@ class VX3_VoxelyzeKernel {
     __device__ void computeTargetCloseness();
     __device__ void saveInitialPosition();
 
+
+    // for Secondary Experiment
+    __device__ void removeVoxels();
+    __device__ void InitializeCenterOfMass();
+
     /* data */
     bool forceExit = false;
     char vxa_filename[256];
@@ -147,6 +152,13 @@ class VX3_VoxelyzeKernel {
     VX3_dVector<VX3_Voxel*>* d_collisionLookupGrid;
 
     VX3_Vec3D<>* d_initialPosition = NULL;
+
+    //for Secondary Experiment
+    int SecondaryExperiment = 0;
+    double ReinitializeInitialPositionAfterThisManySeconds = 0.0;
+    bool InitialPositionReinitialized = false;
+
+    int EnableExpansion=0;
 };
 
 #endif // VX3_VOXELYZE_KERNEL_H

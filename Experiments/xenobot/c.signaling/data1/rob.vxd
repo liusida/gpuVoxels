@@ -1,5 +1,5 @@
 <VXD>
-  <EnableCilia replace="VXA.Simulator.EnableCilia">0</EnableCilia>
+  <EnableCilia replace="VXA.Simulator.EnableCilia">1</EnableCilia>
   <Damping replace="VXA.Simulator.Damping">
     <BondDampingZ>1</BondDampingZ>
     <ColDampingZ>1</ColDampingZ>
@@ -17,8 +17,6 @@
       </Display>
       <Mechanical>
         <Cilia>5</Cilia>
-        <inactivePeriod>0.2</inactivePeriod>
-        <signalTimeDelay>0.001</signalTimeDelay>
         <MatModel>0</MatModel>
         <Elastic_Mod>3e+07</Elastic_Mod>
         <Plastic_Mod>0</Plastic_Mod>
@@ -64,25 +62,16 @@
   <Structure Compression="ASCII_READABLE" replace="VXA.VXC.Structure">
     <X_Voxels>7</X_Voxels>
     <Y_Voxels>1</Y_Voxels>
-    <Z_Voxels>4</Z_Voxels>
+    <Z_Voxels>1</Z_Voxels>
     <Data>
-      <Layer><![CDATA[0000000]]></Layer>
       <Layer><![CDATA[1111002]]></Layer>
-      <Layer><![CDATA[0000000]]></Layer>
-      <Layer><![CDATA[2000000]]></Layer>
     </Data>
     <!--Cilia: every voxel corresponding to 3 numbers. it's a Vec3D.-->
     <BaseCiliaForce>
-      <Layer><![CDATA[0,0,0,0,0,0,0,0,0,0,0,0]]></Layer>
       <Layer><![CDATA[0,7,0,0,0,0,0,0,0,0,5,0]]></Layer>
-      <Layer><![CDATA[0,0,0,0,0,0,0,0,0,0,0,0]]></Layer>
-      <Layer><![CDATA[0,0,0,0,0,0,0,0,0,0,0,0]]></Layer>
     </BaseCiliaForce>
     <ShiftCiliaForce>
-      <Layer><![CDATA[0,0,0,0,0,0,0,0,0,0,0,0]]></Layer>
       <Layer><![CDATA[0,0.001,0,0,0,0,0,0,0,0,0.001,0]]></Layer>
-      <Layer><![CDATA[0,0,0,0,0,0,0,0,0,0,0,0]]></Layer>
-      <Layer><![CDATA[0,0,0,0,0,0,0,0,0,0,0,0]]></Layer>
     </ShiftCiliaForce>
   </Structure>
 </VXD>

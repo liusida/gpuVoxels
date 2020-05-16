@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <VXA Version="1.1">
   <Simulator>
-    <SavePositionOfAllVoxels>0</SavePositionOfAllVoxels>
-    <EnableTargetCloseness>0</EnableTargetCloseness>
-    <EnableCilia>0</EnableCilia>
     <FitnessFunction>
       <mtVAR>x</mtVAR>
     </FitnessFunction>
     <EnableSignals>1</EnableSignals>
-
     <RecordHistory>
       <RecordStepSize>100</RecordStepSize>
       <RecordVoxel>1</RecordVoxel>

@@ -231,7 +231,7 @@ void CVXS_SimGLView::DrawFloor(void) {
         CurViewVox == RVV_HISTORY_ELECTRICAL ||
         CurViewVox == RVV_HISTORY_ROTATION) { // TODO: if showing history, should use history's voxel size. Since we didn't pass this in
                                                 // history file, hard coded for now.
-        z = -0.01 / 2;
+        z = -voxel_size / 2;
     } else {
         z = -pSim->Vx.voxelSize() / 2;
     }
@@ -1124,9 +1124,15 @@ void CVXS_SimGLView::DrawHistory(int Selected, ViewVoxel historyView) {
                         matColors[id] = CColor(r, g, b, a);
                         continue;
                     }
+                    // rescale the whole space. so history file can contain less digits. ( e.g. not 0.000221, but 2.21 )
                     auto op_rescale = tree.get_child_optional("rescale");
                     if (op_rescale) {
                         rescale = tree.get("rescale", 1.0);
+                    }
+                    // voxel size
+                    auto op_voxel_size = tree.get_child_optional("voxel_size");
+                    if (op_voxel_size) {
+                        voxel_size = tree.get("voxel_size", 0.01);
                     }
                 }
                 int j = 0;

@@ -307,6 +307,11 @@ class VX3_Voxel {
     double localSignaldt = 0.0;
     double packmakerNextPulse = 0.0;
     double inactiveUntil = 0.0;
+
+
+    // for Secondary Experiment
+    bool removed = false;
+    bool isMeasured = true;
 };
 
 #endif // VX3_VOXEL_H

@@ -38,20 +38,22 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
         // }
         //
         if (d_v3->RecordStepSize) { // output History file
-
+            // rescale the whole space. so history file can contain less digits. ( e.g. not 0.000221, but 2.21 )
             printf("\n{{{setting}}}<rescale>0.001</rescale>\n");
+            // materials' color
             for (int i = 0; i < d_v3->num_d_voxelMats; i++) {
                 auto &mat = d_v3->d_voxelMats[i];
                 printf("{{{setting}}}<matcolor><id>%d</id><r>%.2f</r><g>%.2f</g><b>%.2f</b><a>%.2f</a></matcolor>\n", mat.matid,
                        mat.r / 255., mat.g / 255., mat.b / 255., mat.a / 255.);
             }
+            printf("\n{{{setting}}}<voxel_size>%f</voxel_size>\n", d_v3->voxSize);
         }
 
         double vs = 1 / 0.001;
 
         d_v3->updateCurrentCenterOfMass();
-        d_v3->initialCenterOfMass = d_v3->currentCenterOfMass;
-        int real_stepsize = int(d_v3->RecordStepSize / (10000 * d_v3->recommendedTimeStep() * d_v3->DtFrac));
+        d_v3->InitializeCenterOfMass();
+        int real_stepsize = int(d_v3->RecordStepSize / (10000 * d_v3->recommendedTimeStep() * d_v3->DtFrac))+1;
         printf("real_stepsize: %d ; recommendedTimeStep %f; d_v3->DtFrac %f . \n", real_stepsize, d_v3->recommendedTimeStep(),
                d_v3->DtFrac);
         // printf("Initial CoM: %f %f %f mm\n",
@@ -70,18 +72,20 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                     if (d_v3->RecordVoxel) {
                         // Voxels
                         printf("<<<Step%d Time:%f>>>", j, d_v3->currentTime);
-                        for (int i = 0; i < d_v3->num_d_voxels; i++) {
-                            auto &v = d_v3->d_voxels[i];
-                            if (v.isSurface()) {
-                                printf("%.1f,%.1f,%.1f,", v.pos.x * vs, v.pos.y * vs, v.pos.z * vs);
-                                printf("%.1f,%.2f,%.2f,%.2f,", v.orient.AngleDegrees(), v.orient.x, v.orient.y, v.orient.z);
+                        for (int i = 0; i < d_v3->num_d_surface_voxels; i++) {
+                            auto v = d_v3->d_surface_voxels[i];
+                            if (v->removed)
+                                continue;
+                            if (v->isSurface()) {
+                                printf("%.1f,%.1f,%.1f,", v->pos.x * vs, v->pos.y * vs, v->pos.z * vs);
+                                printf("%.1f,%.2f,%.2f,%.2f,", v->orient.AngleDegrees(), v->orient.x, v->orient.y, v->orient.z);
                                 VX3_Vec3D<double> ppp, nnn;
-                                nnn = v.cornerOffset(NNN);
-                                ppp = v.cornerOffset(PPP);
+                                nnn = v->cornerOffset(NNN);
+                                ppp = v->cornerOffset(PPP);
                                 printf("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", nnn.x * vs, nnn.y * vs, nnn.z * vs, ppp.x * vs, ppp.y * vs,
                                        ppp.z * vs);
-                                printf("%d,", v.mat->matid); // for coloring
-                                printf("%.1f,", v.localSignal);  // for coloring as well.
+                                printf("%d,", v->mat->matid); // for coloring
+                                printf("%.1f,", v->localSignal);  // for coloring as well.
                                 printf(";");
                             }
                         }
@@ -92,6 +96,8 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_simula
                         printf("|[[[%d]]]", j);
                         for (int i = 0; i < d_v3->d_v_links.size(); i++) {
                             auto l = d_v3->d_v_links[i];
+                            if (l->removed)
+                                continue;
                             // only draw links that are not detached.
                             if (!l->isDetached) {
                                 auto v1 = l->pVPos;
@@ -203,6 +209,8 @@ void VX3_SimulationManager::ParseMathTree(VX3_MathTreeToken *field_ptr, size_t m
                 p->value = 6;
             } else if (tok.second == "numClosePairs") {
                 p->value = 7;
+            } else if (tok.second == "num_voxel") {
+                p->value = 8;
             } else {
                 printf(COLORCODE_BOLD_RED "ERROR: No such variable.\n");
                 break;
@@ -352,6 +360,12 @@ void VX3_SimulationManager::readVXD(fs::path base, std::vector<fs::path> files, 
         h_d_tmp.EnableCilia = pt_merged.get<int>("VXA.Simulator.EnableCilia", 0);
         h_d_tmp.EnableSignals = pt_merged.get<int>("VXA.Simulator.EnableSignals", 0);
         
+        // for Secondary Experiment
+        h_d_tmp.SecondaryExperiment = pt_merged.get<int>("VXA.Simulator.SecondaryExperiment", 0);
+        h_d_tmp.ReinitializeInitialPositionAfterThisManySeconds = pt_merged.get<double>("VXA.Simulator.ReinitializeInitialPositionAfterThisManySeconds", 0.0);
+
+        h_d_tmp.EnableExpansion = pt_merged.get<int>("VXA.Simulator.EnableExpansion", 0);
+
         HeapSize = pt_merged.get<double>("VXA.GPU.HeapSize", 0.5);
         if (HeapSize > 1.0) {
             HeapSize = 0.99;
@@ -405,6 +419,7 @@ void VX3_SimulationManager::collectResults(int num_simulation, int device_index)
     VcudaMemcpy(result_voxelyze_kernel, d_voxelyze_3s[device_index], num_simulation * sizeof(VX3_VoxelyzeKernel), cudaMemcpyDeviceToHost);
     for (int i = 0; i < num_simulation; i++) {
         VX3_SimulationResult tmp;
+        tmp.currentTime = result_voxelyze_kernel[i].currentTime;
         tmp.fitness_score = result_voxelyze_kernel[i].fitness_score;
         tmp.x = result_voxelyze_kernel[i].currentCenterOfMass.x;
         tmp.y = result_voxelyze_kernel[i].currentCenterOfMass.y;
@@ -420,14 +435,19 @@ void VX3_SimulationManager::collectResults(int num_simulation, int device_index)
         tmp_v = (VX3_Voxel *)malloc(result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Voxel));
         VcudaMemcpy(tmp_v, result_voxelyze_kernel[i].d_voxels, result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Voxel),
                    cudaMemcpyDeviceToHost);
-        if (result_voxelyze_kernel[i].SavePositionOfAllVoxels) {
-            VX3_Vec3D<>* tmp_init;
-            tmp_init = (VX3_Vec3D<>*)malloc(result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Vec3D<>));
-            VcudaMemcpy(tmp_init, result_voxelyze_kernel[i].d_initialPosition, result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Vec3D<>), cudaMemcpyDeviceToHost);
-            for (int j = 0; j < result_voxelyze_kernel[i].num_d_voxels; j++) {
-                tmp.voxel_init_pos.push_back(Vec3D<>(tmp_init[j].x, tmp_init[j].y, tmp_init[j].z));
-                tmp.voxel_position.push_back(Vec3D<>(tmp_v[j].pos.x, tmp_v[j].pos.y, tmp_v[j].pos.z));
-                tmp.voxel_mats.push_back(tmp_v[j].matid);
+        tmp.SavePositionOfAllVoxels = result_voxelyze_kernel[i].SavePositionOfAllVoxels;
+        VX3_Vec3D<>* tmp_init;
+        tmp_init = (VX3_Vec3D<>*)malloc(result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Vec3D<>));
+        VcudaMemcpy(tmp_init, result_voxelyze_kernel[i].d_initialPosition, result_voxelyze_kernel[i].num_d_voxels * sizeof(VX3_Vec3D<>), cudaMemcpyDeviceToHost);
+        tmp.num_measured_voxel = 0;
+        tmp.total_distance_of_all_voxels = 0.0;
+        for (int j = 0; j < result_voxelyze_kernel[i].num_d_voxels; j++) {
+            tmp.voxel_init_pos.push_back(Vec3D<>(tmp_init[j].x, tmp_init[j].y, tmp_init[j].z));
+            tmp.voxel_position.push_back(Vec3D<>(tmp_v[j].pos.x, tmp_v[j].pos.y, tmp_v[j].pos.z));
+            tmp.voxel_mats.push_back(tmp_v[j].matid);
+            if (tmp_v[j].isMeasured) {
+                tmp.num_measured_voxel ++;
+                tmp.total_distance_of_all_voxels += tmp.voxel_position.back().Dist(tmp.voxel_init_pos.back());
             }
         }
         delete tmp_v;

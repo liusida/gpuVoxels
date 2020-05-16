@@ -13,7 +13,7 @@ __device__ int bound(int x, int min, int max) {
 /* Sub GPU Threads */
 __global__ void gpu_update_links(VX3_Link **links, int num);
 __global__ void gpu_update_voxels(VX3_Voxel *voxels, int num, double dt, double currentTime, VX3_VoxelyzeKernel *k);
-__global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime);
+__global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime, VX3_VoxelyzeKernel* k);
 __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double watchDistance, VX3_VoxelyzeKernel *k);
 __global__ void gpu_update_cilia_force(VX3_Voxel **surface_voxels, int num, VX3_VoxelyzeKernel *k);
 __global__ void gpu_clear_lookupgrid(VX3_dVector<VX3_Voxel *> *d_collisionLookupGrid, int num);
@@ -155,12 +155,14 @@ __device__ void VX3_VoxelyzeKernel::syncVectors() {
 __device__ void VX3_VoxelyzeKernel::saveInitialPosition() {
     for (int i = 0; i < num_d_voxels; i++) {
         d_initialPosition[i] = d_voxels[i].pos;
+        // Save this value to voxel, so it can be read out when collecting results in cpu.
+        d_voxels[i].isMeasured = (bool) d_voxels[i].mat->isMeasured;
     }
 }
 __device__ bool VX3_VoxelyzeKernel::StopConditionMet(void) // have we met the stop condition yet?
 {
     if (VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, collisionCount, currentTime, recentAngle,
-                           targetCloseness, numClosePairs, StopConditionFormula) > 0) {
+                           targetCloseness, numClosePairs, num_d_voxels, StopConditionFormula) > 0) {
         // double a =
         //     VX3_MathTree::eval(currentCenterOfMass.x, currentCenterOfMass.y, currentCenterOfMass.z, collisionCount, currentTime,
         //     StopConditionFormula);
@@ -225,7 +227,7 @@ __device__ void VX3_VoxelyzeKernel::updateTemperature() {
                                                num_d_voxels); // Dynamically calculate blockSize
             int gridSize_voxels = (num_d_voxels + blockSize - 1) / blockSize;
             int blockSize_voxels = num_d_voxels < blockSize ? num_d_voxels : blockSize;
-            gpu_update_temperature<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, TempAmplitude, TempPeriod, currentTime);
+            gpu_update_temperature<<<gridSize_voxels, blockSize_voxels>>>(d_voxels, num_d_voxels, TempAmplitude, TempPeriod, currentTime, this);
             CUDA_CHECK_AFTER_CALL();
             VcudaDeviceSynchronize();
         }
@@ -331,6 +333,22 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
         computeTargetCloseness();
     }
 
+    if (SecondaryExperiment) {
+        // SecondaryExperiment handle tags:
+        // RemoveFromSimulationAfterThisManySeconds
+        // ReinitializeInitialPositionAfterThisManySeconds
+        // TurnOnThermalExpansionAfterThisManySeconds
+        // TurnOnCiliaAfterThisManySeconds
+
+        removeVoxels();
+        if (InitialPositionReinitialized == false && ReinitializeInitialPositionAfterThisManySeconds < currentTime) {
+            InitialPositionReinitialized = true;
+            InitializeCenterOfMass();
+            saveInitialPosition();
+        }
+
+    }
+
     currentTime += dt;
     // time_measures[1] = clock();
     // printf("running time for each step: \n");
@@ -338,6 +356,46 @@ __device__ bool VX3_VoxelyzeKernel::doTimeStep(float dt) {
     //     printf("\t%d) %ld clock cycles.\n", i,
     //     time_measures[i+1]-time_measures[i]);
     return true;
+}
+
+__device__ void VX3_VoxelyzeKernel::InitializeCenterOfMass() {
+    initialCenterOfMass = currentCenterOfMass;
+}
+
+__device__ void VX3_VoxelyzeKernel::removeVoxels() {
+    for (int i=0;i<num_d_voxelMats;i++) {
+        if (d_voxelMats[i].removed == false &&
+        d_voxelMats[i].RemoveFromSimulationAfterThisManySeconds > 0 &&
+        d_voxelMats[i].RemoveFromSimulationAfterThisManySeconds < currentTime ) {
+            VX3_Voxel* neighbor_voxel;
+
+            for (int j=0;j<num_d_voxels;j++) {
+                if (d_voxels[j].mat == &d_voxelMats[i] && d_voxels[j].removed == false) {
+                    d_voxels[j].removed = true; // mark this voxel as removed
+                    for (int k=0;k<6;k++) { // check links in all direction
+                        if (d_voxels[j].links[k]) {
+                            d_voxels[j].links[k]->removed = true; // mark the link as removed
+                            if (d_voxels[j].links[k]->pVNeg == &d_voxels[j]) { // this voxel is pVNeg
+                                neighbor_voxel = d_voxels[j].links[k]->pVPos;
+                            } else {
+                                neighbor_voxel = d_voxels[j].links[k]->pVNeg;
+                            }
+                            for (int m=0;m<6;m++) {
+                                if (neighbor_voxel->links[m] == d_voxels[j].links[k]) {
+                                    neighbor_voxel->links[m] = NULL; // delete the neighbor's link
+                                    break;
+                                }
+                            }
+                            d_voxels[j].links[k] = NULL; // delete this voxel's link
+                        }
+                    }
+                }
+            }
+            d_voxelMats[i].removed = true;
+            isSurfaceChanged = true;
+        }
+    }
+
 }
 
 __device__ void VX3_VoxelyzeKernel::updateAttach() {
@@ -443,7 +501,7 @@ __device__ void VX3_VoxelyzeKernel::regenerateSurfaceVoxels() {
     VX3_dVector<VX3_Voxel *> tmp;
     for (int i = 0; i < num_d_voxels; i++) {
         d_voxels[i].updateSurface();
-        if (d_voxels[i].isSurface()) {
+        if (d_voxels[i].isSurface() && !d_voxels[i].removed) {
             tmp.push_back(&d_voxels[i]);
         }
     }
@@ -472,7 +530,7 @@ __device__ VX3_MaterialLink *VX3_VoxelyzeKernel::combinedMaterial(VX3_MaterialVo
 __device__ void VX3_VoxelyzeKernel::computeFitness() {
     VX3_Vec3D<> offset = currentCenterOfMass - initialCenterOfMass;
     fitness_score = VX3_MathTree::eval(offset.x, offset.y, offset.z, collisionCount, currentTime, recentAngle, targetCloseness,
-                                       numClosePairs, fitness_function);
+                                       numClosePairs, num_d_voxels, fitness_function);
 }
 
 __device__ void VX3_VoxelyzeKernel::registerTargets() {
@@ -509,6 +567,8 @@ __global__ void gpu_update_links(VX3_Link **links, int num) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         VX3_Link *t = links[gindex];
+        if (t->removed)
+            return;
         if (t->pVPos->mat->fixed && t->pVNeg->mat->fixed)
             return;
         if (t->isDetached)
@@ -523,6 +583,8 @@ __global__ void gpu_update_voxels(VX3_Voxel *voxels, int num, double dt, double 
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         VX3_Voxel *t = &voxels[gindex];
+        if (t->removed)
+            return;
         if (t->mat->fixed)
             return; // fixed voxels, no need to update position
         t->timeStep(dt, currentTime, k);
@@ -546,35 +608,41 @@ __global__ void gpu_update_voxels(VX3_Voxel *voxels, int num, double dt, double 
         // update sticky status
         t->enableAttach = false;
         if (VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
-                               k->numClosePairs, k->AttachCondition[0]) > 0 &&
+                               k->numClosePairs, k->num_d_voxels, k->AttachCondition[0]) > 0 &&
             VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
-                               k->numClosePairs, k->AttachCondition[1]) > 0 &&
+                               k->numClosePairs, k->num_d_voxels, k->AttachCondition[1]) > 0 &&
             VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
-                               k->numClosePairs, k->AttachCondition[2]) > 0 &&
+                               k->numClosePairs, k->num_d_voxels, k->AttachCondition[2]) > 0 &&
             VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
-                               k->numClosePairs, k->AttachCondition[3]) > 0 &&
+                               k->numClosePairs, k->num_d_voxels, k->AttachCondition[3]) > 0 &&
             VX3_MathTree::eval(t->pos.x, t->pos.y, t->pos.z, k->collisionCount, currentTime, k->recentAngle, k->targetCloseness,
-                               k->numClosePairs, k->AttachCondition[4]) > 0) {
+                               k->numClosePairs, k->num_d_voxels, k->AttachCondition[4]) > 0) {
             t->enableAttach = true;
         };
     }
 }
 
-__global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime) {
+__global__ void gpu_update_temperature(VX3_Voxel *voxels, int num, double TempAmplitude, double TempPeriod, double currentTime, VX3_VoxelyzeKernel* k) {
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         // vfloat tmp = pEnv->GetTempAmplitude() *
         // sin(2*3.1415926f*(CurTime/pEnv->GetTempPeriod() + pV->phaseOffset)) -
         // pEnv->GetTempBase();
         VX3_Voxel *t = &voxels[gindex];
+        if (t->removed)
+            return;
+        if (t->mat->TurnOnThermalExpansionAfterThisManySeconds > currentTime)
+            return;
         if (t->mat->fixed)
             return; // fixed voxels, no need to update temperature
         double currentTemperature =
             TempAmplitude * sin(2 * 3.1415926f * (currentTime / TempPeriod + t->phaseOffset)); // update the global temperature
         // TODO: if we decide not to use PhaseOffset any more, we can move this calculation outside.
-        // Important: Sida: This change in actuation will affect older experiment!
-        if (currentTemperature > 0) {
-            currentTemperature = 0;
+        // By default we don't enable expansion. But we can enable that in VXA.
+        if (!k->EnableExpansion) {
+            if (currentTemperature > 0) {
+                currentTemperature = 0;
+            }
         }
         t->setTemperature(currentTemperature);
         // t->setTemperature(0.0f);
@@ -768,6 +836,8 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double wa
     if (first < num && second < first) {
         VX3_Voxel *voxel1 = surface_voxels[first];
         VX3_Voxel *voxel2 = surface_voxels[second];
+        if (voxel1->removed || voxel2->removed)
+            return;
         handle_collision_attachment(voxel1, voxel2, watchDistance, k);
     }
 }
@@ -776,7 +846,11 @@ __global__ void gpu_update_attach(VX3_Voxel **surface_voxels, int num, double wa
 __global__ void gpu_update_cilia_force(VX3_Voxel **surface_voxels, int num, VX3_VoxelyzeKernel *k) {
     int index = threadIdx.x + blockIdx.x * blockDim.x;
     if (index < num) {
+        if (surface_voxels[index]->removed)
+            return;
         if (surface_voxels[index]->mat->Cilia == 0)
+            return;
+        if (surface_voxels[index]->mat->TurnOnCiliaAfterThisManySeconds > k->currentTime)
             return;
         // rotate base cilia force and update it into voxel.
         surface_voxels[index]->CiliaForce = surface_voxels[index]->orient.RotateVec3D(
@@ -811,6 +885,8 @@ __global__ void gpu_pairwise_detection(VX3_Voxel **voxel1, VX3_Voxel **voxel2, i
     int index_x = threadIdx.x + blockIdx.x * blockDim.x;
     int index_y = threadIdx.y + blockIdx.y * blockDim.y;
     if (index_x < num_v1 && index_y < num_v2) {
+        if (voxel1[index_x]->removed || voxel2[index_y]->removed)
+            return;
         handle_collision_attachment(voxel1[index_x], voxel2[index_y], watchDistance, k);
     }
 }
@@ -871,6 +947,8 @@ __global__ void gpu_update_detach(VX3_Link **links, int num, VX3_VoxelyzeKernel*
     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
     if (gindex < num) {
         VX3_Link *t = links[gindex];
+        if (t->removed)
+            return;
         if (t->isDetached)
             return;
         // clu: vxa: MatModel=1, Fail_Stress=1e+6 => Fail_Stress => failureStress => isFailed.

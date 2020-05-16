@@ -52,9 +52,11 @@ CQOpenGL::CQOpenGL(const QGLFormat &format, QWidget *parent) : QGLWidget(format,
     // set up some lights!
     QColor a(90, 90, 90), b(40, 40, 40);
     Lights.push_back(GL_Light(GL_LIGHT0, a, b, Vec3D<>(-0.5, 0.5, 2.0)));
-    QColor c(60, 60, 60), d(60, 20, 20);
+    // QColor c(60, 60, 60), d(60, 20, 20);
+    QColor c(60, 60, 60), d(20, 20, 20);
     Lights.push_back(GL_Light(GL_LIGHT1, c, d, Vec3D<>(-2.0, -0.5, 1.0)));
-    QColor e(90, 90, 90), f(20, 20, 60);
+    // QColor e(90, 90, 90), f(20, 20, 60);
+    QColor e(90, 90, 90), f(20, 20, 20);
     Lights.push_back(GL_Light(GL_LIGHT2, e, f, Vec3D<>(1.0, -1.0, -1.0)));
 }
 

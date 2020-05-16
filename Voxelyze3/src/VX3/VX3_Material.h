@@ -152,10 +152,18 @@ public:
 	double PaceMakerPeriod=0;
 	bool isElectricalActive=false;
 
+	double RemoveFromSimulationAfterThisManySeconds = 0.0;
+	double TurnOnThermalExpansionAfterThisManySeconds = 0.0;
+	double TurnOnCiliaAfterThisManySeconds = 0.0;
+
 	double signalValueDecay = 0.9; // ratio from [0,1]
 	double signalTimeDelay = 0.0; // in sec
 	double inactivePeriod = 0.05; //in sec
 	int isMeasured=1;
+
+
+	// for Secondary Experiment
+    bool removed = false;
 };
 
 
