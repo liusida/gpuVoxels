@@ -1,3 +1,7 @@
+# This project has been merged into voxcraft
+
+Please refer to: https://github.com/liusida/voxcraft-viz/ and https://github.com/liusida/voxcraft-sim/
+
 # gpuVoxels
 
 ![Voxelyze3](https://github.com/liusida/gpuVoxels/blob/master/doc/misc/bigGuys_small.png?raw=true)
